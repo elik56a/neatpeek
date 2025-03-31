@@ -8,6 +8,8 @@ interface User {
   id: string;
   name: string;
   email: string;
+  avatar?: string;
+  companyName?: string;
 }
 
 interface AuthContextType {
@@ -17,6 +19,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   register: (name: string, email: string, password: string) => Promise<void>;
+  loginWithGoogle?: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -55,7 +58,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const userData = {
         id: "user-123",
         name: email.split('@')[0],
-        email
+        email,
+        avatar: "",
+        companyName: ""
       };
       
       setUser(userData);
@@ -81,7 +86,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const userData = {
         id: "user-" + Math.floor(Math.random() * 1000),
         name,
-        email
+        email,
+        avatar: "",
+        companyName: ""
       };
       
       setUser(userData);
@@ -90,6 +97,34 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       router.push("/dashboard");
     } catch (error) {
       console.error("Registration failed:", error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loginWithGoogle = async () => {
+    setIsLoading(true);
+    
+    try {
+      // Mock Google login
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Mock user data
+      const userData = {
+        id: "user-google-" + Math.floor(Math.random() * 1000),
+        name: "Google User",
+        email: "user@gmail.com",
+        avatar: "",
+        companyName: ""
+      };
+      
+      setUser(userData);
+      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("isLoggedIn", "true");
+      router.push("/dashboard");
+    } catch (error) {
+      console.error("Google login failed:", error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -111,7 +146,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         isLoading,
         login,
         logout,
-        register
+        register,
+        loginWithGoogle
       }}
     >
       {children}
