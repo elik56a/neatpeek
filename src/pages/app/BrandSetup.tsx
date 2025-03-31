@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -29,14 +28,12 @@ const BrandSetup = () => {
     additionalNotes: "",
   });
 
-  // Check if at least one tab has content
   const hasGuidelines = !!uploadedFile;
   const hasDesigns = uploadedImages.length > 0;
   const hasManualSettings = brandForm.brandName && brandForm.primaryColor && brandForm.primaryFont;
   
   const atleastOneTabComplete = hasGuidelines || hasDesigns || hasManualSettings;
 
-  // Update save button status when form changes
   const updateSaveStatus = () => {
     setSaveEnabled(atleastOneTabComplete);
   };
@@ -80,7 +77,6 @@ const BrandSetup = () => {
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       toast({
@@ -88,7 +84,6 @@ const BrandSetup = () => {
         description: "Your brand settings have been successfully saved.",
       });
 
-      // Navigate to dashboard or next step
     } catch (error) {
       console.error("Error saving brand setup:", error);
       toast({
@@ -122,7 +117,6 @@ const BrandSetup = () => {
           <TabsTrigger value="manual">Manual Settings</TabsTrigger>
         </TabsList>
 
-        {/* Guidelines Tab */}
         <TabsContent value="guidelines">
           <Card>
             <CardHeader>
@@ -219,7 +213,6 @@ const BrandSetup = () => {
           </Card>
         </TabsContent>
 
-        {/* Designs Tab */}
         <TabsContent value="designs">
           <Card>
             <CardHeader>
@@ -315,7 +308,6 @@ const BrandSetup = () => {
           </Card>
         </TabsContent>
 
-        {/* Manual Settings Tab */}
         <TabsContent value="manual">
           <Card>
             <CardHeader>

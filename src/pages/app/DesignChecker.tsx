@@ -1,409 +1,284 @@
-
 import { useState } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
-import { Loader2, Image, Link as LinkIcon, CheckCircle2, AlertCircle, Upload, ArrowRight, FileX } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Check, Copy, AlertCircle } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 
 const DesignChecker = () => {
+  const [designUrl, setDesignUrl] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState<any>(null);
+  const [copied, setCopied] = useState(false);
+  const [value, setValue] = useState("url");
+  const [htmlCode, setHtmlCode] = useState("");
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("upload");
-  const [figmaLink, setFigmaLink] = useState("");
-  const [designName, setDesignName] = useState("");
-  const [uploadedImages, setUploadedImages] = useState<File[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [checkResults, setCheckResults] = useState<null | {
-    status: "passed" | "failed";
-    issues: Array<{
-      type: string;
-      message: string;
-      severity: "high" | "medium" | "low";
-      element?: string;
-      coordinates?: { x: number; y: number };
-    }>;
-  }>(null);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      setUploadedImages((prev) => [...prev, ...newFiles]);
-    }
+  const handleUrlAnalysis = async () => {
+    setLoading(true);
+    setAnalysisResult(null);
+
+    // Mock analysis result
+    setTimeout(() => {
+      setAnalysisResult({
+        accessibilityScore: 85,
+        performanceScore: 72,
+        seoScore: 92,
+        bestPracticesScore: 78,
+        errors: [
+          "Missing alt text for images",
+          "Low contrast text",
+          "Unminified CSS",
+        ],
+        warnings: ["Large image sizes", "Missing meta description"],
+      });
+      setLoading(false);
+    }, 2000);
   };
 
-  const removeImage = (index: number) => {
-    setUploadedImages((prev) => prev.filter((_, i) => i !== index));
+  const handleHtmlAnalysis = async () => {
+    setLoading(true);
+    setAnalysisResult(null);
+
+    // Mock analysis result
+    setTimeout(() => {
+      setAnalysisResult({
+        accessibilityScore: 60,
+        performanceScore: 50,
+        seoScore: 60,
+        bestPracticesScore: 78,
+        errors: [
+          "Missing alt text for images",
+          "Low contrast text",
+          "Unminified CSS",
+        ],
+        warnings: ["Large image sizes", "Missing meta description"],
+      });
+      setLoading(false);
+    }, 2000);
   };
 
-  const handleSubmit = async () => {
-    // Validation
-    if (activeTab === "upload" && uploadedImages.length === 0) {
-      toast({
-        title: "No images selected",
-        description: "Please upload at least one image to check.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (activeTab === "figma" && !figmaLink) {
-      toast({
-        title: "No Figma link provided",
-        description: "Please enter a valid Figma link.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!designName) {
-      toast({
-        title: "Design name required",
-        description: "Please provide a name for this design check.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Simulate results - in a real app this would come from the server
-      const simulatedResults = {
-        status: Math.random() > 0.5 ? "passed" : "failed",
-        issues: [],
-      } as { status: "passed" | "failed"; issues: Array<any> };
-
-      // If failed, generate some mock issues
-      if (simulatedResults.status === "failed") {
-        simulatedResults.issues = [
-          {
-            type: "color",
-            message: "The button color #FF5733 doesn't match your brand's primary color #8344FF",
-            severity: "high",
-            element: "Call-to-action button",
-            coordinates: { x: 450, y: 320 },
-          },
-          {
-            type: "typography",
-            message: "The heading font 'Montserrat' doesn't match your brand's primary font 'Inter'",
-            severity: "medium",
-            element: "Main heading",
-            coordinates: { x: 200, y: 150 },
-          },
-          {
-            type: "spacing",
-            message: "Inconsistent spacing between elements. Should use 16px grid system.",
-            severity: "low",
-            element: "Card container",
-            coordinates: { x: 300, y: 400 },
-          },
-        ];
-      }
-
-      setCheckResults(simulatedResults);
-
-      toast({
-        title: "Design check complete",
-        description: simulatedResults.status === "passed" 
-          ? "Your design passed all brand compliance checks!" 
-          : `Your design has ${simulatedResults.issues.length} compliance issues.`,
-        variant: simulatedResults.status === "passed" ? "default" : "destructive",
-      });
-    } catch (error) {
-      console.error("Error checking design:", error);
-      toast({
-        title: "Check failed",
-        description: "There was an issue processing your design. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleCopyCode = () => {
+    navigator.clipboard.writeText(JSON.stringify(analysisResult, null, 2));
+    setCopied(true);
+    toast({
+      title: "Copied to clipboard",
+      description: "The analysis result has been copied to your clipboard.",
+    });
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Design Checker</h1>
+    <div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold">Design Checker</h1>
         <p className="text-muted-foreground">
-          Check your designs against your brand guidelines
+          Analyze your website's design for accessibility, performance, and SEO.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>New Design Check</CardTitle>
-            <CardDescription>
-              Upload your design or connect to Figma to check brand compliance
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="designName">Design Name</Label>
-                <Input
-                  id="designName"
-                  placeholder="Homepage Redesign"
-                  value={designName}
-                  onChange={(e) => setDesignName(e.target.value)}
-                  disabled={isSubmitting || !!checkResults}
-                />
-              </div>
+      <Tabs defaultValue="url" value={value} onValueChange={setValue} className="w-full">
+        <TabsList>
+          <TabsTrigger value="url">Analyze URL</TabsTrigger>
+          <TabsTrigger value="html">Analyze HTML</TabsTrigger>
+        </TabsList>
+        <TabsContent value="url" className="space-y-4">
+          <div className="grid gap-2">
+            <Label htmlFor="url">Website URL</Label>
+            <Input
+              id="url"
+              placeholder="https://example.com"
+              type="url"
+              value={designUrl}
+              onChange={(e) => setDesignUrl(e.target.value)}
+            />
+          </div>
+          <Button onClick={handleUrlAnalysis} disabled={loading}>
+            {loading ? "Analyzing..." : "Analyze"}
+          </Button>
+        </TabsContent>
+        <TabsContent value="html" className="space-y-4">
+          <div className="grid gap-2">
+            <Label htmlFor="html">HTML Code</Label>
+            <Textarea
+              id="html"
+              placeholder="Paste your HTML code here"
+              value={htmlCode}
+              onChange={(e) => setHtmlCode(e.target.value)}
+            />
+          </div>
+          <Button onClick={handleHtmlAnalysis} disabled={loading}>
+            {loading ? "Analyzing..." : "Analyze"}
+          </Button>
+        </TabsContent>
+      </Tabs>
 
-              <Tabs
-                defaultValue="upload"
-                value={activeTab}
-                onValueChange={setActiveTab}
-                className="space-y-4"
-                disabled={isSubmitting || !!checkResults}
-              >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="upload">Upload Images</TabsTrigger>
-                  <TabsTrigger value="figma">Figma Link</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="upload" className="space-y-4">
-                  <div 
-                    className="border-2 border-dashed rounded-lg p-6 text-center hover:bg-muted/50 transition-colors cursor-pointer"
-                    onClick={() => document.getElementById("design-upload")?.click()}
-                  >
-                    <input
-                      id="design-upload"
-                      type="file"
-                      className="hidden"
-                      accept="image/*"
-                      multiple
-                      onChange={handleImageUpload}
-                      disabled={isSubmitting || !!checkResults}
-                    />
-                    
-                    <div className="flex flex-col items-center">
-                      <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
-                        <Upload className="h-6 w-6" />
-                      </div>
-                      <p className="font-medium">Upload design images</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Drag and drop or click to browse
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-4">
-                        Supports PNG, JPG, and SVG files up to 5MB each
-                      </p>
-                    </div>
+      {analysisResult && (
+        <div className="mt-8 space-y-4">
+          <h2 className="text-2xl font-bold">Analysis Result</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Accessibility</CardTitle>
+                <CardDescription>Overall accessibility score</CardDescription>
+              </CardHeader>
+              <CardContent className="text-center">
+                <div className="relative h-24 w-24 mx-auto">
+                  <Progress
+                    value={analysisResult.accessibilityScore}
+                    className="absolute top-0 left-0 h-full w-full rounded-full"
+                  />
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl font-bold">
+                    {analysisResult.accessibilityScore}
                   </div>
-                  
-                  {uploadedImages.length > 0 && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
-                      {uploadedImages.map((image, index) => (
-                        <div key={index} className="relative rounded-lg border overflow-hidden">
-                          <div className="aspect-video bg-muted/50 flex items-center justify-center">
-                            <Image className="h-8 w-8 text-muted-foreground" />
-                          </div>
-                          <div className="p-2">
-                            <p className="text-sm font-medium truncate">{image.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {(image.size / (1024 * 1024)).toFixed(2)} MB
-                            </p>
-                          </div>
-                          <button
-                            className="absolute top-2 right-2 h-6 w-6 rounded-full bg-background/80 flex items-center justify-center border text-muted-foreground hover:text-destructive"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              removeImage(index);
-                            }}
-                            disabled={isSubmitting || !!checkResults}
-                          >
-                            <FileX className="h-4 w-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </TabsContent>
+                </div>
+              </CardContent>
+            </Card>
 
-                <TabsContent value="figma" className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="figmaLink">Figma Link</Label>
-                    <div className="flex items-center space-x-2">
-                      <div className="relative flex-1">
-                        <LinkIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                          id="figmaLink"
-                          placeholder="https://www.figma.com/file/..."
-                          className="pl-8"
-                          value={figmaLink}
-                          onChange={(e) => setFigmaLink(e.target.value)}
-                          disabled={isSubmitting || !!checkResults}
-                        />
-                      </div>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Paste a link to your Figma file. Make sure the file is set to "Anyone with the link can view".
-                    </p>
+            <Card>
+              <CardHeader>
+                <CardTitle>Performance</CardTitle>
+                <CardDescription>Overall performance score</CardDescription>
+              </CardHeader>
+              <CardContent className="text-center">
+                <div className="relative h-24 w-24 mx-auto">
+                  <Progress
+                    value={analysisResult.performanceScore}
+                    className="absolute top-0 left-0 h-full w-full rounded-full"
+                  />
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl font-bold">
+                    {analysisResult.performanceScore}
                   </div>
-                </TabsContent>
-              </Tabs>
-            </div>
-          </CardContent>
-          <CardFooter className="flex justify-between">
-            <div />
-            <Button 
-              onClick={handleSubmit} 
-              disabled={isSubmitting || !!checkResults}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Checking...
-                </>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>SEO</CardTitle>
+                <CardDescription>Overall SEO score</CardDescription>
+              </CardHeader>
+              <CardContent className="text-center">
+                <div className="relative h-24 w-24 mx-auto">
+                  <Progress
+                    value={analysisResult.seoScore}
+                    className="absolute top-0 left-0 h-full w-full rounded-full"
+                  />
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl font-bold">
+                    {analysisResult.seoScore}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Best Practices</CardTitle>
+                <CardDescription>Overall best practices score</CardDescription>
+              </CardHeader>
+              <CardContent className="text-center">
+                <div className="relative h-24 w-24 mx-auto">
+                  <Progress
+                    value={analysisResult.bestPracticesScore}
+                    className="absolute top-0 left-0 h-full w-full rounded-full"
+                  />
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-2xl font-bold">
+                    {analysisResult.bestPracticesScore}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <Separator className="my-4" />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h3 className="text-xl font-bold mb-2">
+                <AlertCircle className="mr-2 inline-block h-5 w-5" />
+                Errors
+              </h3>
+              {analysisResult.errors.length > 0 ? (
+                <ul className="list-none space-y-2">
+                  {analysisResult.errors.map((error: string, index: number) => (
+                    <li key={index} className="flex items-center">
+                      <Badge variant="destructive" className="mr-2">
+                        Error
+                      </Badge>
+                      {error}
+                    </li>
+                  ))}
+                </ul>
               ) : (
-                <>
-                  Check Design
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </>
+                <p className="text-muted-foreground">No errors found.</p>
               )}
-            </Button>
-          </CardFooter>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Check Status</CardTitle>
-            <CardDescription>
-              View compliance check results
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {checkResults ? (
-              <div className="space-y-6">
-                <div className="flex flex-col items-center justify-center py-6">
-                  {checkResults.status === "passed" ? (
-                    <>
-                      <div className="h-16 w-16 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center mb-4">
-                        <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-500" />
-                      </div>
-                      <h3 className="text-xl font-bold text-green-600 dark:text-green-500">Passed!</h3>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Your design matches your brand guidelines
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <div className="h-16 w-16 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center mb-4">
-                        <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-500" />
-                      </div>
-                      <h3 className="text-xl font-bold text-red-600 dark:text-red-500">
-                        {checkResults.issues.length} Issues Found
-                      </h3>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Your design needs some adjustments
-                      </p>
-                    </>
-                  )}
-                </div>
-
-                {checkResults.status === "failed" && (
-                  <div className="space-y-3">
-                    <h4 className="text-sm font-medium">Issues to Fix:</h4>
-                    {checkResults.issues.map((issue, index) => (
-                      <div key={index} className="rounded-lg border p-3 text-sm space-y-1">
-                        <div className="font-medium flex items-center gap-2">
-                          <span 
-                            className={`inline-block h-2 w-2 rounded-full ${
-                              issue.severity === "high" 
-                                ? "bg-red-500" 
-                                : issue.severity === "medium" 
-                                ? "bg-amber-500" 
-                                : "bg-blue-500"
-                            }`}
-                          />
-                          {issue.element}
-                        </div>
-                        <p className="text-muted-foreground">{issue.message}</p>
-                        {issue.coordinates && (
-                          <p className="text-xs text-muted-foreground">
-                            Location: x: {issue.coordinates.x}, y: {issue.coordinates.y}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <div className="border-t pt-4 mt-6">
-                  <Button className="w-full" onClick={() => {
-                    setCheckResults(null);
-                    setActiveTab("upload");
-                    setUploadedImages([]);
-                    setFigmaLink("");
-                    setDesignName("");
-                  }}>
-                    Start New Check
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-6 text-center">
-                <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mb-4">
-                  <FileX className="h-8 w-8 text-muted-foreground" />
-                </div>
-                <h3 className="text-lg font-medium">No check in progress</h3>
-                <p className="text-sm text-muted-foreground mt-1 max-w-xs">
-                  Upload your designs or provide a Figma link to start checking for brand compliance
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>How It Works</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-brand-gradient text-white flex items-center justify-center font-bold">
-                  1
-                </div>
-                <h3 className="font-medium">Upload or Link</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Upload design images or connect directly to your Figma file to check against your brand guidelines.
-              </p>
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-brand-gradient text-white flex items-center justify-center font-bold">
-                  2
-                </div>
-                <h3 className="font-medium">Automatic Analysis</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Our AI compares your designs against your brand rules to identify inconsistencies or deviations.
-              </p>
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-brand-gradient text-white flex items-center justify-center font-bold">
-                  3
-                </div>
-                <h3 className="font-medium">Get Detailed Feedback</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Receive specific feedback on what needs to be fixed with exact locations and suggestions.
-              </p>
+
+            <div>
+              <h3 className="text-xl font-bold mb-2">
+                <AlertCircle className="mr-2 inline-block h-5 w-5 text-yellow-500" />
+                Warnings
+              </h3>
+              {analysisResult.warnings.length > 0 ? (
+                <ul className="list-none space-y-2">
+                  {analysisResult.warnings.map((warning: string, index: number) => (
+                    <li key={index} className="flex items-center">
+                      <Badge variant="warning" className="mr-2">
+                        Warning
+                      </Badge>
+                      {warning}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-muted-foreground">No warnings found.</p>
+              )}
             </div>
           </div>
-        </CardContent>
-      </Card>
+
+          <Card className="mt-4">
+            <CardHeader>
+              <CardTitle>Raw Analysis Result</CardTitle>
+              <CardDescription>
+                Copy the raw JSON result for further analysis.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="overflow-x-auto">
+              <pre className="bg-muted rounded-md p-4 font-mono text-sm">
+                {JSON.stringify(analysisResult, null, 2)}
+              </pre>
+            </CardContent>
+            <CardFooter>
+              <Button onClick={handleCopyCode} disabled={copied}>
+                {copied ? (
+                  <>
+                    <Check className="mr-2 h-4 w-4" />
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="mr-2 h-4 w-4" />
+                    Copy Code
+                  </>
+                )}
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };

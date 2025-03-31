@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme/theme-provider";
+import { AuthProvider } from "./context/auth-context";
 
 // Marketing pages
 import LandingPage from "./pages/marketing/LandingPage";
@@ -24,7 +25,6 @@ import Settings from "./pages/app/Settings";
 import NotFound from "./pages/NotFound";
 import AppLayout from "./components/layout/AppLayout";
 import MarketingLayout from "./components/layout/MarketingLayout";
-import { AuthProvider } from "./context/auth-context";
 
 const queryClient = new QueryClient();
 
@@ -32,10 +32,10 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider defaultTheme="light" storageKey="tailor-checker-theme">
       <TooltipProvider>
-        <AuthProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+        <BrowserRouter>
+          <AuthProvider>
+            <Toaster />
+            <Sonner />
             <Routes>
               {/* Marketing routes */}
               <Route element={<MarketingLayout />}>
@@ -62,8 +62,8 @@ const App = () => (
               {/* 404 route */}
               <Route path="*" element={<NotFound />} />
             </Routes>
-          </BrowserRouter>
-        </AuthProvider>
+          </AuthProvider>
+        </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>
   </QueryClientProvider>
