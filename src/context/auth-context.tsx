@@ -31,20 +31,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     // Check if user is logged in from localStorage
-    const storedUser = localStorage.getItem("user");
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    
-    if (isLoggedIn === "true" && storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-      } catch (e) {
-        console.error("Failed to parse user data:", e);
-        localStorage.removeItem("user");
-        localStorage.removeItem("isLoggedIn");
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem("user");
+      const isLoggedIn = localStorage.getItem("isLoggedIn");
+      
+      if (isLoggedIn === "true" && storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch (e) {
+          console.error("Failed to parse user data:", e);
+          localStorage.removeItem("user");
+          localStorage.removeItem("isLoggedIn");
+        }
       }
+      
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   }, []);
 
   const login = async (email: string, password: string) => {

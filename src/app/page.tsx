@@ -11,9 +11,11 @@ export default function Home() {
   
   useEffect(() => {
     // Check if user is logged in and redirect to dashboard if needed
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
-    if (isLoggedIn === "true") {
-      router.push("/dashboard");
+    if (typeof window !== 'undefined') {
+      const isLoggedIn = localStorage.getItem("isLoggedIn");
+      if (isLoggedIn === "true") {
+        router.push("/dashboard");
+      }
     }
   }, [router]);
 

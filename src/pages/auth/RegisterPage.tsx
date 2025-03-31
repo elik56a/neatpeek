@@ -16,7 +16,7 @@ const RegisterPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  const { signUp, loginWithGoogle } = useAuth();
+  const { register, loginWithGoogle } = useAuth();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,7 +34,7 @@ const RegisterPage = () => {
     setIsLoading(true);
     
     try {
-      await signUp(email, password, name);
+      await register(name, email, password);
       toast({
         title: "Account created successfully",
         description: "Welcome to TailorChecker!",
@@ -55,7 +55,7 @@ const RegisterPage = () => {
     setIsLoading(true);
     
     try {
-      await loginWithGoogle();
+      await loginWithGoogle?.();
       toast({
         title: "Account created successfully",
         description: "Welcome to TailorChecker!",

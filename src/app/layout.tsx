@@ -10,8 +10,6 @@ import "@/app/globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
-const queryClient = new QueryClient();
-
 export const metadata = {
   title: "TailorChecker - Brand Consistency Checker",
   description: "Ensure all your designs meet your brand guidelines",
@@ -25,17 +23,15 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <QueryClientProvider client={queryClient}>
-          <ThemeProvider defaultTheme="light" storageKey="tailor-checker-theme">
-            <TooltipProvider>
-              <AuthProvider>
-                <Toaster />
-                <Sonner />
-                {children}
-              </AuthProvider>
-            </TooltipProvider>
-          </ThemeProvider>
-        </QueryClientProvider>
+        <ThemeProvider defaultTheme="light" storageKey="tailor-checker-theme">
+          <TooltipProvider>
+            <AuthProvider>
+              <Toaster />
+              <Sonner />
+              {children}
+            </AuthProvider>
+          </TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

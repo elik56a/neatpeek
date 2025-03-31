@@ -1,6 +1,9 @@
 
+"use client";
+
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
@@ -9,14 +12,17 @@ import { useAuth } from "@/context/auth-context";
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isAuthenticated } = useAuth();
+  const pathname = usePathname();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const closeMenu = () => setIsMenuOpen(false);
 
+  const isActive = (path: string) => pathname === path;
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
       <div className="container flex h-16 items-center justify-between px-4 md:px-6">
-        <Link to="/" className="flex items-center gap-2" onClick={closeMenu}>
+        <Link href="/" className="flex items-center gap-2" onClick={closeMenu}>
           <div className="h-8 w-8 rounded-lg bg-brand-gradient flex items-center justify-center">
             <span className="text-white font-bold">TC</span>
           </div>
@@ -24,19 +30,34 @@ const Header = () => {
         </Link>
         
         <nav className="hidden md:flex items-center gap-6">
-          <Link to="/" className="text-sm font-medium hover:text-primary transition-colors">
+          <Link 
+            href="/" 
+            className={`text-sm font-medium transition-colors ${isActive('/') ? 'text-primary' : 'hover:text-primary'}`}
+          >
             Home
           </Link>
-          <Link to="/features" className="text-sm font-medium hover:text-primary transition-colors">
+          <Link 
+            href="/features" 
+            className={`text-sm font-medium transition-colors ${isActive('/features') ? 'text-primary' : 'hover:text-primary'}`}
+          >
             Features
           </Link>
-          <Link to="/pricing" className="text-sm font-medium hover:text-primary transition-colors">
+          <Link 
+            href="/pricing" 
+            className={`text-sm font-medium transition-colors ${isActive('/pricing') ? 'text-primary' : 'hover:text-primary'}`}
+          >
             Pricing
           </Link>
-          <Link to="/about" className="text-sm font-medium hover:text-primary transition-colors">
+          <Link 
+            href="/about" 
+            className={`text-sm font-medium transition-colors ${isActive('/about') ? 'text-primary' : 'hover:text-primary'}`}
+          >
             About
           </Link>
-          <Link to="/faq" className="text-sm font-medium hover:text-primary transition-colors">
+          <Link 
+            href="/faq" 
+            className={`text-sm font-medium transition-colors ${isActive('/faq') ? 'text-primary' : 'hover:text-primary'}`}
+          >
             FAQ
           </Link>
         </nav>
@@ -47,15 +68,15 @@ const Header = () => {
           <div className="hidden md:flex items-center gap-2">
             {isAuthenticated ? (
               <Button asChild>
-                <Link to="/dashboard">Dashboard</Link>
+                <Link href="/dashboard">Dashboard</Link>
               </Button>
             ) : (
               <>
                 <Button variant="outline" asChild>
-                  <Link to="/login">Login</Link>
+                  <Link href="/login">Login</Link>
                 </Button>
                 <Button asChild>
-                  <Link to="/register">Get Started</Link>
+                  <Link href="/register">Get Started</Link>
                 </Button>
               </>
             )}
@@ -78,36 +99,36 @@ const Header = () => {
         <div className="fixed inset-0 top-16 z-50 bg-background animate-fade-in md:hidden">
           <nav className="container flex flex-col gap-4 p-6">
             <Link
-              to="/"
-              className="flex h-10 items-center rounded-md px-3 text-sm font-medium hover:bg-accent transition-colors"
+              href="/"
+              className={`flex h-10 items-center rounded-md px-3 text-sm font-medium transition-colors ${isActive('/') ? 'bg-primary/10 text-primary' : 'hover:bg-accent'}`}
               onClick={closeMenu}
             >
               Home
             </Link>
             <Link
-              to="/features"
-              className="flex h-10 items-center rounded-md px-3 text-sm font-medium hover:bg-accent transition-colors"
+              href="/features"
+              className={`flex h-10 items-center rounded-md px-3 text-sm font-medium transition-colors ${isActive('/features') ? 'bg-primary/10 text-primary' : 'hover:bg-accent'}`}
               onClick={closeMenu}
             >
               Features
             </Link>
             <Link
-              to="/pricing"
-              className="flex h-10 items-center rounded-md px-3 text-sm font-medium hover:bg-accent transition-colors"
+              href="/pricing"
+              className={`flex h-10 items-center rounded-md px-3 text-sm font-medium transition-colors ${isActive('/pricing') ? 'bg-primary/10 text-primary' : 'hover:bg-accent'}`}
               onClick={closeMenu}
             >
               Pricing
             </Link>
             <Link
-              to="/about"
-              className="flex h-10 items-center rounded-md px-3 text-sm font-medium hover:bg-accent transition-colors"
+              href="/about"
+              className={`flex h-10 items-center rounded-md px-3 text-sm font-medium transition-colors ${isActive('/about') ? 'bg-primary/10 text-primary' : 'hover:bg-accent'}`}
               onClick={closeMenu}
             >
               About
             </Link>
             <Link
-              to="/faq"
-              className="flex h-10 items-center rounded-md px-3 text-sm font-medium hover:bg-accent transition-colors"
+              href="/faq"
+              className={`flex h-10 items-center rounded-md px-3 text-sm font-medium transition-colors ${isActive('/faq') ? 'bg-primary/10 text-primary' : 'hover:bg-accent'}`}
               onClick={closeMenu}
             >
               FAQ
@@ -116,19 +137,19 @@ const Header = () => {
             <div className="mt-4 flex flex-col gap-2">
               {isAuthenticated ? (
                 <Button asChild>
-                  <Link to="/dashboard" onClick={closeMenu}>
+                  <Link href="/dashboard" onClick={closeMenu}>
                     Dashboard
                   </Link>
                 </Button>
               ) : (
                 <>
                   <Button variant="outline" asChild>
-                    <Link to="/login" onClick={closeMenu}>
+                    <Link href="/login" onClick={closeMenu}>
                       Login
                     </Link>
                   </Button>
                   <Button asChild>
-                    <Link to="/register" onClick={closeMenu}>
+                    <Link href="/register" onClick={closeMenu}>
                       Get Started
                     </Link>
                   </Button>

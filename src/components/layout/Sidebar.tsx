@@ -1,5 +1,8 @@
 
-import { Link, useLocation } from "react-router-dom";
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -20,7 +23,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 
 const Sidebar = () => {
   const { user, logout } = useAuth();
-  const location = useLocation();
+  const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 
   const sidebarLinks = [
@@ -62,7 +65,7 @@ const Sidebar = () => {
     >
       <div className="p-4 flex items-center justify-between border-b">
         {!collapsed && (
-          <Link to="/dashboard" className="flex items-center gap-2">
+          <Link href="/dashboard" className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-brand-gradient flex items-center justify-center">
               <span className="text-white font-bold">TC</span>
             </div>
@@ -87,7 +90,7 @@ const Sidebar = () => {
       <ScrollArea className="flex-1 py-4">
         <nav className="px-2 space-y-1">
           {sidebarLinks.map((link) => {
-            const isActive = location.pathname === link.href;
+            const isActive = pathname === link.href;
             
             if (collapsed) {
               return (
@@ -95,7 +98,7 @@ const Sidebar = () => {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Link
-                        to={link.href}
+                        href={link.href}
                         className={cn(
                           "flex h-10 w-10 mx-auto items-center justify-center rounded-md",
                           "transition-colors hover:bg-sidebar-accent",
@@ -116,7 +119,7 @@ const Sidebar = () => {
             return (
               <Link
                 key={link.name}
-                to={link.href}
+                href={link.href}
                 className={cn(
                   "flex h-10 items-center gap-3 rounded-md px-3",
                   "transition-colors hover:bg-sidebar-accent",
