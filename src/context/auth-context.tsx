@@ -1,14 +1,13 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+"use client";
+
+import { createContext, useContext, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 interface User {
   id: string;
   name: string;
   email: string;
-  avatar?: string;
-  companyName?: string;
-  role: 'admin' | 'user';
 }
 
 interface AuthContextType {
@@ -17,91 +16,80 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  signUp: (email: string, password: string, name: string) => Promise<void>;
-  loginWithGoogle: () => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
-    // Check if user is stored in localStorage (simulating persistent auth for demo)
-    const storedUser = localStorage.getItem('tailor-checker-user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    // Check if user is logged in from localStorage
+    const storedUser = localStorage.getItem("user");
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+    
+    if (isLoggedIn === "true" && storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error("Failed to parse user data:", e);
+        localStorage.removeItem("user");
+        localStorage.removeItem("isLoggedIn");
+      }
     }
+    
     setIsLoading(false);
   }, []);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
+    
     try {
-      // This is a mock implementation - would use real auth in production
-      // For demo purposes, we're simulating a successful login
-      const demoUser: User = {
-        id: '1',
-        name: 'Demo User',
-        email: email,
-        avatar: 'https://ui-avatars.com/api/?name=Demo+User&background=8344ff&color=fff',
-        companyName: 'Acme Design',
-        role: 'admin'
+      // Mock login - would be replaced with actual API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Mock user data
+      const userData = {
+        id: "user-123",
+        name: email.split('@')[0],
+        email
       };
       
-      setUser(demoUser);
-      localStorage.setItem('tailor-checker-user', JSON.stringify(demoUser));
-      navigate('/dashboard');
+      setUser(userData);
+      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("isLoggedIn", "true");
+      router.push("/dashboard");
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error("Login failed:", error);
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const signUp = async (email: string, password: string, name: string) => {
+  const register = async (name: string, email: string, password: string) => {
     setIsLoading(true);
+    
     try {
-      // This is a mock implementation - would use real auth in production
-      const demoUser: User = {
-        id: '1',
-        name: name,
-        email: email,
-        avatar: `https://ui-avatars.com/api/?name=${name.replace(' ', '+')}&background=8344ff&color=fff`,
-        role: 'admin'
+      // Mock registration - would be replaced with actual API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Mock user data
+      const userData = {
+        id: "user-" + Math.floor(Math.random() * 1000),
+        name,
+        email
       };
       
-      setUser(demoUser);
-      localStorage.setItem('tailor-checker-user', JSON.stringify(demoUser));
-      navigate('/brand-setup');
+      setUser(userData);
+      localStorage.setItem("user", JSON.stringify(userData));
+      localStorage.setItem("isLoggedIn", "true");
+      router.push("/dashboard");
     } catch (error) {
-      console.error('Sign up failed:', error);
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const loginWithGoogle = async () => {
-    setIsLoading(true);
-    try {
-      // Mock Google login
-      const demoUser: User = {
-        id: '1',
-        name: 'Google User',
-        email: 'google.user@example.com',
-        avatar: 'https://ui-avatars.com/api/?name=Google+User&background=8344ff&color=fff',
-        role: 'admin'
-      };
-      
-      setUser(demoUser);
-      localStorage.setItem('tailor-checker-user', JSON.stringify(demoUser));
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Google login failed:', error);
+      console.error("Registration failed:", error);
       throw error;
     } finally {
       setIsLoading(false);
@@ -110,8 +98,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('tailor-checker-user');
-    navigate('/');
+    localStorage.removeItem("user");
+    localStorage.removeItem("isLoggedIn");
+    router.push("/login");
   };
 
   return (
@@ -122,8 +111,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading,
         login,
         logout,
-        signUp,
-        loginWithGoogle
+        register
       }}
     >
       {children}
@@ -131,10 +119,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
-export const useAuth = (): AuthContextType => {
+export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };

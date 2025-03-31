@@ -1,14 +1,15 @@
 
-import { Outlet } from "react-router-dom";
+"use client";
+
 import Header from "./Header";
 import Footer from "./Footer";
 
-const MarketingLayout = () => {
+const MarketingLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="flex min-h-screen flex-col">
       <Header />
       <main className="flex-1">
-        <Outlet />
+        {children}
       </main>
       <Footer />
     </div>
