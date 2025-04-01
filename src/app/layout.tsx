@@ -1,16 +1,16 @@
 
+import type { Metadata } from 'next/types';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@/components/theme/theme-provider";
+import { Inter } from 'next/font/google';
 import { AuthProvider } from "@/context/auth-context";
-import { Inter } from "next/font/google";
 import "@/app/globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "TailorChecker - Brand Consistency Checker",
   description: "Ensure all your designs meet your brand guidelines",
 };

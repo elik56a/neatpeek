@@ -1,606 +1,798 @@
 
-import { useState } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { Loader2, Upload, FileText, Image, Check, X, Plus, Trash2 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+"use client";
+
+import { useState, useMemo } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { CheckCircle, Palette, Upload, Sliders, BookOpen, FileCheck, Check } from 'lucide-react';
+import { UploadDropzone } from '@/components/ui/upload-dropzone';
+import { ChromePicker } from 'react-color';
+import { Progress } from '@/components/ui/progress';
+
+interface FormData {
+  brandName: string;
+  description: string;
+  colorPalette: {
+    primary: string;
+    secondary: string;
+    accent: string;
+    background: string;
+    text: string;
+  };
+  logo: File | null;
+  logoPreview: string | null;
+  typography: {
+    headingFont: string;
+    bodyFont: string;
+    fontPairStyle: string;
+  };
+  spacing: {
+    unit: string;
+    scale: string;
+  };
+  imagery: {
+    style: string;
+    treatment: string;
+    customRules: string;
+  };
+}
+
+const initialFormData: FormData = {
+  brandName: '',
+  description: '',
+  colorPalette: {
+    primary: '#3b82f6',
+    secondary: '#8b5cf6',
+    accent: '#f97316',
+    background: '#ffffff',
+    text: '#1e293b',
+  },
+  logo: null,
+  logoPreview: null,
+  typography: {
+    headingFont: 'Inter',
+    bodyFont: 'Inter',
+    fontPairStyle: 'matching',
+  },
+  spacing: {
+    unit: '4px',
+    scale: 'linear',
+  },
+  imagery: {
+    style: 'photography',
+    treatment: 'natural',
+    customRules: '',
+  },
+};
 
 const BrandSetup = () => {
-  const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState("guidelines");
-  const [saveEnabled, setSaveEnabled] = useState(false);
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [uploadedImages, setUploadedImages] = useState<File[]>([]);
-  const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
-  const [brandForm, setBrandForm] = useState({
-    brandName: "",
-    primaryColor: "#8344ff",
-    secondaryColor: "#5112cc",
-    accentColor: "#f97316",
-    primaryFont: "",
-    secondaryFont: "",
-    logo: null,
-    spacing: "",
-    additionalNotes: "",
+  const [activeTab, setActiveTab] = useState<string>('basics');
+  const [formData, setFormData] = useState<FormData>(initialFormData);
+  const [activeColorPicker, setActiveColorPicker] = useState<string | null>(null);
+  const [completedSteps, setCompletedSteps] = useState<Record<string, boolean>>({
+    basics: false,
+    colors: false,
+    typography: false,
+    spacing: false,
+    imagery: false,
   });
 
-  const hasGuidelines = !!uploadedFile;
-  const hasDesigns = uploadedImages.length > 0;
-  const hasManualSettings = brandForm.brandName && brandForm.primaryColor && brandForm.primaryFont;
-  
-  const atleastOneTabComplete = hasGuidelines || hasDesigns || hasManualSettings;
+  const isTabComplete = (tabName: string): boolean => !!completedSteps[tabName];
 
-  const updateSaveStatus = () => {
-    setSaveEnabled(atleastOneTabComplete);
+  const progressPercentage = useMemo(() => {
+    const totalSteps = Object.keys(completedSteps).length;
+    const completedCount = Object.values(completedSteps).filter(Boolean).length;
+    return Math.round((completedCount / totalSteps) * 100);
+  }, [completedSteps]);
+
+  const handleColorPickerToggle = (colorKey: string) => {
+    setActiveColorPicker(activeColorPicker === colorKey ? null : colorKey);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setUploadedFile(e.target.files[0]);
-      updateSaveStatus();
-    }
+  const handleColorChange = (colorKey: string, color: any) => {
+    setFormData((prev) => ({
+      ...prev,
+      colorPalette: {
+        ...prev.colorPalette,
+        [colorKey]: color.hex,
+      },
+    }));
   };
 
-  const handleImagesUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      
-      // Create URLs for previews
-      const newPreviewUrls = newFiles.map(file => URL.createObjectURL(file));
-      
-      setUploadedImages((prev) => [...prev, ...newFiles]);
-      setImagePreviewUrls((prev) => [...prev, ...newPreviewUrls]);
-      updateSaveStatus();
-    }
-  };
-
-  const removeImage = (index: number) => {
-    // Revoke the URL to prevent memory leaks
-    URL.revokeObjectURL(imagePreviewUrls[index]);
-    
-    setUploadedImages((prev) => prev.filter((_, i) => i !== index));
-    setImagePreviewUrls((prev) => prev.filter((_, i) => i !== index));
-    updateSaveStatus();
-  };
-
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setBrandForm((prev) => ({ ...prev, [name]: value }));
-    updateSaveStatus();
-  };
-
-  const tabVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { duration: 0.4, ease: "easeOut" }
-    },
-    exit: { 
-      opacity: 0, 
-      y: -20,
-      transition: { duration: 0.3, ease: "easeIn" }
+    
+    if (name.includes('.')) {
+      const [section, field] = name.split('.');
+      setFormData((prev) => ({
+        ...prev,
+        [section]: {
+          ...prev[section as keyof FormData],
+          [field]: value,
+        },
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
     }
   };
 
-  const handleSubmit = async () => {
-    if (!atleastOneTabComplete) {
-      toast({
-        title: "Incomplete Setup",
-        description: "Please complete at least one tab before saving.",
-        variant: "destructive",
-      });
-      return;
+  const handleRadioChange = (section: string, field: string, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [section]: {
+        ...prev[section as keyof FormData],
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleLogoUpload = (file: File) => {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormData((prev) => ({
+        ...prev,
+        logo: file,
+        logoPreview: reader.result as string,
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleNext = () => {
+    const tabs = ['basics', 'colors', 'typography', 'spacing', 'imagery'];
+    const currentIndex = tabs.indexOf(activeTab);
+    
+    // Mark current tab as completed
+    setCompletedSteps((prev) => ({
+      ...prev,
+      [activeTab]: true,
+    }));
+    
+    // Move to next tab if available
+    if (currentIndex < tabs.length - 1) {
+      setActiveTab(tabs[currentIndex + 1]);
     }
+  };
 
-    setIsSubmitting(true);
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+  };
 
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      toast({
-        title: "Brand setup saved",
-        description: "Your brand settings have been successfully saved.",
-      });
-
-    } catch (error) {
-      console.error("Error saving brand setup:", error);
-      toast({
-        title: "Save failed",
-        description: "There was an issue saving your brand setup. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleSave = () => {
+    // Mark all tabs as completed
+    const allCompleted = Object.keys(completedSteps).reduce((acc, key) => {
+      acc[key] = true;
+      return acc;
+    }, {} as Record<string, boolean>);
+    
+    setCompletedSteps(allCompleted);
+    
+    // Here you would typically send the data to your backend
+    console.log('Brand guidelines saved:', formData);
+    
+    // Show success message or redirect user
+    alert('Brand guidelines saved successfully!');
   };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Brand Setup</h1>
-        <p className="text-muted-foreground">
-          Configure your brand guidelines to ensure design consistency
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Brand Setup</h1>
+          <p className="text-muted-foreground">
+            Define your brand guidelines for consistent design checks
+          </p>
+        </div>
+        <Button onClick={handleSave} className="hover-scale">
+          <Check className="h-4 w-4 mr-2" />
+          Save Guidelines
+        </Button>
       </div>
-
-      <Tabs 
-        defaultValue="guidelines" 
-        value={activeTab}
-        onValueChange={setActiveTab}
-        className="space-y-6"
-      >
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="guidelines" className="relative overflow-hidden group">
-            <span className="relative z-10">Brand Guidelines</span>
-            <span className="absolute inset-0 bg-primary/10 transform scale-x-0 group-data-[state=active]:scale-x-100 transition-transform origin-left duration-300 ease-out"></span>
-          </TabsTrigger>
-          <TabsTrigger value="designs" className="relative overflow-hidden group">
-            <span className="relative z-10">Example Designs</span>
-            <span className="absolute inset-0 bg-primary/10 transform scale-x-0 group-data-[state=active]:scale-x-100 transition-transform origin-left duration-300 ease-out"></span>
-          </TabsTrigger>
-          <TabsTrigger value="manual" className="relative overflow-hidden group">
-            <span className="relative z-10">Manual Settings</span>
-            <span className="absolute inset-0 bg-primary/10 transform scale-x-0 group-data-[state=active]:scale-x-100 transition-transform origin-left duration-300 ease-out"></span>
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="guidelines">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            variants={tabVariants}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>Upload Brand Guidelines</CardTitle>
-                <CardDescription>
-                  Upload your brand guideline document (PDF, Word, etc.) and we'll automatically extract your brand rules.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div 
-                    className={cn(
-                      "border-2 border-dashed rounded-lg p-12 text-center hover:bg-muted/50 transition-colors cursor-pointer transform hover:scale-[1.01] transition-all duration-200",
-                      uploadedFile ? "border-brand-500 bg-brand-50/30 dark:bg-brand-950/20" : "border-border"
-                    )}
-                    onClick={() => document.getElementById("guidelines-upload")?.click()}
-                  >
-                    <input
-                      id="guidelines-upload"
-                      type="file"
-                      className="hidden"
-                      accept=".pdf,.doc,.docx,.ppt,.pptx"
-                      onChange={handleFileUpload}
-                    />
+      
+      <div className="grid gap-6 md:grid-cols-8">
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle>Setup Progress</CardTitle>
+            <CardDescription>Complete all sections to finalize your brand guidelines</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Overall completion</span>
+                <span className="font-medium">{progressPercentage}%</span>
+              </div>
+              <Progress value={progressPercentage} className="h-2" />
+            </div>
+            
+            <div className="space-y-2">
+              <Button 
+                variant={activeTab === 'basics' ? 'default' : 'outline'}
+                className={`justify-start w-full ${isTabComplete('basics') ? 'border-green-500 dark:border-green-600' : ''}`}
+                onClick={() => handleTabChange('basics')}
+              >
+                <BookOpen className="h-4 w-4 mr-2" />
+                <span>Brand Basics</span>
+                {isTabComplete('basics') && <CheckCircle className="h-3.5 w-3.5 ml-auto text-green-500" />}
+              </Button>
+              
+              <Button 
+                variant={activeTab === 'colors' ? 'default' : 'outline'}
+                className={`justify-start w-full ${isTabComplete('colors') ? 'border-green-500 dark:border-green-600' : ''}`}
+                onClick={() => handleTabChange('colors')}
+              >
+                <Palette className="h-4 w-4 mr-2" />
+                <span>Color Palette</span>
+                {isTabComplete('colors') && <CheckCircle className="h-3.5 w-3.5 ml-auto text-green-500" />}
+              </Button>
+              
+              <Button 
+                variant={activeTab === 'typography' ? 'default' : 'outline'}
+                className={`justify-start w-full ${isTabComplete('typography') ? 'border-green-500 dark:border-green-600' : ''}`}
+                onClick={() => handleTabChange('typography')}
+              >
+                <FileCheck className="h-4 w-4 mr-2" />
+                <span>Typography</span>
+                {isTabComplete('typography') && <CheckCircle className="h-3.5 w-3.5 ml-auto text-green-500" />}
+              </Button>
+              
+              <Button 
+                variant={activeTab === 'spacing' ? 'default' : 'outline'}
+                className={`justify-start w-full ${isTabComplete('spacing') ? 'border-green-500 dark:border-green-600' : ''}`}
+                onClick={() => handleTabChange('spacing')}
+              >
+                <Sliders className="h-4 w-4 mr-2" />
+                <span>Spacing & Scale</span>
+                {isTabComplete('spacing') && <CheckCircle className="h-3.5 w-3.5 ml-auto text-green-500" />}
+              </Button>
+              
+              <Button 
+                variant={activeTab === 'imagery' ? 'default' : 'outline'}
+                className={`justify-start w-full ${isTabComplete('imagery') ? 'border-green-500 dark:border-green-600' : ''}`}
+                onClick={() => handleTabChange('imagery')}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                <span>Imagery & Media</span>
+                {isTabComplete('imagery') && <CheckCircle className="h-3.5 w-3.5 ml-auto text-green-500" />}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <div className="md:col-span-6">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+            <TabsList className="w-full justify-start mb-6 border-b rounded-none h-auto p-0 bg-transparent">
+              <TabsTrigger 
+                value="basics"
+                className={`rounded-b-none border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent ${
+                  isTabComplete('basics') && activeTab !== 'basics' ? 'border-green-500' : ''
+                }`}
+              >
+                Brand Basics
+                {isTabComplete('basics') && <CheckCircle className="h-3 w-3 ml-2 text-green-500" />}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="colors"
+                className={`rounded-b-none border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent ${
+                  isTabComplete('colors') && activeTab !== 'colors' ? 'border-green-500' : ''
+                }`}
+              >
+                Colors
+                {isTabComplete('colors') && <CheckCircle className="h-3 w-3 ml-2 text-green-500" />}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="typography"
+                className={`rounded-b-none border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent ${
+                  isTabComplete('typography') && activeTab !== 'typography' ? 'border-green-500' : ''
+                }`}
+              >
+                Typography
+                {isTabComplete('typography') && <CheckCircle className="h-3 w-3 ml-2 text-green-500" />}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="spacing"
+                className={`rounded-b-none border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent ${
+                  isTabComplete('spacing') && activeTab !== 'spacing' ? 'border-green-500' : ''
+                }`}
+              >
+                Spacing
+                {isTabComplete('spacing') && <CheckCircle className="h-3 w-3 ml-2 text-green-500" />}
+              </TabsTrigger>
+              <TabsTrigger 
+                value="imagery"
+                className={`rounded-b-none border-b-2 data-[state=active]:border-primary data-[state=active]:bg-transparent ${
+                  isTabComplete('imagery') && activeTab !== 'imagery' ? 'border-green-500' : ''
+                }`}
+              >
+                Imagery
+                {isTabComplete('imagery') && <CheckCircle className="h-3 w-3 ml-2 text-green-500" />}
+              </TabsTrigger>
+            </TabsList>
+            
+            <Card className="border-t-0 rounded-tl-none shadow-md">
+              <CardContent className="pt-6">
+                <TabsContent value="basics" className="mt-0">
+                  <div className="space-y-6">
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-medium">Brand Identity</h3>
+                      <div className="space-y-4">
+                        <div className="grid gap-2">
+                          <Label htmlFor="brandName">Brand Name *</Label>
+                          <Input 
+                            id="brandName" 
+                            name="brandName" 
+                            value={formData.brandName} 
+                            onChange={handleInputChange} 
+                            placeholder="e.g., TailorChecker" 
+                          />
+                        </div>
+                        
+                        <div className="grid gap-2">
+                          <Label htmlFor="description">Brand Description</Label>
+                          <Textarea 
+                            id="description" 
+                            name="description" 
+                            value={formData.description} 
+                            onChange={handleInputChange} 
+                            placeholder="Describe your brand's identity, values, and voice..." 
+                            rows={5} 
+                          />
+                        </div>
+                        
+                        <div className="grid gap-2">
+                          <Label>Brand Logo</Label>
+                          {formData.logoPreview ? (
+                            <div className="relative bg-muted p-4 rounded-md flex flex-col items-center">
+                              <img 
+                                src={formData.logoPreview} 
+                                alt="Brand Logo Preview" 
+                                className="max-h-40 object-contain mb-4" 
+                              />
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => setFormData(prev => ({ ...prev, logo: null, logoPreview: null }))}
+                              >
+                                Remove Logo
+                              </Button>
+                            </div>
+                          ) : (
+                            <UploadDropzone 
+                              accept={{ 'image/*': ['.png', '.jpg', '.jpeg', '.svg'] }}
+                              maxFiles={1}
+                              maxSize={3 * 1024 * 1024}
+                              onUpload={handleLogoUpload}
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
                     
-                    {uploadedFile ? (
-                      <div className="flex flex-col items-center">
-                        <div className="h-12 w-12 rounded-full bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center mb-4">
-                          <FileText className="h-6 w-6 text-brand-600 dark:text-brand-400" />
-                        </div>
-                        <p className="font-medium">{uploadedFile.name}</p>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {(uploadedFile.size / (1024 * 1024)).toFixed(2)} MB
-                        </p>
-                        <div className="mt-4 flex items-center gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            className="text-red-500 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/20"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setUploadedFile(null);
-                              updateSaveStatus();
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4 mr-1" />
-                            Remove
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              document.getElementById("guidelines-upload")?.click();
-                            }}
-                          >
-                            <Upload className="h-4 w-4 mr-1" />
-                            Replace
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center">
-                        <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
-                          <Upload className="h-6 w-6" />
-                        </div>
-                        <p className="font-medium">Upload your brand guidelines</p>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Drag and drop or click to browse
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-4">
-                          Supports PDF, Word, and PowerPoint files up to 10MB
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="rounded-lg border p-4">
-                    <h3 className="text-sm font-medium mb-2">What happens after upload?</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Our AI will analyze your brand guidelines and extract key information like colors, typography, spacing rules, and more. This process may take a few minutes depending on the file size.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button variant="outline" onClick={() => setActiveTab("designs")} className="hover:scale-105 transition-transform duration-200">
-                  Skip for now
-                </Button>
-                <Button 
-                  onClick={() => setActiveTab("designs")} 
-                  disabled={!uploadedFile}
-                  className="relative overflow-hidden group hover:scale-105 transition-transform duration-200"
-                >
-                  <span className="relative z-10">Continue to Designs</span>
-                  <span className="absolute inset-0 bg-primary/10 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300 ease-out"></span>
-                </Button>
-              </CardFooter>
-            </Card>
-          </motion.div>
-        </TabsContent>
-
-        <TabsContent value="designs">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            variants={tabVariants}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>Upload Example Designs</CardTitle>
-                <CardDescription>
-                  Upload sample designs that represent your brand's aesthetic and design standard.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div 
-                    className={cn(
-                      "border-2 border-dashed rounded-lg p-12 text-center hover:bg-muted/50 transition-colors cursor-pointer transform hover:scale-[1.01] transition-all duration-200",
-                      "border-border"
-                    )}
-                    onClick={() => document.getElementById("designs-upload")?.click()}
-                  >
-                    <input
-                      id="designs-upload"
-                      type="file"
-                      className="hidden"
-                      accept="image/*"
-                      multiple
-                      onChange={handleImagesUpload}
-                    />
-                    
-                    <div className="flex flex-col items-center">
-                      <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
-                        <Image className="h-6 w-6" />
-                      </div>
-                      <p className="font-medium">Upload example designs</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Drag and drop or click to browse
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-4">
-                        Supports PNG, JPG, and SVG files up to 5MB each
-                      </p>
+                    <div className="flex justify-end">
+                      <Button onClick={handleNext}>
+                        Next Step: Colors
+                      </Button>
                     </div>
                   </div>
-                  
-                  {uploadedImages.length > 0 && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
-                      {uploadedImages.map((image, index) => (
-                        <div key={index} className="relative rounded-lg border overflow-hidden group hover:shadow-md transition-all duration-200 hover:scale-[1.02]">
-                          <div className="aspect-video bg-muted/50 flex items-center justify-center">
-                            {imagePreviewUrls[index] && (
-                              <img 
-                                src={imagePreviewUrls[index]} 
-                                alt={`Preview of ${image.name}`}
-                                className="object-cover w-full h-full"
-                              />
+                </TabsContent>
+                
+                <TabsContent value="colors" className="mt-0">
+                  <div className="space-y-6">
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-medium">Color Palette</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Define your brand's color system. Click on each color to choose from the color picker.
+                      </p>
+                      
+                      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {Object.entries(formData.colorPalette).map(([key, value]) => (
+                          <div key={key} className="space-y-2">
+                            <Label className="capitalize">{key}</Label>
+                            <div 
+                              className="h-12 rounded-md border cursor-pointer flex items-center justify-between p-2 transition-all hover:border-primary"
+                              style={{ backgroundColor: value }}
+                              onClick={() => handleColorPickerToggle(key)}
+                            >
+                              <span className="bg-white/90 dark:bg-black/60 text-xs px-2 py-1 rounded">
+                                {value}
+                              </span>
+                            </div>
+                            
+                            {activeColorPicker === key && (
+                              <div className="mt-2 z-10 relative">
+                                <div 
+                                  className="fixed inset-0 z-10" 
+                                  onClick={() => setActiveColorPicker(null)}
+                                />
+                                <div className="absolute z-20">
+                                  <ChromePicker 
+                                    color={value} 
+                                    onChange={(color) => handleColorChange(key, color)} 
+                                    disableAlpha 
+                                  />
+                                </div>
+                              </div>
                             )}
                           </div>
-                          <div className="p-2">
-                            <p className="text-sm font-medium truncate">{image.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {(image.size / (1024 * 1024)).toFixed(2)} MB
-                            </p>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="mt-8 space-y-4">
+                      <h4 className="font-medium">Preview</h4>
+                      <div className="p-4 rounded-md border bg-card">
+                        <div className="flex flex-wrap gap-2">
+                          {Object.entries(formData.colorPalette).map(([key, value]) => (
+                            <div key={key} className="space-y-1 text-center">
+                              <div 
+                                className="w-16 h-16 rounded-md"
+                                style={{ backgroundColor: value }}
+                              />
+                              <p className="text-xs font-medium capitalize">{key}</p>
+                            </div>
+                          ))}
+                        </div>
+                        
+                        <Separator className="my-4" />
+                        
+                        <div className="space-y-3 p-3 rounded-md" style={{ backgroundColor: formData.colorPalette.background }}>
+                          <h3 className="text-xl font-bold" style={{ color: formData.colorPalette.text }}>
+                            Sample Heading
+                          </h3>
+                          <p className="text-sm" style={{ color: formData.colorPalette.text }}>
+                            This is a sample paragraph to preview how your colors work together.
+                          </p>
+                          <div className="flex gap-2 mt-2">
+                            <Button
+                              style={{ 
+                                backgroundColor: formData.colorPalette.primary,
+                                color: '#fff',
+                                borderColor: formData.colorPalette.primary
+                              }}
+                            >
+                              Primary
+                            </Button>
+                            <Button
+                              variant="outline"
+                              style={{ 
+                                color: formData.colorPalette.secondary,
+                                borderColor: formData.colorPalette.secondary
+                              }}
+                            >
+                              Secondary
+                            </Button>
                           </div>
-                          <button
-                            className="absolute top-2 right-2 h-6 w-6 rounded-full bg-background/80 flex items-center justify-center border text-muted-foreground hover:text-destructive transform hover:scale-110 transition-all duration-200"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              removeImage(index);
-                            }}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-end">
+                      <Button onClick={handleNext}>
+                        Next Step: Typography
+                      </Button>
+                    </div>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="typography" className="mt-0">
+                  <div className="space-y-6">
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-medium">Typography Settings</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Define the fonts and typographic styles for your brand.
+                      </p>
+                      
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="typography.headingFont">Heading Font</Label>
+                          <Input 
+                            id="typography.headingFont" 
+                            name="typography.headingFont" 
+                            value={formData.typography.headingFont} 
+                            onChange={handleInputChange} 
+                            placeholder="e.g., Inter, Poppins, etc." 
+                          />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="typography.bodyFont">Body Font</Label>
+                          <Input 
+                            id="typography.bodyFont" 
+                            name="typography.bodyFont" 
+                            value={formData.typography.bodyFont} 
+                            onChange={handleInputChange} 
+                            placeholder="e.g., Inter, Roboto, etc." 
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label>Font Pairing Style</Label>
+                        <RadioGroup 
+                          value={formData.typography.fontPairStyle}
+                          onValueChange={(value) => handleRadioChange('typography', 'fontPairStyle', value)}
+                          className="flex flex-col space-y-1"
+                        >
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="matching" id="matching" />
+                            <Label htmlFor="matching" className="font-normal cursor-pointer">
+                              Matching (Same font family for headings and body)
+                            </Label>
+                          </div>
+                          
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="complementary" id="complementary" />
+                            <Label htmlFor="complementary" className="font-normal cursor-pointer">
+                              Complementary (Different fonts that work well together)
+                            </Label>
+                          </div>
+                          
+                          <div className="flex items-center space-x-2">
+                            <RadioGroupItem value="contrasting" id="contrasting" />
+                            <Label htmlFor="contrasting" className="font-normal cursor-pointer">
+                              Contrasting (Distinct fonts for visual interest)
+                            </Label>
+                          </div>
+                        </RadioGroup>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-6 p-4 rounded-md border bg-card">
+                      <h4 className="font-medium mb-3">Typography Preview</h4>
+                      <div className="space-y-4">
+                        <div>
+                          <div className="text-sm text-muted-foreground mb-1">Heading Font: {formData.typography.headingFont}</div>
+                          <h1 className="text-3xl font-bold" style={{ fontFamily: formData.typography.headingFont }}>
+                            This is a Heading Example
+                          </h1>
+                          <h2 className="text-xl font-semibold mt-2" style={{ fontFamily: formData.typography.headingFont }}>
+                            Secondary Heading Sample
+                          </h2>
+                        </div>
+                        
+                        <div>
+                          <div className="text-sm text-muted-foreground mb-1">Body Font: {formData.typography.bodyFont}</div>
+                          <p className="text-base" style={{ fontFamily: formData.typography.bodyFont }}>
+                            This is an example of body text using your selected font. Good typography improves readability and enhances the user experience across your brand materials and digital products.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-end">
+                      <Button onClick={handleNext}>
+                        Next Step: Spacing
+                      </Button>
+                    </div>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="spacing" className="mt-0">
+                  <div className="space-y-6">
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-medium">Spacing & Scale</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Define the spacing system that will be used across your designs.
+                      </p>
+                      
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label htmlFor="spacing.unit">Base Spacing Unit</Label>
+                          <Input 
+                            id="spacing.unit" 
+                            name="spacing.unit" 
+                            value={formData.spacing.unit} 
+                            onChange={handleInputChange} 
+                            placeholder="e.g., 4px, 8px, etc." 
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            The base unit all spacing will be calculated from
+                          </p>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label>Spacing Scale</Label>
+                          <RadioGroup 
+                            value={formData.spacing.scale}
+                            onValueChange={(value) => handleRadioChange('spacing', 'scale', value)}
+                            className="flex flex-col space-y-1"
                           >
-                            <X className="h-4 w-4" />
-                          </button>
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="linear" id="linear" />
+                              <Label htmlFor="linear" className="font-normal cursor-pointer">
+                                Linear (4, 8, 12, 16, 20, ...)
+                              </Label>
+                            </div>
+                            
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="double" id="double" />
+                              <Label htmlFor="double" className="font-normal cursor-pointer">
+                                Double (4, 8, 16, 32, 64, ...)
+                              </Label>
+                            </div>
+                            
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="custom" id="custom" />
+                              <Label htmlFor="custom" className="font-normal cursor-pointer">
+                                Custom Scale
+                              </Label>
+                            </div>
+                          </RadioGroup>
                         </div>
-                      ))}
-                      <div 
-                        className="relative rounded-lg border border-dashed flex items-center justify-center p-4 h-[140px] hover:bg-muted/50 cursor-pointer transform hover:scale-[1.02] transition-all duration-200"
-                        onClick={() => document.getElementById("designs-upload")?.click()}
-                      >
-                        <div className="text-center">
-                          <Plus className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                          <p className="text-sm text-muted-foreground">Add more designs</p>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-6 p-4 rounded-md border bg-card">
+                      <h4 className="font-medium mb-3">Spacing Preview</h4>
+                      <div className="space-y-4">
+                        <div className="flex flex-col space-y-2">
+                          <div className="flex items-center">
+                            <div className="w-16 text-xs">Small</div>
+                            <div className="h-4 bg-primary/20 rounded"></div>
+                          </div>
+                          <div className="flex items-center">
+                            <div className="w-16 text-xs">Medium</div>
+                            <div className="h-4 bg-primary/40 rounded" style={{ width: formData.spacing.scale === 'linear' ? '32px' : '64px' }}></div>
+                          </div>
+                          <div className="flex items-center">
+                            <div className="w-16 text-xs">Large</div>
+                            <div className="h-4 bg-primary/60 rounded" style={{ width: formData.spacing.scale === 'linear' ? '64px' : '128px' }}></div>
+                          </div>
+                          <div className="flex items-center">
+                            <div className="w-16 text-xs">XLarge</div>
+                            <div className="h-4 bg-primary/80 rounded" style={{ width: formData.spacing.scale === 'linear' ? '96px' : '256px' }}></div>
+                          </div>
+                        </div>
+                        
+                        <div className="text-xs text-muted-foreground">
+                          Base unit: {formData.spacing.unit} · Scale type: {formData.spacing.scale}
                         </div>
                       </div>
                     </div>
-                  )}
-                  
-                  <div className="rounded-lg border p-4">
-                    <h3 className="text-sm font-medium mb-2">How we analyze your designs</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Our AI will analyze your example designs to identify common design patterns, color usage, spacing, and layout preferences. This helps us build a more accurate profile of your brand style.
-                    </p>
+                    
+                    <div className="flex justify-end">
+                      <Button onClick={handleNext}>
+                        Next Step: Imagery
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                </TabsContent>
+                
+                <TabsContent value="imagery" className="mt-0">
+                  <div className="space-y-6">
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-medium">Imagery & Media Guidelines</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Define the visual style and treatment for images used across your brand.
+                      </p>
+                      
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-2">
+                          <Label>Image Style</Label>
+                          <RadioGroup 
+                            value={formData.imagery.style}
+                            onValueChange={(value) => handleRadioChange('imagery', 'style', value)}
+                            className="flex flex-col space-y-1"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="photography" id="photography" />
+                              <Label htmlFor="photography" className="font-normal cursor-pointer">
+                                Photography
+                              </Label>
+                            </div>
+                            
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="illustration" id="illustration" />
+                              <Label htmlFor="illustration" className="font-normal cursor-pointer">
+                                Illustration
+                              </Label>
+                            </div>
+                            
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="mixed" id="mixed" />
+                              <Label htmlFor="mixed" className="font-normal cursor-pointer">
+                                Mixed Media
+                              </Label>
+                            </div>
+                          </RadioGroup>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label>Image Treatment</Label>
+                          <RadioGroup 
+                            value={formData.imagery.treatment}
+                            onValueChange={(value) => handleRadioChange('imagery', 'treatment', value)}
+                            className="flex flex-col space-y-1"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="natural" id="natural" />
+                              <Label htmlFor="natural" className="font-normal cursor-pointer">
+                                Natural/Realistic
+                              </Label>
+                            </div>
+                            
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="filtered" id="filtered" />
+                              <Label htmlFor="filtered" className="font-normal cursor-pointer">
+                                Consistent Filter/Treatment
+                              </Label>
+                            </div>
+                            
+                            <div className="flex items-center space-x-2">
+                              <RadioGroupItem value="duotone" id="duotone" />
+                              <Label htmlFor="duotone" className="font-normal cursor-pointer">
+                                Duotone/Brand Colors
+                              </Label>
+                            </div>
+                          </RadioGroup>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="imagery.customRules">Custom Image Rules</Label>
+                        <Textarea 
+                          id="imagery.customRules" 
+                          name="imagery.customRules" 
+                          value={formData.imagery.customRules} 
+                          onChange={handleInputChange} 
+                          placeholder="Any additional guidelines for imagery (e.g., subject matter, composition, etc.)" 
+                          rows={4} 
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="mt-6 border rounded-md overflow-hidden">
+                      <div className="p-3 bg-muted font-medium text-sm">Image Style Preview</div>
+                      <div className="p-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <div className="aspect-video bg-muted rounded-md flex items-center justify-center">
+                              <p className="text-sm text-muted-foreground text-center p-4">
+                                {formData.imagery.style === 'photography' 
+                                  ? 'Photographic imagery' 
+                                  : formData.imagery.style === 'illustration' 
+                                  ? 'Illustrated imagery'
+                                  : 'Mixed media imagery'}
+                              </p>
+                            </div>
+                            <p className="text-xs text-center text-muted-foreground">Style: {formData.imagery.style}</p>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <div className="aspect-video bg-muted rounded-md flex items-center justify-center">
+                              <p className="text-sm text-muted-foreground text-center p-4">
+                                {formData.imagery.treatment === 'natural' 
+                                  ? 'Natural treatment' 
+                                  : formData.imagery.treatment === 'filtered' 
+                                  ? 'Filtered treatment'
+                                  : 'Duotone treatment'}
+                              </p>
+                            </div>
+                            <p className="text-xs text-center text-muted-foreground">Treatment: {formData.imagery.treatment}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex justify-end">
+                      <Button onClick={handleSave} className="hover-scale">
+                        <Check className="h-4 w-4 mr-2" />
+                        Save Brand Guidelines
+                      </Button>
+                    </div>
+                  </div>
+                </TabsContent>
               </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setActiveTab("guidelines")}
-                  className="hover:scale-105 transition-transform duration-200"
-                >
-                  Back
-                </Button>
-                <Button 
-                  onClick={() => setActiveTab("manual")}
-                  className="hover:scale-105 transition-transform duration-200"
-                >
-                  Continue to Manual Settings
-                </Button>
-              </CardFooter>
             </Card>
-          </motion.div>
-        </TabsContent>
-
-        <TabsContent value="manual">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            variants={tabVariants}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle>Manual Brand Settings</CardTitle>
-                <CardDescription>
-                  Input your brand specifications manually for more precise control.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="brandName">Brand Name</Label>
-                      <Input
-                        id="brandName"
-                        name="brandName"
-                        placeholder="Acme Inc."
-                        value={brandForm.brandName}
-                        onChange={handleFormChange}
-                        className="hover:border-primary/50 transition-colors duration-200"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="logo">Brand Logo</Label>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          id="logo"
-                          type="file"
-                          accept="image/*"
-                          className="flex-1 hover:border-primary/50 transition-colors duration-200"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="primaryColor">Primary Color</Label>
-                      <div className="flex gap-2">
-                        <div
-                          className="w-10 h-10 rounded-md border transform hover:scale-110 transition-all duration-200"
-                          style={{ backgroundColor: brandForm.primaryColor }}
-                        />
-                        <Input
-                          id="primaryColor"
-                          name="primaryColor"
-                          type="color"
-                          value={brandForm.primaryColor}
-                          onChange={handleFormChange}
-                          className="flex-1 hover:border-primary/50 transition-colors duration-200"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="secondaryColor">Secondary Color</Label>
-                      <div className="flex gap-2">
-                        <div
-                          className="w-10 h-10 rounded-md border transform hover:scale-110 transition-all duration-200"
-                          style={{ backgroundColor: brandForm.secondaryColor }}
-                        />
-                        <Input
-                          id="secondaryColor"
-                          name="secondaryColor"
-                          type="color"
-                          value={brandForm.secondaryColor}
-                          onChange={handleFormChange}
-                          className="flex-1 hover:border-primary/50 transition-colors duration-200"
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="accentColor">Accent Color</Label>
-                      <div className="flex gap-2">
-                        <div
-                          className="w-10 h-10 rounded-md border transform hover:scale-110 transition-all duration-200"
-                          style={{ backgroundColor: brandForm.accentColor }}
-                        />
-                        <Input
-                          id="accentColor"
-                          name="accentColor"
-                          type="color"
-                          value={brandForm.accentColor}
-                          onChange={handleFormChange}
-                          className="flex-1 hover:border-primary/50 transition-colors duration-200"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="primaryFont">Primary Font</Label>
-                      <Input
-                        id="primaryFont"
-                        name="primaryFont"
-                        placeholder="Inter, Helvetica, sans-serif"
-                        value={brandForm.primaryFont}
-                        onChange={handleFormChange}
-                        className="hover:border-primary/50 transition-colors duration-200"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="secondaryFont">Secondary Font</Label>
-                      <Input
-                        id="secondaryFont"
-                        name="secondaryFont"
-                        placeholder="Georgia, serif"
-                        value={brandForm.secondaryFont}
-                        onChange={handleFormChange}
-                        className="hover:border-primary/50 transition-colors duration-200"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="spacing">Spacing Guidelines</Label>
-                    <Textarea
-                      id="spacing"
-                      name="spacing"
-                      placeholder="Describe your brand's spacing guidelines (e.g. '8px grid system')"
-                      value={brandForm.spacing}
-                      onChange={handleFormChange}
-                      rows={3}
-                      className="hover:border-primary/50 transition-colors duration-200"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="additionalNotes">Additional Notes</Label>
-                    <Textarea
-                      id="additionalNotes"
-                      name="additionalNotes"
-                      placeholder="Any other brand guidelines or rules to consider"
-                      value={brandForm.additionalNotes}
-                      onChange={handleFormChange}
-                      rows={4}
-                      className="hover:border-primary/50 transition-colors duration-200"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setActiveTab("designs")}
-                  className="hover:scale-105 transition-transform duration-200"
-                >
-                  Back
-                </Button>
-                <Button 
-                  onClick={handleSubmit} 
-                  disabled={isSubmitting}
-                  className="hover:scale-105 transition-transform duration-200"
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    "Save Brand Settings"
-                  )}
-                </Button>
-              </CardFooter>
-            </Card>
-          </motion.div>
-        </TabsContent>
-      </Tabs>
-
-      <div className="rounded-lg border p-4 bg-muted/50 hover:bg-muted/70 transition-colors duration-200">
-        <div className="flex items-start gap-4">
-          <div>
-            <h3 className="text-sm font-medium mb-1">Completion Status</h3>
-            <div className="flex items-center gap-6 mt-3">
-              <div className="flex items-center gap-2">
-                {hasGuidelines ? (
-                  <Check className="h-4 w-4 text-green-500" />
-                ) : (
-                  <X className="h-4 w-4 text-muted-foreground" />
-                )}
-                <span className="text-sm">Guidelines</span>
-              </div>
-              <div className="flex items-center gap-2">
-                {hasDesigns ? (
-                  <Check className="h-4 w-4 text-green-500" />
-                ) : (
-                  <X className="h-4 w-4 text-muted-foreground" />
-                )}
-                <span className="text-sm">Designs</span>
-              </div>
-              <div className="flex items-center gap-2">
-                {hasManualSettings ? (
-                  <Check className="h-4 w-4 text-green-500" />
-                ) : (
-                  <X className="h-4 w-4 text-muted-foreground" />
-                )}
-                <span className="text-sm">Manual Settings</span>
-              </div>
-            </div>
-          </div>
-          <div className="ml-auto">
-            <Button 
-              onClick={handleSubmit} 
-              disabled={!saveEnabled || isSubmitting}
-              className="h-9 hover:scale-105 transition-transform duration-200"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                "Save Brand Settings"
-              )}
-            </Button>
-          </div>
+          </Tabs>
         </div>
       </div>
     </div>

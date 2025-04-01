@@ -9,7 +9,7 @@ import {
   FileCheck, CheckCircle2, AlertCircle, ArrowUpRight, 
   Grid, List, Eye, Calendar, Filter, FileText
 } from "lucide-react";
-import { Link } from "next/link";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
