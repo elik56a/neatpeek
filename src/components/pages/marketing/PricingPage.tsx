@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, Info, ArrowRight, CheckCircle2, X } from "lucide-react";
+import { Check, Info, ArrowRight, CheckCircle2, X, CreditCard } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
@@ -86,59 +86,69 @@ const featureComparison = [
     free: '3 per month',
     pro: 'Unlimited',
     business: 'Unlimited',
+    icon: '🔍',
   },
   {
     name: 'Projects',
     free: '1',
     pro: 'Up to 5',
     business: 'Unlimited',
+    icon: '📁',
   },
   {
     name: 'Team Members',
     free: '1',
     pro: 'Up to 3',
     business: 'Unlimited',
+    icon: '👥',
   },
   {
     name: 'Figma Integration',
     free: false,
     pro: true,
     business: true,
+    icon: '🔌',
   },
   {
     name: 'Advanced Brand Guidelines',
     free: false,
     pro: true,
     business: true,
+    icon: '📘',
   },
   {
     name: 'API Access',
     free: false,
     pro: false,
     business: true,
+    icon: '🔑',
   },
   {
     name: 'Custom Rules',
     free: false,
     pro: true,
     business: true,
+    icon: '⚙️',
   },
   {
     name: 'Advanced Analytics',
     free: false,
     pro: false,
     business: true,
+    icon: '📊',
   },
   {
     name: 'Support',
     free: 'Email',
     pro: 'Priority',
     business: 'Dedicated',
+    icon: '🛟',
   },
 ];
 
 const PricingPage = () => {
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
+  const [processingTier, setProcessingTier] = useState<string | null>(null);
   const { toast } = useToast();
   
   const handlePriceClick = async (tier: Tier) => {
@@ -168,26 +178,41 @@ const PricingPage = () => {
       return;
     }
     
-    toast({
-      title: "Redirecting to checkout",
-      description: "Taking you to our secure checkout page.",
-    });
-    
-    // Stripe checkout would be implemented here
-    // For Next.js, we'd implement this by calling an API route that starts a Stripe Checkout session
-    // const response = await fetch('/api/create-checkout-session', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ priceId })
-    // });
-    // 
-    // const { url } = await response.json();
-    // window.location.href = url;
-    
-    // For now, let's just redirect to register
-    setTimeout(() => {
-      window.location.href = '/register';
-    }, 1500);
+    try {
+      setProcessingTier(tier.id);
+      
+      toast({
+        title: "Processing payment",
+        description: "Taking you to our secure checkout page.",
+      });
+      
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      
+      const { url } = await response.json();
+      
+      if (url) {
+        window.location.href = url;
+      } else {
+        throw new Error('No checkout URL returned');
+      }
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      toast({
+        title: "Checkout error",
+        description: "There was a problem creating your checkout session. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setProcessingTier(null);
+    }
   };
   
   return (
@@ -227,7 +252,7 @@ const PricingPage = () => {
             transition={{ duration: 0.4, delay: i * 0.1 }}
           >
             <Card 
-              className={`relative flex h-full flex-col hover-scale ${tier.mostPopular ? 'border-primary shadow-md' : ''}`}
+              className={`relative flex h-full flex-col transition-all duration-200 hover:shadow-lg ${tier.mostPopular ? 'border-primary shadow-md' : ''}`}
             >
               {tier.mostPopular && (
                 <div className="absolute -top-4 left-0 right-0 mx-auto w-fit rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground">
@@ -270,10 +295,23 @@ const PricingPage = () => {
               <CardFooter>
                 <Button 
                   onClick={() => handlePriceClick(tier)} 
-                  className="w-full"
+                  className="w-full group relative overflow-hidden"
                   variant={tier.mostPopular ? 'default' : 'outline'}
+                  disabled={processingTier === tier.id}
                 >
-                  {tier.buttonText || 'Get Started'}
+                  {processingTier === tier.id ? (
+                    <div className="flex items-center">
+                      <CreditCard className="mr-2 h-4 w-4 animate-pulse" />
+                      Processing...
+                    </div>
+                  ) : (
+                    <>
+                      <span className="relative z-10 transition-transform duration-300 group-hover:translate-x-1">
+                        {tier.buttonText || 'Get Started'}
+                      </span>
+                      <span className="absolute inset-0 z-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent opacity-0 group-hover:animate-shine" />
+                    </>
+                  )}
                 </Button>
               </CardFooter>
             </Card>
@@ -284,49 +322,52 @@ const PricingPage = () => {
       <div className="space-y-8">
         <h2 className="text-3xl font-bold text-center">Compare Plans</h2>
         
-        <div className="rounded-lg border overflow-hidden">
-          <div className="grid grid-cols-4 border-b bg-muted">
-            <div className="px-6 py-3 text-sm font-medium">Features</div>
-            <div className="px-6 py-3 text-sm font-medium">Free</div>
-            <div className="px-6 py-3 text-sm font-medium">Pro</div>
-            <div className="px-6 py-3 text-sm font-medium">Business</div>
+        <div className="overflow-hidden rounded-lg border border-muted shadow-sm">
+          <div className="grid grid-cols-4 border-b bg-muted/80">
+            <div className="px-6 py-4 text-base font-medium">Features</div>
+            <div className="px-6 py-4 text-base font-medium text-center">Free</div>
+            <div className="px-6 py-4 text-base font-medium text-center bg-primary/5">Pro</div>
+            <div className="px-6 py-4 text-base font-medium text-center">Business</div>
           </div>
           
           <div className="divide-y">
             {featureComparison.map((feature, i) => (
-              <div key={i} className="grid grid-cols-4 hover:bg-muted/50">
-                <div className="px-6 py-4 text-sm font-medium">{feature.name}</div>
-                <div className="px-6 py-4 text-sm">
+              <div key={i} className="grid grid-cols-4 hover:bg-muted/30 transition-colors duration-150">
+                <div className="px-6 py-4 text-sm font-medium flex items-center">
+                  <span className="mr-2">{feature.icon}</span>
+                  {feature.name}
+                </div>
+                <div className="px-6 py-4 text-sm text-center">
                   {typeof feature.free === 'boolean' ? (
                     feature.free ? (
-                      <CheckCircle2 className="h-5 w-5 text-primary" />
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mx-auto" />
                     ) : (
-                      <X className="h-5 w-5 text-muted-foreground" />
+                      <X className="h-5 w-5 text-muted-foreground mx-auto" />
                     )
                   ) : (
-                    feature.free
+                    <span className={feature.free === 'Email' ? 'text-amber-500' : ''}>{feature.free}</span>
                   )}
                 </div>
-                <div className="px-6 py-4 text-sm">
+                <div className="px-6 py-4 text-sm text-center bg-primary/5">
                   {typeof feature.pro === 'boolean' ? (
                     feature.pro ? (
-                      <CheckCircle2 className="h-5 w-5 text-primary" />
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mx-auto" />
                     ) : (
-                      <X className="h-5 w-5 text-muted-foreground" />
+                      <X className="h-5 w-5 text-muted-foreground mx-auto" />
                     )
                   ) : (
-                    feature.pro
+                    <span className={feature.pro === 'Priority' ? 'text-primary font-medium' : ''}>{feature.pro}</span>
                   )}
                 </div>
-                <div className="px-6 py-4 text-sm">
+                <div className="px-6 py-4 text-sm text-center">
                   {typeof feature.business === 'boolean' ? (
                     feature.business ? (
-                      <CheckCircle2 className="h-5 w-5 text-primary" />
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mx-auto" />
                     ) : (
-                      <X className="h-5 w-5 text-muted-foreground" />
+                      <X className="h-5 w-5 text-muted-foreground mx-auto" />
                     )
                   ) : (
-                    feature.business
+                    <span className={feature.business === 'Dedicated' ? 'text-indigo-500 font-medium' : ''}>{feature.business}</span>
                   )}
                 </div>
               </div>
@@ -335,13 +376,13 @@ const PricingPage = () => {
         </div>
       </div>
       
-      <div className="rounded-xl bg-muted p-8 text-center">
+      <div className="rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 p-8 text-center">
         <h3 className="text-2xl font-bold mb-4">Need a custom plan?</h3>
         <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
           We offer custom plans for larger teams and enterprise organizations. 
           Contact our sales team to discuss your specific needs.
         </p>
-        <Button className="hover-scale">
+        <Button className="transition-all duration-300 hover:shadow-lg">
           Contact Sales <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </div>

@@ -3,10 +3,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -16,409 +18,454 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { LineChart, BarChart, PieChart, Area, Line, Bar, Pie, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts";
-import { ArrowRight, BarChart3, LineChart as LineChartIcon, PieChart as PieChartIcon, PlusCircle, Users, CheckCircle2, Clock, Image as ImageIcon, FilePieChart, ImageIcon as ImageBoxIcon } from "lucide-react";
+import {
+  AreaChart,
+  BarChart,
+  LineChart,
+  PieChart,
+} from '@/components/ui/chart';
+import { format, subMonths, subDays } from "date-fns";
+import {
+  ArrowRight,
+  BarChart3,
+  ChevronUp,
+  FileText,
+  Layers,
+  LineChart as LineChartIcon,
+  LayoutDashboard,
+  PieChart as PieChartIcon,
+  Sliders,
+  Clock,
+  TrendingUp,
+  Folder,
+  CheckCircle,
+  AlertTriangle,
+  XCircle,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { CustomLoader } from "@/components/ui/custom-loader";
 
-// Mock data for charts
-const monthlyData = [
-  { name: "Jan", designs: 65, errors: 12, score: 76 },
-  { name: "Feb", designs: 59, errors: 15, score: 71 },
-  { name: "Mar", designs: 80, errors: 8, score: 88 },
-  { name: "Apr", designs: 81, errors: 10, score: 82 },
-  { name: "May", designs: 56, errors: 20, score: 65 },
-  { name: "Jun", designs: 55, errors: 22, score: 62 },
-  { name: "Jul", designs: 40, errors: 15, score: 70 },
-  { name: "Aug", designs: 72, errors: 5, score: 92 },
-  { name: "Sep", designs: 90, errors: 10, score: 85 },
-  { name: "Oct", designs: 95, errors: 8, score: 90 },
-  { name: "Nov", designs: 110, errors: 12, score: 85 },
-  { name: "Dec", designs: 120, errors: 14, score: 82 },
+// Type definitions for chart data
+interface ChartData {
+  name: string;
+  value: number;
+}
+
+interface LineData {
+  date: string;
+  value: number;
+}
+
+interface AreaData {
+  date: string;
+  desktop: number;
+  mobile: number;
+  tablet: number;
+}
+
+interface BarData {
+  name: string;
+  value: number;
+}
+
+// Utility functions to generate dates
+const generateDates = (days: number): string[] => {
+  return Array.from({ length: days }, (_, i) => {
+    const date = subDays(new Date(), days - i - 1);
+    return format(date, "MMM dd");
+  });
+};
+
+// Mock dashboard data
+const activityData: LineData[] = generateDates(30).map((date, i) => ({
+  date,
+  value: Math.floor(Math.random() * 20) + 10 + (i % 10),
+}));
+
+const deviceBreakdownData: ChartData[] = [
+  { name: "Desktop", value: 65 },
+  { name: "Mobile", value: 25 },
+  { name: "Tablet", value: 10 },
 ];
 
-const issueTypeData = [
-  { name: "Color Mismatch", value: 35 },
-  { name: "Typography", value: 25 },
-  { name: "Spacing", value: 15 },
-  { name: "Logo Usage", value: 10 },
-  { name: "Imagery", value: 15 },
-];
-
-const COLORS = ["#8344FF", "#FF6B6B", "#FFD166", "#06D6A0", "#118AB2"];
-
-const designTypeData = [
-  { name: "Web", value: 40 },
-  { name: "Mobile", value: 30 },
+const designTypeData: BarData[] = [
+  { name: "Web", value: 45 },
+  { name: "Mobile", value: 28 },
   { name: "Email", value: 15 },
-  { name: "Social", value: 10 },
-  { name: "Print", value: 5 },
+  { name: "Social", value: 12 },
 ];
 
-const recentDesigns = [
-  {
-    id: 1,
-    name: "Homepage Redesign",
-    type: "Web",
-    date: "Today, 2:30 PM",
-    score: 92,
-    status: "Passed",
-    issues: 2,
-  },
-  {
-    id: 2,
-    name: "Mobile App Checkout",
-    type: "Mobile",
-    date: "Yesterday, 11:20 AM",
-    score: 76,
-    status: "Passed",
-    issues: 5,
-  },
-  {
-    id: 3,
-    name: "Email Newsletter",
-    type: "Email",
-    date: "Oct 21, 4:15 PM",
-    score: 65,
-    status: "Failed",
-    issues: 8,
-  },
-  {
-    id: 4,
-    name: "Instagram Post",
-    type: "Social",
-    date: "Oct 20, 10:30 AM",
-    score: 88,
-    status: "Passed",
-    issues: 3,
-  },
-  {
-    id: 5,
-    name: "Product Brochure",
-    type: "Print",
-    date: "Oct 18, 2:45 PM",
-    score: 90,
-    status: "Passed",
-    issues: 2,
-  },
-];
+const historyData: AreaData[] = generateDates(30).map((date, i) => ({
+  date,
+  desktop: Math.floor(Math.random() * 50) + 20 + (i % 5),
+  mobile: Math.floor(Math.random() * 30) + 10 + (i % 7),
+  tablet: Math.floor(Math.random() * 20) + 5 + (i % 3),
+}));
 
 const Dashboard = () => {
-  const [chartView, setChartView] = useState<"line" | "bar" | "pie">("line");
+  const [chartType, setChartType] = useState<'line' | 'area' | 'bar' | 'pie'>('line');
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Recent Activity Data
+  const recentActivity = [
+    {
+      id: "ACT-1234",
+      type: "Design Check",
+      name: "Homepage Redesign",
+      date: new Date("2023-10-10"),
+      status: "Passed",
+    },
+    {
+      id: "ACT-1235",
+      type: "Brand Update",
+      name: "Logo Colors Updated",
+      date: new Date("2023-10-09"),
+      status: "Updated",
+    },
+    {
+      id: "ACT-1236",
+      type: "Design Check",
+      name: "Mobile App Dashboard",
+      date: new Date("2023-10-08"),
+      status: "Failed",
+    },
+    {
+      id: "ACT-1237",
+      type: "Brand Setup",
+      name: "Typography Guidelines",
+      date: new Date("2023-10-05"),
+      status: "Updated",
+    },
+  ];
 
   return (
-    <div className="grid gap-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground">
-            Overview of your brand consistency performance
+            Welcome back to your brand consistency dashboard
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button asChild>
+          <Button asChild className="hover-scale">
             <Link href="/design-checker">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              New Design Check
+              New Design Check <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="hover-scale">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Designs Checked</CardTitle>
-            <ImageIcon className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">
+              Total Design Checks
+            </CardTitle>
+            <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">856</div>
+            <div className="text-2xl font-bold">128</div>
             <p className="text-xs text-muted-foreground">
-              +12% from last month
+              +14% from last month
             </p>
           </CardContent>
         </Card>
         <Card className="hover-scale">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Average Score</CardTitle>
-            <FilePieChart className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">
+              Passing Rate
+            </CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">82%</div>
+            <div className="text-2xl font-bold">86%</div>
             <p className="text-xs text-muted-foreground">
-              +5% from last month
+              +2.5% from last month
             </p>
           </CardContent>
         </Card>
         <Card className="hover-scale">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Common Issue</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">
+              Brand Consistency
+            </CardTitle>
+            <Sliders className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Color Match</div>
+            <div className="text-2xl font-bold">92%</div>
             <p className="text-xs text-muted-foreground">
-              35% of all issues
+              +5.2% from last month
             </p>
           </CardContent>
         </Card>
         <Card className="hover-scale">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Last Check</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
+            <Folder className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">2h ago</div>
+            <div className="text-2xl font-bold">5</div>
             <p className="text-xs text-muted-foreground">
-              Homepage redesign
+              +1 from last month
             </p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-8">
+        <Card className="md:col-span-2 lg:col-span-4">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle>Design Checks Over Time</CardTitle>
-              <div className="flex space-x-2">
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setChartView("line")}
-                  className={chartView === "line" ? "bg-primary/10" : ""}
-                >
-                  <LineChartIcon className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setChartView("bar")}
-                  className={chartView === "bar" ? "bg-primary/10" : ""}
-                >
-                  <BarChart3 className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => setChartView("pie")}
-                  className={chartView === "pie" ? "bg-primary/10" : ""}
-                >
-                  <PieChartIcon className="h-4 w-4" />
-                </Button>
-              </div>
+              <CardTitle>Design Checks Analytics</CardTitle>
+              <Tabs 
+                value={chartType} 
+                onValueChange={(v) => setChartType(v as 'line' | 'area' | 'bar' | 'pie')}
+                className="relative h-8"
+              >
+                <TabsList className="grid grid-cols-4 w-fit h-8">
+                  <TabsTrigger value="line" className="h-8 px-2 relative">
+                    <LineChartIcon className="h-4 w-4" />
+                  </TabsTrigger>
+                  <TabsTrigger value="area" className="h-8 px-2 relative">
+                    <LayoutDashboard className="h-4 w-4" />
+                  </TabsTrigger>
+                  <TabsTrigger value="bar" className="h-8 px-2 relative">
+                    <BarChart3 className="h-4 w-4" />
+                  </TabsTrigger>
+                  <TabsTrigger value="pie" className="h-8 px-2 relative">
+                    <PieChartIcon className="h-4 w-4" />
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
             <CardDescription>
-              Track how your brand consistency has improved over time
+              Design checks performed over the last 30 days
             </CardDescription>
           </CardHeader>
-          <CardContent className="h-[350px]">
-            {chartView === "line" && (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={monthlyData}
-                  margin={{
-                    top: 5,
-                    right: 30,
-                    left: 20,
-                    bottom: 5,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Line 
-                    type="monotone" 
-                    dataKey="score" 
-                    name="Brand Score" 
-                    stroke="#8344FF" 
-                    activeDot={{ r: 8 }} 
-                    strokeWidth={2}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="designs" 
-                    name="Designs Checked" 
-                    stroke="#FF6B6B" 
-                    strokeWidth={2}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            )}
-            {chartView === "bar" && (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={monthlyData}
-                  margin={{
-                    top: 5,
-                    right: 30,
-                    left: 20,
-                    bottom: 5,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="designs" name="Designs Checked" fill="#8344FF" />
-                  <Bar dataKey="errors" name="Issues Found" fill="#FF6B6B" />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-            {chartView === "pie" && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-full">
-                <div>
-                  <h3 className="text-sm font-medium mb-2 text-center">Issue Types</h3>
-                  <ResponsiveContainer width="100%" height={200}>
-                    <PieChart>
-                      <Pie
-                        data={issueTypeData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                      >
-                        {issueTypeData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium mb-2 text-center">Design Types</h3>
-                  <ResponsiveContainer width="100%" height={200}>
-                    <PieChart>
-                      <Pie
-                        data={designTypeData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        outerRadius={80}
-                        fill="#8884d8"
-                        dataKey="value"
-                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                      >
-                        {designTypeData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            )}
+          <CardContent className="pl-2">
+            <TabsContent value="line" className="mt-0 space-y-4">
+              <LineChart 
+                data={activityData}
+                categories={['value']}
+                colors={['#8344FF']}
+                yAxisWidth={30}
+                showLegend={false}
+                showGridLines={false}
+                showAnimation={true}
+                className="aspect-[4/2]"
+              />
+            </TabsContent>
+            <TabsContent value="area" className="mt-0 space-y-4">
+              <AreaChart 
+                data={historyData}
+                categories={['desktop', 'mobile', 'tablet']}
+                colors={['#8344FF', '#4BCAFF', '#F97316']}
+                yAxisWidth={30}
+                showLegend={true}
+                showGridLines={false}
+                showAnimation={true}
+                className="aspect-[4/2]"
+              />
+            </TabsContent>
+            <TabsContent value="bar" className="mt-0 space-y-4">
+              <BarChart 
+                data={designTypeData}
+                categories={['value']}
+                colors={['#8344FF']}
+                yAxisWidth={30}
+                showLegend={false}
+                showGridLines={false}
+                showAnimation={true}
+                className="aspect-[4/2]"
+              />
+            </TabsContent>
+            <TabsContent value="pie" className="mt-0 space-y-4">
+              <PieChart 
+                data={deviceBreakdownData}
+                category="value"
+                index="name"
+                colors={['#8344FF', '#4BCAFF', '#F97316']}
+                showAnimation={true}
+                className="aspect-[4/2]"
+              />
+            </TabsContent>
           </CardContent>
         </Card>
-        <Card>
+        
+        <Card className="md:col-span-2 lg:col-span-4">
           <CardHeader>
-            <CardTitle>Recent Design Checks</CardTitle>
+            <CardTitle>Recent Activity</CardTitle>
             <CardDescription>
-              Your latest designs analyzed for brand consistency
+              Your latest design checks and brand updates
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ScrollArea className="h-[350px]">
-              <div className="space-y-4">
-                {recentDesigns.map((design) => (
-                  <div
-                    key={design.id}
-                    className="flex items-center justify-between border-b pb-3 last:border-0 last:pb-0 hover-scale"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={`rounded-full p-2 ${design.type === 'Web' ? 'bg-blue-100' 
-                        : design.type === 'Mobile' ? 'bg-purple-100' 
-                        : design.type === 'Email' ? 'bg-green-100' 
-                        : design.type === 'Social' ? 'bg-yellow-100' 
-                        : 'bg-red-100'} `}>
-                        {design.type === 'Web' ? <LineChartIcon className="h-4 w-4 text-blue-600" /> 
-                        : design.type === 'Mobile' ? <ImageBoxIcon className="h-4 w-4 text-purple-600" /> 
-                        : design.type === 'Email' ? <ImageIcon className="h-4 w-4 text-green-600" /> 
-                        : design.type === 'Social' ? <Users className="h-4 w-4 text-yellow-600" /> 
-                        : <FilePieChart className="h-4 w-4 text-red-600" />}
-                      </div>
-                      <div>
-                        <p className="font-medium">{design.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {design.type} • {design.date}
-                        </p>
+            <div className="space-y-4">
+              {recentActivity.map((activity) => (
+                <div key={activity.id} className="flex items-start gap-3 hover-scale">
+                  <div className="rounded-full p-1.5 mt-0.5">
+                    {activity.type === "Design Check" ? (
+                      activity.status === "Passed" ? (
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                      ) : (
+                        <XCircle className="h-4 w-4 text-red-500" />
+                      )
+                    ) : (
+                      <Layers className="h-4 w-4 text-blue-500" />
+                    )}
+                  </div>
+                  <div className="flex-1 space-y-1">
+                    <div className="flex items-center justify-between">
+                      <div className="font-semibold">{activity.name}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {format(activity.date, "MMM d")}
                       </div>
                     </div>
-                    <div className="flex flex-col items-end">
-                      <div className="flex items-center">
-                        <span className={`h-2 w-2 rounded-full mr-1 ${
-                          design.status === 'Passed' ? 'bg-green-500' : 'bg-red-500'
-                        }`} />
-                        <span className="text-xs font-medium">
-                          {design.score}%
-                        </span>
+                    <div className="flex items-center text-sm">
+                      <div className="text-muted-foreground">{activity.type}</div>
+                      <div className="ml-auto">
+                        <Badge
+                          variant={
+                            activity.status === "Passed" 
+                              ? "default" 
+                              : activity.status === "Failed" 
+                              ? "destructive" 
+                              : "outline"
+                          }
+                        >
+                          {activity.status}
+                        </Badge>
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        {design.issues} issues
-                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
-            </ScrollArea>
+                </div>
+              ))}
+            </div>
           </CardContent>
+          <CardFooter>
+            <Button variant="outline" className="w-full hover-scale">
+              View All Activity
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </CardFooter>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <Card className="hover-scale">
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-6">
+        <Card className="md:col-span-3">
           <CardHeader>
-            <CardTitle>Brand Guidelines</CardTitle>
+            <CardTitle>Design Checks by Type</CardTitle>
             <CardDescription>
-              Edit your brand guidelines to improve consistency
+              Distribution of design checks by type
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-medium">Current settings</p>
-                <p className="text-xs text-muted-foreground">
-                  Last updated 3 days ago
-                </p>
-              </div>
-              <Button asChild variant="outline" className="hover-scale">
-                <Link href="/brand-setup">
-                  Edit Guidelines
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
+            <BarChart 
+              data={designTypeData}
+              index="name"
+              categories={['value']}
+              colors={['#8344FF']}
+              layout="vertical"
+              showLegend={false}
+              showGridLines={false}
+              showAnimation={true}
+              className="aspect-[4/3]"
+            />
+          </CardContent>
+        </Card>
+        
+        <Card className="md:col-span-3">
+          <CardHeader>
+            <CardTitle>Device Breakdown</CardTitle>
+            <CardDescription>
+              Designs checked by device type
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <PieChart 
+              data={deviceBreakdownData}
+              category="value"
+              index="name"
+              colors={['#8344FF', '#4BCAFF', '#F97316']}
+              valueFormatter={(number) => `${number}%`}
+              showAnimation={true}
+              className="aspect-[4/3]"
+            />
+          </CardContent>
+        </Card>
+      </div>
+      
+      <div className="flex flex-col md:flex-row gap-4">
+        <Card className="md:w-2/3">
+          <CardHeader>
+            <CardTitle>Project Status</CardTitle>
+            <CardDescription>Latest updates on your active projects</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[
+                { name: "Website Redesign", progress: 75, status: "In Progress" },
+                { name: "Mobile App", progress: 90, status: "Finalizing" },
+                { name: "Brand Guidelines Update", progress: 30, status: "Just Started" },
+                { name: "Email Campaign", progress: 100, status: "Completed" },
+              ].map((project, index) => (
+                <div key={index} className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="font-medium">{project.name}</div>
+                    <Badge variant={
+                      project.progress === 100 
+                        ? "default" 
+                        : project.progress > 70 
+                        ? "outline" 
+                        : "secondary"
+                    }>
+                      {project.status}
+                    </Badge>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-2.5">
+                    <div 
+                      className={`h-2.5 rounded-full ${
+                        project.progress === 100 
+                          ? "bg-green-500" 
+                          : project.progress > 70 
+                          ? "bg-blue-500" 
+                          : "bg-amber-500"
+                      }`}
+                      style={{ width: `${project.progress}%` }}
+                    ></div>
+                  </div>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
-        <Card className="hover-scale">
+        
+        <Card className="md:w-1/3">
           <CardHeader>
-            <CardTitle>Design History</CardTitle>
-            <CardDescription>
-              View all your previous design checks
-            </CardDescription>
+            <CardTitle>Top Issues</CardTitle>
+            <CardDescription>Most common brand inconsistencies</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="space-y-1">
-                <p className="text-sm font-medium">856 designs analyzed</p>
-                <p className="text-xs text-muted-foreground">
-                  View their consistency scores and issues
-                </p>
-              </div>
-              <Button asChild variant="outline" className="hover-scale">
-                <Link href="/design-history">
-                  View History
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
+            <div className="space-y-4">
+              {[
+                { issue: "Color Consistency", count: 32 },
+                { issue: "Typography", count: 28 },
+                { issue: "Logo Placement", count: 17 },
+                { issue: "Spacing", count: 12 },
+                { issue: "Element Alignment", count: 8 },
+              ].map((item, index) => (
+                <div 
+                  key={index} 
+                  className="flex items-center justify-between hover-scale py-1"
+                >
+                  <div className="flex items-center">
+                    <span className="w-5 text-muted-foreground">{index + 1}.</span>
+                    <span>{item.issue}</span>
+                  </div>
+                  <Badge variant="outline">{item.count}</Badge>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>

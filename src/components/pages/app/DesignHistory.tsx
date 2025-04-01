@@ -29,8 +29,9 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { ArrowDown, ArrowUp, ChevronDown, Filter, Grid, List, MoreHorizontal, Search } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronDown, Eye, Filter, Grid, List, MoreHorizontal, Search } from "lucide-react";
 import { format } from "date-fns";
+import { motion } from "framer-motion";
 
 // Mock data
 const designChecks = [
@@ -121,6 +122,7 @@ const DesignHistory = () => {
   const [viewMode, setViewMode] = useState<"table" | "grid">("table");
   const [sortColumn, setSortColumn] = useState<"date" | "score">("date");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [selectedDesign, setSelectedDesign] = useState<string | null>(null);
 
   // Filter and sort designs
   const filteredDesigns = designChecks
@@ -150,6 +152,16 @@ const DesignHistory = () => {
       setSortDirection("desc");
     }
   };
+
+  // Function to handle design item click for details
+  const handleDesignClick = (designId: string) => {
+    setSelectedDesign(designId === selectedDesign ? null : designId);
+  };
+
+  // Get the selected design details
+  const selectedDesignDetails = selectedDesign 
+    ? designChecks.find(design => design.id === selectedDesign) 
+    : null;
 
   return (
     <div>
@@ -200,7 +212,7 @@ const DesignHistory = () => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <div className="flex items-center border rounded-md">
+          <div className="flex items-center border rounded-md overflow-hidden">
             <Button
               variant="ghost"
               size="icon"
@@ -273,7 +285,14 @@ const DesignHistory = () => {
               </TableHeader>
               <TableBody>
                 {filteredDesigns.map((design) => (
-                  <TableRow key={design.id} className="hover-scale">
+                  <TableRow 
+                    key={design.id} 
+                    className={cn(
+                      "transition-colors duration-200 cursor-pointer",
+                      selectedDesign === design.id ? "bg-muted" : "hover:bg-muted/50"
+                    )}
+                    onClick={() => handleDesignClick(design.id)}
+                  >
                     <TableCell className="font-medium">{design.id}</TableCell>
                     <TableCell>{design.name}</TableCell>
                     <TableCell>{design.type}</TableCell>
@@ -288,19 +307,10 @@ const DesignHistory = () => {
                     </TableCell>
                     <TableCell>{design.issues}</TableCell>
                     <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                            <span className="sr-only">Actions</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>View Details</DropdownMenuItem>
-                          <DropdownMenuItem>Download Report</DropdownMenuItem>
-                          <DropdownMenuItem>Archive</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <Button variant="ghost" size="icon" className="hover:bg-muted">
+                        <Eye className="h-4 w-4" />
+                        <span className="sr-only">View</span>
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -311,61 +321,160 @@ const DesignHistory = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredDesigns.map((design) => (
-            <Card key={design.id} className="overflow-hidden hover-scale">
-              <div className="aspect-video relative">
-                <img
-                  src={design.image}
-                  alt={design.name}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute top-2 right-2">
-                  <Badge
-                    variant={design.status === "Passed" ? "default" : "destructive"}
-                  >
-                    {design.score}%
-                  </Badge>
-                </div>
-              </div>
-              <CardHeader className="p-4 pb-0">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-lg">{design.name}</CardTitle>
-                    <CardDescription>{design.type}</CardDescription>
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Actions</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>View Details</DropdownMenuItem>
-                      <DropdownMenuItem>Download Report</DropdownMenuItem>
-                      <DropdownMenuItem>Archive</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 pt-2">
-                <div className="flex justify-between text-sm">
-                  <div className="text-muted-foreground">
-                    {format(design.date, "MMM d, yyyy")}
-                  </div>
-                  <div>
-                    <span className="font-medium">{design.issues}</span>{" "}
-                    <span className="text-muted-foreground">issues</span>
+            <motion.div 
+              key={design.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Card 
+                className={cn(
+                  "overflow-hidden transition-all duration-200",
+                  selectedDesign === design.id 
+                    ? "ring-2 ring-primary" 
+                    : "hover:shadow-md"
+                )}
+                onClick={() => handleDesignClick(design.id)}
+              >
+                <div className="aspect-video relative">
+                  <img
+                    src={design.image}
+                    alt={design.name}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute top-2 right-2">
+                    <Badge
+                      variant={design.status === "Passed" ? "default" : "destructive"}
+                      className="font-medium"
+                    >
+                      {design.score}%
+                    </Badge>
                   </div>
                 </div>
-              </CardContent>
-              <CardFooter className="p-4 pt-0">
-                <Button variant="outline" size="sm" className="w-full">
-                  View Analysis
-                </Button>
-              </CardFooter>
-            </Card>
+                <CardHeader className="p-4 pb-0">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <CardTitle className="text-lg">{design.name}</CardTitle>
+                        <Badge variant="outline" className="text-xs">
+                          {design.id}
+                        </Badge>
+                      </div>
+                      <CardDescription>{design.type}</CardDescription>
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                      <MoreHorizontal className="h-4 w-4" />
+                      <span className="sr-only">Actions</span>
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-4 pt-2">
+                  <div className="flex justify-between text-sm">
+                    <div className="text-muted-foreground">
+                      {format(design.date, "MMM d, yyyy")}
+                    </div>
+                    <div>
+                      <span className="font-medium">{design.issues}</span>{" "}
+                      <span className="text-muted-foreground">issues</span>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="p-4 pt-0">
+                  <Button variant="outline" size="sm" className="w-full group">
+                    <span className="relative z-10 transition-transform duration-300 group-hover:translate-x-1">View Analysis</span>
+                  </Button>
+                </CardFooter>
+              </Card>
+            </motion.div>
           ))}
         </div>
+      )}
+
+      {selectedDesignDetails && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <Card className="mt-6 overflow-hidden">
+            <CardHeader className="bg-muted/40">
+              <div className="flex justify-between items-center">
+                <CardTitle>Design Details: {selectedDesignDetails.name}</CardTitle>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => setSelectedDesign(null)}
+                >
+                  <X className="h-4 w-4" />
+                  <span className="sr-only">Close</span>
+                </Button>
+              </div>
+              <CardDescription>{selectedDesignDetails.id} • {selectedDesignDetails.type}</CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                  <div className="aspect-video rounded-lg overflow-hidden border mb-4">
+                    <img
+                      src={selectedDesignDetails.image}
+                      alt={selectedDesignDetails.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  
+                  <div className="space-y-1 text-sm mb-4">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Date Checked:</span>
+                      <span>{format(selectedDesignDetails.date, "MMMM d, yyyy")}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Status:</span>
+                      <Badge variant={selectedDesignDetails.status === "Passed" ? "default" : "destructive"}>
+                        {selectedDesignDetails.status}
+                      </Badge>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Total Issues:</span>
+                      <span>{selectedDesignDetails.issues}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-lg font-semibold mb-4">Brand Consistency Score</h3>
+                  <div className="bg-muted h-8 rounded-full overflow-hidden mb-6">
+                    <div 
+                      className={cn(
+                        "h-full rounded-full flex items-center justify-end px-3 text-white font-medium",
+                        selectedDesignDetails.score > 70 ? "bg-green-500" :
+                        selectedDesignDetails.score > 40 ? "bg-yellow-500" :
+                        "bg-red-500"
+                      )}
+                      style={{ width: `${selectedDesignDetails.score}%` }}
+                    >
+                      {selectedDesignDetails.score}%
+                    </div>
+                  </div>
+                  
+                  <h3 className="text-lg font-semibold mb-2">Analysis Summary</h3>
+                  <p className="text-muted-foreground mb-4">
+                    {selectedDesignDetails.score > 85 
+                      ? "This design performs very well against your brand guidelines with only minor adjustments needed."
+                      : selectedDesignDetails.score > 70
+                      ? "This design generally follows brand guidelines but has several inconsistencies that should be addressed."
+                      : "This design has significant inconsistencies with your brand guidelines and requires major revisions."}
+                  </p>
+                  
+                  <div className="flex justify-end mt-8">
+                    <Button variant="default" className="transition-all duration-200 hover:shadow">
+                      View Full Analysis
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       )}
     </div>
   );

@@ -2,71 +2,54 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @layer base {
   :root {
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
-
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
- 
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
- 
-    --primary: 262 83% 58%;
+    --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
- 
-    --secondary: 262 83% 96%;
+    --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
- 
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
- 
-    --accent: 262 83% 96%;
+    --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
- 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 262 83% 58%;
- 
+    --ring: 221.2 83.2% 53.3%;
     --radius: 0.5rem;
   }
- 
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
- 
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
- 
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
- 
-    --primary: 262 83% 58%;
-    --primary-foreground: 210 40% 98%;
- 
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
- 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
- 
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
- 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
- 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 262 83% 58%;
+    --ring: 224.3 76.3% 48%;
   }
 }
- 
+
 @layer base {
   * {
     @apply border-border;
@@ -76,73 +59,58 @@
   }
 }
 
-.tab-indicator {
-  transition: transform 0.3s ease;
-}
+@layer utilities {
+  .hover-scale {
+    @apply transition-transform duration-200 hover:scale-[1.02];
+  }
+  
+  .animate-shine {
+    animation: shine 1.5s ease-in-out infinite;
+  }
+  
+  @keyframes shine {
+    from {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    50% {
+      opacity: 0.5;
+    }
+    to {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+  }
 
-/* Tab transition animations */
-.tab-content-enter {
-  opacity: 0;
-  transform: translateY(10px);
-}
-.tab-content-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-.tab-content-exit {
-  opacity: 1;
-  transform: translateY(0);
-}
-.tab-content-exit-active {
-  opacity: 0;
-  transform: translateY(-10px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
+  .bg-grid {
+    background-size: 20px 20px;
+    background-image: 
+      linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px), 
+      linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+  }
 
-/* Hover animations */
-.hover-scale {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.hover-scale:hover {
-  transform: scale(1.02);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-}
+  .count-animation {
+    counter-reset: count var(--num);
+    animation: counter 2s forwards ease-out;
+  }
 
-/* Progress animations */
-@keyframes progressFill {
-  from { width: 0%; }
-  to { width: var(--progress-value); }
-}
+  @keyframes counter {
+    from {
+      --num: 0;
+    }
+    to {
+      --num: var(--target);
+    }
+  }
 
-.progress-animate {
-  animation: progressFill 1s ease forwards;
-}
+  .count-animation::after {
+    content: counter(count);
+  }
 
-/* Slide animations */
-@keyframes slideInRight {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
-}
-
-.slide-in-right {
-  animation: slideInRight 0.3s ease forwards;
-}
-
-/* Count up animation */
-@keyframes countUp {
-  from { content: "0"; }
-  to { content: attr(data-value); }
-}
-
-.count-up::before {
-  content: attr(data-value);
-  display: inline-block;
-  animation: countUp 2s ease-out forwards;
-}
-
-/* Mobile nav background fix */
-.mobile-nav {
-  background-color: hsl(var(--background));
-  border: 1px solid hsl(var(--border));
+  .glass-card {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
 }

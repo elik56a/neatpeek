@@ -15,12 +15,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Check, Copy, AlertCircle, Image as ImageIcon, FileText, Link2, Loader2, ExternalLink, X, LineChart, BarChart3 } from "lucide-react";
+import { 
+  Check, Copy, AlertCircle, Image as ImageIcon, FileText, Link2, 
+  ExternalLink, X, LineChart, BarChart3, Trash2
+} from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { CustomLoader } from "@/components/ui/custom-loader";
 
 interface AnalysisResult {
   brandConsistencyScore: number;
@@ -34,6 +38,25 @@ interface AnalysisResult {
   designImages?: { imageUrl: string; issues: string[] }[];
 }
 
+// Type for design type
+type DesignType = 'web' | 'mobile' | 'email' | 'social' | 'print' | 'logo' | null;
+
+const designTypes = [
+  { id: "web", name: "Web Design", icon: <LineChart className="h-12 w-12" /> },
+  { id: "mobile", name: "Mobile App", icon: <ImageIcon className="h-12 w-12" /> },
+  { id: "email", name: "Email Design", icon: <FileText className="h-12 w-12" /> },
+  { id: "social", name: "Social Media", icon: <Link2 className="h-12 w-12" /> },
+  { id: "print", name: "Print Design", icon: <FileText className="h-12 w-12" /> },
+  { id: "logo", name: "Logo & Branding", icon: <BarChart3 className="h-12 w-12" /> },
+];
+
+// Function to extract hex colors from strings
+const extractHexColors = (text: string): string[] => {
+  const hexRegex = /#([0-9A-F]{6})/gi;
+  const matches = text.match(hexRegex);
+  return matches ? matches : [];
+};
+
 const DesignChecker = () => {
   const { toast } = useToast();
   const [figmaUrl, setFigmaUrl] = useState("");
@@ -43,7 +66,7 @@ const DesignChecker = () => {
   const [value, setValue] = useState("figma");
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
-  const [designType, setDesignType] = useState<string | null>(null);
+  const [designType, setDesignType] = useState<DesignType>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -85,7 +108,7 @@ const DesignChecker = () => {
       // This would be an actual API call in production
       // const response = await fetch('/api/analyze-figma', {
       //   method: 'POST',
-      //   body: JSON.stringify({ figmaUrl }),
+      //   body: JSON.stringify({ figmaUrl, designType }),
       //   headers: { 'Content-Type': 'application/json' }
       // });
       // const data = await response.json();
@@ -173,8 +196,9 @@ const DesignChecker = () => {
       // uploadedImages.forEach((image, index) => {
       //   formData.append(`image${index}`, image);
       // });
+      // formData.append('designType', designType || 'general');
       // 
-      // const response = await fetch('/api/analyze-images', {
+      // const response = await fetch('/api/analyze-design', {
       //   method: 'POST',
       //   body: formData
       // });
@@ -268,29 +292,29 @@ const DesignChecker = () => {
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
-          {[
-            { id: "web", name: "Web Design", icon: <LineChart className="h-12 w-12" /> },
-            { id: "mobile", name: "Mobile App", icon: <ImageIcon className="h-12 w-12" /> },
-            { id: "email", name: "Email Design", icon: <FileText className="h-12 w-12" /> },
-            { id: "social", name: "Social Media", icon: <Link2 className="h-12 w-12" /> },
-            { id: "print", name: "Print Design", icon: <FileText className="h-12 w-12" /> },
-            { id: "logo", name: "Logo & Branding", icon: <BarChart3 className="h-12 w-12" /> },
-          ].map((type) => (
-            <Card 
+          {designTypes.map((type) => (
+            <motion.div
               key={type.id}
-              className="hover-scale cursor-pointer hover:border-primary/50 transition-all duration-200"
-              onClick={() => setDesignType(type.id)}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: designTypes.indexOf(type) * 0.1 }}
             >
-              <CardContent className="p-6 flex flex-col items-center text-center">
-                <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  {type.icon}
-                </div>
-                <h3 className="text-xl font-medium">{type.name}</h3>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Analyze {type.name.toLowerCase()} against your brand guidelines
-                </p>
-              </CardContent>
-            </Card>
+              <Card 
+                key={type.id}
+                className="hover-scale cursor-pointer hover:border-primary/50 transition-all duration-200"
+                onClick={() => setDesignType(type.id as DesignType)}
+              >
+                <CardContent className="p-6 flex flex-col items-center text-center">
+                  <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                    {type.icon}
+                  </div>
+                  <h3 className="text-xl font-medium">{type.name}</h3>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Analyze {type.name.toLowerCase()} against your brand guidelines
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -367,7 +391,7 @@ const DesignChecker = () => {
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <CustomLoader size="sm" className="mr-2" />
                       Analyzing Figma Design...
                     </>
                   ) : (
@@ -415,7 +439,7 @@ const DesignChecker = () => {
                   {imagePreviewUrls.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                       {imagePreviewUrls.map((url, index) => (
-                        <div key={index} className="border rounded-md overflow-hidden hover-scale group">
+                        <div key={index} className="border rounded-md overflow-hidden hover-scale group relative">
                           <div className="relative">
                             <img 
                               src={url} 
@@ -423,10 +447,11 @@ const DesignChecker = () => {
                               className="w-full h-48 object-cover"
                             />
                             <button
-                              className="absolute top-2 right-2 h-6 w-6 rounded-full bg-background/80 flex items-center justify-center border text-muted-foreground hover:text-destructive transform hover:scale-110 transition-all duration-200"
+                              className="absolute top-2 right-2 h-8 w-8 rounded-full bg-background/80 flex items-center justify-center border text-destructive hover:bg-destructive hover:text-white hover:border-destructive transform hover:scale-110 transition-all duration-200"
                               onClick={(e) => removeImage(index, e)}
+                              aria-label={`Remove design ${index + 1}`}
                             >
-                              <X className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4" />
                             </button>
                           </div>
                           <div className="p-2 text-sm truncate">
@@ -444,7 +469,7 @@ const DesignChecker = () => {
                   >
                     {loading ? (
                       <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        <CustomLoader size="sm" className="mr-2" />
                         Analyzing Designs...
                       </>
                     ) : (
@@ -464,8 +489,8 @@ const DesignChecker = () => {
           animate={{ opacity: 1 }}
           className="mt-8 text-center"
         >
-          <div className="inline-flex items-center justify-center p-8 rounded-full bg-muted">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+          <div className="inline-flex items-center justify-center p-8">
+            <CustomLoader size="xl" />
           </div>
           <h3 className="text-xl font-medium mt-6">
             We're checking your design against your brand guidelines
@@ -516,8 +541,8 @@ const DesignChecker = () => {
                   <CardContent>
                     <div className="space-y-2">
                       {designImage.issues.map((issue, issueIndex) => {
-                        // Check if the issue contains a color hex code
-                        const colorHexMatch = issue.match(/#([0-9A-F]{6})/gi);
+                        // Extract hex colors from the issue text
+                        const colorHexCodes = extractHexColors(issue);
                         
                         return (
                           <div key={issueIndex} className="flex items-start p-2 rounded-md border">
@@ -526,12 +551,12 @@ const DesignChecker = () => {
                             </Badge>
                             <div>
                               <p>{issue}</p>
-                              {colorHexMatch && (
+                              {colorHexCodes.length > 0 && (
                                 <div className="flex gap-2 mt-2">
-                                  {colorHexMatch.map((hex, hexIndex) => (
+                                  {colorHexCodes.map((hex, hexIndex) => (
                                     <div key={hexIndex} className="flex items-center">
                                       <div 
-                                        className="w-4 h-4 rounded-full border mr-1" 
+                                        className="w-6 h-6 rounded-full border mr-1" 
                                         style={{ backgroundColor: hex }}
                                       />
                                       <span className="text-xs">{hex}</span>
@@ -563,8 +588,8 @@ const DesignChecker = () => {
               {analysisResult.errors.length > 0 ? (
                 <div className="space-y-3">
                   {analysisResult.errors.map((error, index) => {
-                    // Check if the error contains a color hex code
-                    const colorHexMatch = error.match(/#([0-9A-F]{6})/gi);
+                    // Extract hex colors from the error text
+                    const colorHexCodes = extractHexColors(error);
                     
                     return (
                       <div key={index} className="flex items-start p-3 rounded-lg border bg-background hover-scale">
@@ -573,12 +598,12 @@ const DesignChecker = () => {
                         </Badge>
                         <div>
                           <p>{error}</p>
-                          {colorHexMatch && (
+                          {colorHexCodes.length > 0 && (
                             <div className="flex gap-3 mt-2">
-                              {colorHexMatch.map((hex, hexIndex) => (
+                              {colorHexCodes.map((hex, hexIndex) => (
                                 <div key={hexIndex} className="flex items-center">
                                   <div 
-                                    className="w-5 h-5 rounded-full border mr-1" 
+                                    className="w-6 h-6 rounded-full border mr-1" 
                                     style={{ backgroundColor: hex }}
                                   />
                                   <span className="text-xs">{hex}</span>

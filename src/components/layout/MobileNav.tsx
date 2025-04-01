@@ -57,7 +57,7 @@ export function MobileNav({ items, isMarketing = false }: MobileNavProps) {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex w-full items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-muted",
+                "flex w-full items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-muted transition-colors duration-200",
                 pathname === item.href && "bg-muted"
               )}
               onClick={() => setOpen(false)}
@@ -71,7 +71,7 @@ export function MobileNav({ items, isMarketing = false }: MobileNavProps) {
               <Link
                 href="/login"
                 className={cn(
-                  "flex w-full items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-muted",
+                  "flex w-full items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-muted transition-colors duration-200",
                   pathname === "/login" && "bg-muted"
                 )}
                 onClick={() => setOpen(false)}
@@ -81,7 +81,7 @@ export function MobileNav({ items, isMarketing = false }: MobileNavProps) {
               <Link
                 href="/register"
                 className={cn(
-                  "flex w-full items-center rounded-md px-3 py-2 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90",
+                  "flex w-full items-center rounded-md px-3 py-2 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-colors duration-200",
                 )}
                 onClick={() => setOpen(false)}
               >

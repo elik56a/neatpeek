@@ -53,10 +53,20 @@ export function Header() {
                   variant="ghost" 
                   asChild
                   className={cn(
-                    pathname === item.href && "bg-muted text-foreground"
+                    "transition-colors duration-200",
+                    pathname === item.href ? 
+                      "bg-muted text-foreground font-medium" : 
+                      "hover:bg-muted/70 hover:text-foreground"
                   )}
                 >
-                  <Link href={item.href}>{item.title}</Link>
+                  <Link href={item.href}>
+                    <span className="relative">
+                      {item.title}
+                      {pathname === item.href && (
+                        <span className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary transform origin-bottom-right"></span>
+                      )}
+                    </span>
+                  </Link>
                 </Button>
               ))}
             </div>
@@ -68,7 +78,7 @@ export function Header() {
               <Button variant="ghost" asChild className="hidden md:inline-flex">
                 <Link href="/login">Sign In</Link>
               </Button>
-              <Button asChild>
+              <Button asChild className="hover-scale">
                 <Link href="/register">Sign Up</Link>
               </Button>
               <MobileNav items={marketingNavItems} isMarketing={true} />
