@@ -1,166 +1,85 @@
 
 "use client";
 
-import { useState } from "react";
+import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { useAuth } from "@/context/auth-context";
+import { Button } from "@/components/ui/button";
+import { MobileNav } from "./MobileNav";
+import { cn } from "@/lib/utils";
 
-const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { isAuthenticated } = useAuth();
+const marketingNavItems = [
+  {
+    title: "Features",
+    href: "/features",
+  },
+  {
+    title: "Pricing",
+    href: "/pricing",
+  },
+  {
+    title: "About",
+    href: "/about",
+  },
+  {
+    title: "FAQ",
+    href: "/faq",
+  },
+];
+
+export function Header() {
   const pathname = usePathname();
-
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-  const closeMenu = () => setIsMenuOpen(false);
-
-  const isActive = (path: string) => pathname === path;
+  const isMarketing = !pathname?.startsWith("/dashboard") &&
+                      !pathname?.startsWith("/design-") &&
+                      !pathname?.startsWith("/brand-") &&
+                      !pathname?.startsWith("/app") &&
+                      pathname !== "/login" &&
+                      pathname !== "/register";
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
-      <div className="container flex h-16 items-center justify-between px-4 md:px-6">
-        <Link href="/" className="flex items-center gap-2" onClick={closeMenu}>
-          <div className="h-8 w-8 rounded-lg bg-brand-gradient flex items-center justify-center">
-            <span className="text-white font-bold">TC</span>
-          </div>
-          <span className="font-bold text-xl hidden md:inline-block">TailorChecker</span>
+    <header className="border-b bg-background sticky top-0 z-50">
+      <div className="container flex h-16 items-center px-4 sm:px-8">
+        <Link href="/" className="flex items-center mr-6">
+          <span className="text-lg font-bold flex-shrink-0">TailorChecker</span>
         </Link>
-        
-        <nav className="hidden md:flex items-center gap-6">
-          <Link 
-            href="/" 
-            className={`text-sm font-medium transition-colors ${isActive('/') ? 'text-primary' : 'hover:text-primary'}`}
-          >
-            Home
-          </Link>
-          <Link 
-            href="/features" 
-            className={`text-sm font-medium transition-colors ${isActive('/features') ? 'text-primary' : 'hover:text-primary'}`}
-          >
-            Features
-          </Link>
-          <Link 
-            href="/pricing" 
-            className={`text-sm font-medium transition-colors ${isActive('/pricing') ? 'text-primary' : 'hover:text-primary'}`}
-          >
-            Pricing
-          </Link>
-          <Link 
-            href="/about" 
-            className={`text-sm font-medium transition-colors ${isActive('/about') ? 'text-primary' : 'hover:text-primary'}`}
-          >
-            About
-          </Link>
-          <Link 
-            href="/faq" 
-            className={`text-sm font-medium transition-colors ${isActive('/faq') ? 'text-primary' : 'hover:text-primary'}`}
-          >
-            FAQ
-          </Link>
-        </nav>
-        
-        <div className="flex items-center gap-4">
-          <ThemeToggle />
-          
-          <div className="hidden md:flex items-center gap-2">
-            {isAuthenticated ? (
-              <Button asChild>
-                <Link href="/dashboard">Dashboard</Link>
-              </Button>
-            ) : (
-              <>
-                <Button variant="outline" asChild>
-                  <Link href="/login">Login</Link>
+
+        {isMarketing ? (
+          <>
+            <div className="hidden md:flex items-center space-x-2">
+              {marketingNavItems.map((item) => (
+                <Button 
+                  key={item.href} 
+                  variant="ghost" 
+                  asChild
+                  className={cn(
+                    pathname === item.href && "bg-muted text-foreground"
+                  )}
+                >
+                  <Link href={item.href}>{item.title}</Link>
                 </Button>
-                <Button asChild>
-                  <Link href="/register">Get Started</Link>
-                </Button>
-              </>
-            )}
-          </div>
-          
-          <Button
-            variant="outline"
-            size="icon"
-            className="md:hidden"
-            onClick={toggleMenu}
-          >
-            {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            <span className="sr-only">Toggle menu</span>
-          </Button>
-        </div>
-      </div>
-      
-      {/* Mobile menu */}
-      {isMenuOpen && (
-        <div className="fixed inset-0 top-16 z-50 bg-background animate-fade-in md:hidden">
-          <nav className="container flex flex-col gap-4 p-6">
-            <Link
-              href="/"
-              className={`flex h-10 items-center rounded-md px-3 text-sm font-medium transition-colors ${isActive('/') ? 'bg-primary/10 text-primary' : 'hover:bg-accent'}`}
-              onClick={closeMenu}
-            >
-              Home
-            </Link>
-            <Link
-              href="/features"
-              className={`flex h-10 items-center rounded-md px-3 text-sm font-medium transition-colors ${isActive('/features') ? 'bg-primary/10 text-primary' : 'hover:bg-accent'}`}
-              onClick={closeMenu}
-            >
-              Features
-            </Link>
-            <Link
-              href="/pricing"
-              className={`flex h-10 items-center rounded-md px-3 text-sm font-medium transition-colors ${isActive('/pricing') ? 'bg-primary/10 text-primary' : 'hover:bg-accent'}`}
-              onClick={closeMenu}
-            >
-              Pricing
-            </Link>
-            <Link
-              href="/about"
-              className={`flex h-10 items-center rounded-md px-3 text-sm font-medium transition-colors ${isActive('/about') ? 'bg-primary/10 text-primary' : 'hover:bg-accent'}`}
-              onClick={closeMenu}
-            >
-              About
-            </Link>
-            <Link
-              href="/faq"
-              className={`flex h-10 items-center rounded-md px-3 text-sm font-medium transition-colors ${isActive('/faq') ? 'bg-primary/10 text-primary' : 'hover:bg-accent'}`}
-              onClick={closeMenu}
-            >
-              FAQ
-            </Link>
-            
-            <div className="mt-4 flex flex-col gap-2">
-              {isAuthenticated ? (
-                <Button asChild>
-                  <Link href="/dashboard" onClick={closeMenu}>
-                    Dashboard
-                  </Link>
-                </Button>
-              ) : (
-                <>
-                  <Button variant="outline" asChild>
-                    <Link href="/login" onClick={closeMenu}>
-                      Login
-                    </Link>
-                  </Button>
-                  <Button asChild>
-                    <Link href="/register" onClick={closeMenu}>
-                      Get Started
-                    </Link>
-                  </Button>
-                </>
-              )}
+              ))}
             </div>
-          </nav>
-        </div>
-      )}
+
+            <div className="flex flex-1 items-center justify-end gap-1 md:gap-2">
+              <div className="hidden md:flex">
+                <ThemeToggle />
+              </div>
+              <Button variant="ghost" asChild className="hidden md:inline-flex">
+                <Link href="/login">Sign In</Link>
+              </Button>
+              <Button asChild>
+                <Link href="/register">Sign Up</Link>
+              </Button>
+              <MobileNav items={marketingNavItems} isMarketing={true} />
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-1 items-center justify-end">
+            <ThemeToggle />
+          </div>
+        )}
+      </div>
     </header>
   );
-};
-
-export default Header;
+}

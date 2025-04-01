@@ -15,7 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Check, Copy, AlertCircle, Image as ImageIcon, FileText, Link2, Loader2, ExternalLink, X } from "lucide-react";
+import { Check, Copy, AlertCircle, Image as ImageIcon, FileText, Link2, Loader2, ExternalLink, X, LineChart, BarChart3 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +31,7 @@ interface AnalysisResult {
   warnings: string[];
   figmaLink?: string;
   commentCount?: number;
+  designImages?: { imageUrl: string; issues: string[] }[];
 }
 
 const DesignChecker = () => {
@@ -42,6 +43,7 @@ const DesignChecker = () => {
   const [value, setValue] = useState("figma");
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
+  const [designType, setDesignType] = useState<string | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -108,6 +110,16 @@ const DesignChecker = () => {
         ],
         figmaLink: figmaUrl,
         commentCount: 4,
+        designImages: [
+          {
+            imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
+            issues: ["Primary color #3A86FF doesn't match brand color #8344FF"]
+          },
+          {
+            imageUrl: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
+            issues: ["Heading font 'Montserrat' doesn't match brand font 'Inter'"]
+          }
+        ]
       });
     } catch (error) {
       console.error("Error analyzing Figma design:", error);
@@ -186,6 +198,10 @@ const DesignChecker = () => {
           "Button styles inconsistent across designs",
           "Padding in content sections varies too much",
         ],
+        designImages: uploadedImages.map((_, index) => ({
+          imageUrl: imagePreviewUrls[index],
+          issues: ["Color palette mismatch", "Typography inconsistency"]
+        }))
       });
     } catch (error) {
       console.error("Error analyzing images:", error);
@@ -240,13 +256,57 @@ const DesignChecker = () => {
     </Card>
   );
 
+  // Design Type Selection Screen
+  if (!designType) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold">Design Checker</h1>
+          <p className="text-muted-foreground mt-2">
+            Select the type of design you want to analyze
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          {[
+            { id: "web", name: "Web Design", icon: <LineChart className="h-12 w-12" /> },
+            { id: "mobile", name: "Mobile App", icon: <ImageIcon className="h-12 w-12" /> },
+            { id: "email", name: "Email Design", icon: <FileText className="h-12 w-12" /> },
+            { id: "social", name: "Social Media", icon: <Link2 className="h-12 w-12" /> },
+            { id: "print", name: "Print Design", icon: <FileText className="h-12 w-12" /> },
+            { id: "logo", name: "Logo & Branding", icon: <BarChart3 className="h-12 w-12" /> },
+          ].map((type) => (
+            <Card 
+              key={type.id}
+              className="hover-scale cursor-pointer hover:border-primary/50 transition-all duration-200"
+              onClick={() => setDesignType(type.id)}
+            >
+              <CardContent className="p-6 flex flex-col items-center text-center">
+                <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                  {type.icon}
+                </div>
+                <h3 className="text-xl font-medium">{type.name}</h3>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Analyze {type.name.toLowerCase()} against your brand guidelines
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Design Checker</h1>
         <p className="text-muted-foreground">
-          Check if your designs align with your brand guidelines
+          Checking <span className="font-medium">{designType.charAt(0).toUpperCase() + designType.slice(1)} Design</span> against your brand guidelines
         </p>
+        <Button variant="outline" className="mt-2" onClick={() => setDesignType(null)}>
+          Change Design Type
+        </Button>
       </div>
 
       <Tabs 
@@ -265,7 +325,7 @@ const DesignChecker = () => {
           <TabsTrigger value="image" className="relative z-10 overflow-hidden group">
             <span className="relative z-10 flex items-center">
               <ImageIcon className="w-4 h-4 mr-2" />
-              Analyze Images
+              Analyze Design Images
             </span>
           </TabsTrigger>
           <div 
@@ -359,7 +419,7 @@ const DesignChecker = () => {
                           <div className="relative">
                             <img 
                               src={url} 
-                              alt={`Design ${index + this}`} 
+                              alt={`Design ${index + 1}`} 
                               className="w-full h-48 object-cover"
                             />
                             <button
@@ -370,7 +430,7 @@ const DesignChecker = () => {
                             </button>
                           </div>
                           <div className="p-2 text-sm truncate">
-                            {uploadedImages[index]?.name}
+                            {uploadedImages[index]?.name || `Design ${index + 1}`}
                           </div>
                         </div>
                       ))}
@@ -385,10 +445,10 @@ const DesignChecker = () => {
                     {loading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Analyzing Images...
+                        Analyzing Designs...
                       </>
                     ) : (
-                      "Analyze Images"
+                      "Analyze Design Images"
                     )}
                   </Button>
                 </div>
@@ -436,7 +496,61 @@ const DesignChecker = () => {
 
           <Separator className="my-4" />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-6">
+            <h3 className="text-xl font-bold mb-4">Design Issues by Image</h3>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {analysisResult.designImages?.map((designImage, imageIndex) => (
+                <Card key={imageIndex} className="overflow-hidden hover-scale">
+                  <div className="aspect-video bg-muted">
+                    <img 
+                      src={designImage.imageUrl} 
+                      alt={`Design ${imageIndex + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Design {imageIndex + 1}</CardTitle>
+                    <CardDescription>Found {designImage.issues.length} issues</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-2">
+                      {designImage.issues.map((issue, issueIndex) => {
+                        // Check if the issue contains a color hex code
+                        const colorHexMatch = issue.match(/#([0-9A-F]{6})/gi);
+                        
+                        return (
+                          <div key={issueIndex} className="flex items-start p-2 rounded-md border">
+                            <Badge variant="destructive" className="mr-2 mt-0.5 shrink-0">
+                              Issue
+                            </Badge>
+                            <div>
+                              <p>{issue}</p>
+                              {colorHexMatch && (
+                                <div className="flex gap-2 mt-2">
+                                  {colorHexMatch.map((hex, hexIndex) => (
+                                    <div key={hexIndex} className="flex items-center">
+                                      <div 
+                                        className="w-4 h-4 rounded-full border mr-1" 
+                                        style={{ backgroundColor: hex }}
+                                      />
+                                      <span className="text-xs">{hex}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -448,14 +562,34 @@ const DesignChecker = () => {
               </h3>
               {analysisResult.errors.length > 0 ? (
                 <div className="space-y-3">
-                  {analysisResult.errors.map((error, index) => (
-                    <div key={index} className="flex items-start p-3 rounded-lg border bg-background hover-scale">
-                      <Badge variant="destructive" className="mr-2 mt-0.5 shrink-0">
-                        Error
-                      </Badge>
-                      <p>{error}</p>
-                    </div>
-                  ))}
+                  {analysisResult.errors.map((error, index) => {
+                    // Check if the error contains a color hex code
+                    const colorHexMatch = error.match(/#([0-9A-F]{6})/gi);
+                    
+                    return (
+                      <div key={index} className="flex items-start p-3 rounded-lg border bg-background hover-scale">
+                        <Badge variant="destructive" className="mr-2 mt-0.5 shrink-0">
+                          Error
+                        </Badge>
+                        <div>
+                          <p>{error}</p>
+                          {colorHexMatch && (
+                            <div className="flex gap-3 mt-2">
+                              {colorHexMatch.map((hex, hexIndex) => (
+                                <div key={hexIndex} className="flex items-center">
+                                  <div 
+                                    className="w-5 h-5 rounded-full border mr-1" 
+                                    style={{ backgroundColor: hex }}
+                                  />
+                                  <span className="text-xs">{hex}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-muted-foreground">No brand consistency issues found.</p>
