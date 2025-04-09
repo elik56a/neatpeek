@@ -1,5 +1,5 @@
 
-import { Link } from "react-router-dom";
+import Link  from "next/link";
 
 const Footer = () => {
   return (
@@ -7,7 +7,7 @@ const Footer = () => {
       <div className="container px-4 py-12 md:px-6">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-2">
-            <Link to="/" className="flex items-center gap-2 mb-4">
+            <Link href="/" className="flex items-center gap-2 mb-4">
               <div className="h-8 w-8 rounded-lg bg-brand-gradient flex items-center justify-center">
                 <span className="text-white font-bold">TC</span>
               </div>
@@ -44,12 +44,12 @@ const Footer = () => {
             <h3 className="text-sm font-medium">Product</h3>
             <ul className="mt-4 space-y-2 text-sm">
               <li>
-                <Link to="/features" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/features" className="text-muted-foreground hover:text-foreground transition-colors">
                   Features
                 </Link>
               </li>
               <li>
-                <Link to="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
                   Pricing
                 </Link>
               </li>
@@ -69,7 +69,7 @@ const Footer = () => {
             <h3 className="text-sm font-medium">Company</h3>
             <ul className="mt-4 space-y-2 text-sm">
               <li>
-                <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">
+                <Link href="/about" className="text-muted-foreground hover:text-foreground transition-colors">
                   About
                 </Link>
               </li>

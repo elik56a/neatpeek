@@ -1,10 +1,11 @@
 
 "use client";
 
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/features/auth";
+import { CompanyProvider } from "@/features/company";
+import { AppLayout } from "@/features/layout";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
-import AppLayout from "@/components/layout/AppLayout";
 
 export default function AppRootLayout({
   children,
@@ -35,5 +36,9 @@ export default function AppRootLayout({
     redirect("/login");
   }
 
-  return <AppLayout>{children}</AppLayout>;
+  return (
+    <CompanyProvider>
+      <AppLayout>{children}</AppLayout>
+    </CompanyProvider>
+  );
 }

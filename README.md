@@ -1,73 +1,107 @@
-# Welcome to your Lovable project
+# Tailor Checker - Design QA Analysis SaaS
 
-## Project info
+## Project Overview
 
-**URL**: https://lovable.dev/projects/1e5d0b16-e79f-4340-b236-e6b3eac99287
+Tailor Checker is a SaaS platform that analyzes design frames against brand guidelines and provides feedback through Figma comments. It uses AI-powered analysis to ensure design consistency and adherence to brand guidelines.
 
-## How can I edit this code?
+## Technical Stack
 
-There are several ways of editing your application.
+- Next.js 14+ (App Router)
+- PostgreSQL as the database
+- Prisma ORM with TypeScript
+- Vercel for deployment
 
-**Use Lovable**
+## Getting Started
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/1e5d0b16-e79f-4340-b236-e6b3eac99287) and start prompting.
+### Prerequisites
 
-Changes made via Lovable will be committed automatically to this repo.
+- Node.js 18+ and npm/yarn/pnpm
+- PostgreSQL database server
+- Figma account for integration testing
 
-**Use your preferred IDE**
+### Database Setup
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+1. Install PostgreSQL on your machine or use a cloud service (like Railway, Supabase, etc.)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+2. Create a database named `tailordb`:
+   ```
+   CREATE DATABASE tailordb;
+   ```
 
-Follow these steps:
+3. Create a user and grant privileges (adjust as needed for your setup):
+   ```
+   CREATE USER tailoruser WITH PASSWORD 'your_secure_password';
+   GRANT ALL PRIVILEGES ON DATABASE tailordb TO tailoruser;
+   ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+4. Update the `.env` file with your database credentials:
+   ```
+   DATABASE_URL="postgresql://tailoruser:your_secure_password@localhost:5432/tailordb?schema=public"
+   ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Installation
 
-# Step 3: Install the necessary dependencies.
-npm i
+1. Clone the repository
+   ```
+   git clone <repository-url>
+   cd tailor-checker
+   ```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+2. Install dependencies
+   ```
+   npm install
+   ```
 
-**Edit a file directly in GitHub**
+3. Generate Prisma client
+   ```
+   npm run prisma:generate
+   ```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+4. Run database migrations
+   ```
+   npm run prisma:migrate:dev
+   ```
 
-**Use GitHub Codespaces**
+5. Seed the database with initial data
+   ```
+   npm run prisma:seed
+   ```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+6. Start the development server
+   ```
+   npm run dev
+   ```
 
-## What technologies are used for this project?
+7. Open [http://localhost:4455](http://localhost:4455) in your browser
 
-This project is built with .
+## Database Schema
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+The database schema includes these core models:
 
-## How can I deploy this project?
+- **User and Account Models**: For user authentication and management
+- **Subscription Models**: For handling different subscription tiers
+- **Brand Models**: For storing brand guidelines and design examples
+- **Design Analysis Models**: For storing analysis results and feedback
+- **Figma Integration Models**: For tracking Figma files and frames
 
-Simply open [Lovable](https://lovable.dev/projects/1e5d0b16-e79f-4340-b236-e6b3eac99287) and click on Share -> Publish.
+### Migration Process
 
-## Can I connect a custom domain to my Lovable project?
+When updating the database schema, follow these steps:
 
-Yes it is!
+1. Update the `prisma/schema.prisma` file with your changes
+2. Run `npm run prisma:migrate:dev -- --name descriptive_migration_name` to create a new migration
+3. Commit both the schema changes and the generated migration files
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Development Guidelines
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- Use the singleton Prisma client instance from `src/lib/prisma.ts`
+- Use the database helper functions in `src/lib/db.ts` for common operations
+- Add new helper functions as needed for specific business logic
+
+## Contributing
+
+[Add contribution guidelines here]
+
+## License
+
+[Add license information here]

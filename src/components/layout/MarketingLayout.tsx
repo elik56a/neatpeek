@@ -3,13 +3,13 @@
 
 import React from "react";
 import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
+import Footer from "@/components/layout/Footer";
 
 interface MarketingLayoutProps {
   children: React.ReactNode;
 }
 
-export function MarketingLayout({ children }: MarketingLayoutProps) {
+const MarketingLayout = ({ children }: MarketingLayoutProps)  =>{
   return (
     <>
       <Header />
@@ -18,3 +18,5 @@ export function MarketingLayout({ children }: MarketingLayoutProps) {
     </>
   );
 }
+
+export default MarketingLayout;

@@ -2,7 +2,7 @@
 import { CheckIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import Link  from "next/link";
 
 const tiers = [
   {
@@ -200,7 +200,7 @@ const PricingPage = () => {
                     variant={tier.mostPopular ? "default" : "outline"}
                     asChild
                   >
-                    <Link to="/register">{tier.cta}</Link>
+                    <Link href="/register">{tier.cta}</Link>
                   </Button>
                 </div>
               </div>

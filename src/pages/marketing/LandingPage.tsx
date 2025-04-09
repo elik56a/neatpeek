@@ -1,7 +1,7 @@
 
 import { ArrowRight, CheckCircle, LineChart, Shield, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import Link  from "next/link";
 
 const LandingPage = () => {
   return (
@@ -19,13 +19,13 @@ const LandingPage = () => {
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <Button size="lg" asChild>
-                <Link to="/register">
+                <Link href="/register">
                   Get Started
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link to="/features">See Features</Link>
+                <Link href="/features">See Features</Link>
               </Button>
             </div>
           </div>
@@ -175,7 +175,7 @@ const LandingPage = () => {
               Join thousands of designers who've transformed their process with TailorChecker.
             </p>
             <Button size="lg" variant="secondary" asChild>
-              <Link to="/register">
+              <Link href="/register">
                 Get Started Free
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -210,7 +210,7 @@ const LandingPage = () => {
               </ul>
               <div className="mt-10">
                 <Button asChild>
-                  <Link to="/features">See all features</Link>
+                  <Link href="/features">See all features</Link>
                 </Button>
               </div>
             </div>

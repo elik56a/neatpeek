@@ -1,8 +1,8 @@
 
-import { Link } from "react-router-dom";
+import Link  from "next/link";
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation } from "next/link";
 
 const NotFound = () => {
   const location = useLocation();
@@ -24,10 +24,10 @@ const NotFound = () => {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button asChild>
-            <Link to="/">Back to Home</Link>
+            <Link href="/">Back to Home</Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link to="/dashboard">Go to Dashboard</Link>
+            <Link href="/dashboard">Go to Dashboard</Link>
           </Button>
         </div>
       </div>

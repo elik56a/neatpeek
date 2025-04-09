@@ -1,20 +1,19 @@
 
 "use client";
 
-import { useAuth } from "@/context/auth-context";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import PageTransition from "./PageTransition";
 import Sidebar from "./Sidebar";
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen">
       <Sidebar />
-      <div className="flex-1 overflow-hidden">
-        <ScrollArea className="h-screen">
-          <main className="p-6 md:p-8 max-w-7xl mx-auto">
+      <div className="flex-1 overflow-y-auto">
+        <main className="p-6 md:p-8 max-w-7xl mx-auto min-h-screen">
+          <PageTransition>
             {children}
-          </main>
-        </ScrollArea>
+          </PageTransition>
+        </main>
       </div>
     </div>
   );

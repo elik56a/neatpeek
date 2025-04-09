@@ -6,7 +6,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import Link  from "next/link";
 
 const faqs = [
   {
@@ -104,7 +104,7 @@ const FaqPage = () => {
             <a href="mailto:support@tailorchecker.com">Contact Support</a>
           </Button>
           <Button size="lg" variant="outline" asChild>
-            <Link to="/register">Try It Free</Link>
+            <Link href="/register">Try It Free</Link>
           </Button>
         </div>
       </div>

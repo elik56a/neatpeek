@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -24,26 +23,22 @@ import {
   LineChart,
   PieChart,
 } from '@/components/ui/chart';
-import { format, subMonths, subDays } from "date-fns";
+import { format, subDays } from "date-fns";
 import {
   ArrowRight,
   BarChart3,
-  ChevronUp,
   FileText,
   Layers,
   LineChart as LineChartIcon,
   LayoutDashboard,
   PieChart as PieChartIcon,
   Sliders,
-  Clock,
   TrendingUp,
   Folder,
   CheckCircle,
-  AlertTriangle,
   XCircle,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { CustomLoader } from "@/components/ui/custom-loader";
 
 // Type definitions for chart data
 interface ChartData {
@@ -104,9 +99,7 @@ const historyData: AreaData[] = generateDates(30).map((date, i) => ({
 
 const Dashboard = () => {
   const [chartType, setChartType] = useState<'line' | 'area' | 'bar' | 'pie'>('line');
-  const [isLoading, setIsLoading] = useState(false);
 
-  // Recent Activity Data
   const recentActivity = [
     {
       id: "ACT-1234",
@@ -159,44 +152,32 @@ const Dashboard = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="hover-scale">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Total Design Checks
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Total Design Checks</CardTitle>
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">128</div>
-            <p className="text-xs text-muted-foreground">
-              +14% from last month
-            </p>
+            <p className="text-xs text-muted-foreground">+14% from last month</p>
           </CardContent>
         </Card>
         <Card className="hover-scale">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Passing Rate
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Passing Rate</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">86%</div>
-            <p className="text-xs text-muted-foreground">
-              +2.5% from last month
-            </p>
+            <p className="text-xs text-muted-foreground">+2.5% from last month</p>
           </CardContent>
         </Card>
         <Card className="hover-scale">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Brand Consistency
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">Brand Consistency</CardTitle>
             <Sliders className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">92%</div>
-            <p className="text-xs text-muted-foreground">
-              +5.2% from last month
-            </p>
+            <p className="text-xs text-muted-foreground">+5.2% from last month</p>
           </CardContent>
         </Card>
         <Card className="hover-scale">
@@ -206,9 +187,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">5</div>
-            <p className="text-xs text-muted-foreground">
-              +1 from last month
-            </p>
+            <p className="text-xs text-muted-foreground">+1 from last month</p>
           </CardContent>
         </Card>
       </div>
@@ -216,89 +195,76 @@ const Dashboard = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-8">
         <Card className="md:col-span-2 lg:col-span-4">
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>Design Checks Analytics</CardTitle>
-              <Tabs 
-                value={chartType} 
-                onValueChange={(v) => setChartType(v as 'line' | 'area' | 'bar' | 'pie')}
-                className="relative h-8"
-              >
-                <TabsList className="grid grid-cols-4 w-fit h-8">
-                  <TabsTrigger value="line" className="h-8 px-2 relative">
-                    <LineChartIcon className="h-4 w-4" />
-                  </TabsTrigger>
-                  <TabsTrigger value="area" className="h-8 px-2 relative">
-                    <LayoutDashboard className="h-4 w-4" />
-                  </TabsTrigger>
-                  <TabsTrigger value="bar" className="h-8 px-2 relative">
-                    <BarChart3 className="h-4 w-4" />
-                  </TabsTrigger>
-                  <TabsTrigger value="pie" className="h-8 px-2 relative">
-                    <PieChartIcon className="h-4 w-4" />
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-            <CardDescription>
-              Design checks performed over the last 30 days
-            </CardDescription>
+            <CardTitle>Design Checks Analytics</CardTitle>
+            <CardDescription>Design checks performed over the last 30 days</CardDescription>
           </CardHeader>
           <CardContent className="pl-2">
-            <TabsContent value="line" className="mt-0 space-y-4">
-              <LineChart 
-                data={activityData}
-                categories={['value']}
-                colors={['#8344FF']}
-                yAxisWidth={30}
-                showLegend={false}
-                showGridLines={false}
-                showAnimation={true}
-                className="aspect-[4/2]"
-              />
-            </TabsContent>
-            <TabsContent value="area" className="mt-0 space-y-4">
-              <AreaChart 
-                data={historyData}
-                categories={['desktop', 'mobile', 'tablet']}
-                colors={['#8344FF', '#4BCAFF', '#F97316']}
-                yAxisWidth={30}
-                showLegend={true}
-                showGridLines={false}
-                showAnimation={true}
-                className="aspect-[4/2]"
-              />
-            </TabsContent>
-            <TabsContent value="bar" className="mt-0 space-y-4">
-              <BarChart 
-                data={designTypeData}
-                categories={['value']}
-                colors={['#8344FF']}
-                yAxisWidth={30}
-                showLegend={false}
-                showGridLines={false}
-                showAnimation={true}
-                className="aspect-[4/2]"
-              />
-            </TabsContent>
-            <TabsContent value="pie" className="mt-0 space-y-4">
-              <PieChart 
-                data={deviceBreakdownData}
-                category="value"
-                index="name"
-                colors={['#8344FF', '#4BCAFF', '#F97316']}
-                showAnimation={true}
-                className="aspect-[4/2]"
-              />
-            </TabsContent>
+            <Tabs
+              value={chartType}
+              onValueChange={(v) => setChartType(v as 'line' | 'area' | 'bar' | 'pie')}
+              className="w-full"
+            >
+              <TabsList className="grid grid-cols-4 w-fit h-8 mb-4">
+                <TabsTrigger value="line"><LineChartIcon className="h-4 w-4" /></TabsTrigger>
+                <TabsTrigger value="area"><LayoutDashboard className="h-4 w-4" /></TabsTrigger>
+                <TabsTrigger value="bar"><BarChart3 className="h-4 w-4" /></TabsTrigger>
+                <TabsTrigger value="pie"><PieChartIcon className="h-4 w-4" /></TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="line">
+                <LineChart
+                  data={activityData}
+                  categories={['value']}
+                  colors={['#8344FF']}
+                  yAxisWidth={30}
+                  showLegend={false}
+                  showGridLines={false}
+                  showAnimation={true}
+                  className="aspect-[4/2]"
+                />
+              </TabsContent>
+              <TabsContent value="area">
+                <AreaChart
+                  data={historyData}
+                  categories={['desktop', 'mobile', 'tablet']}
+                  colors={['#8344FF', '#4BCAFF', '#F97316']}
+                  yAxisWidth={30}
+                  showLegend={true}
+                  showGridLines={false}
+                  showAnimation={true}
+                  className="aspect-[4/2]"
+                />
+              </TabsContent>
+              <TabsContent value="bar">
+                <BarChart
+                  data={designTypeData}
+                  categories={['value']}
+                  colors={['#8344FF']}
+                  yAxisWidth={30}
+                  showLegend={false}
+                  showGridLines={false}
+                  showAnimation={true}
+                  className="aspect-[4/2]"
+                />
+              </TabsContent>
+              <TabsContent value="pie">
+                <PieChart
+                  data={deviceBreakdownData}
+                  category="value"
+                  index="name"
+                  colors={['#8344FF', '#4BCAFF', '#F97316']}
+                  showAnimation={true}
+                  className="aspect-[4/2]"
+                />
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
-        
+
         <Card className="md:col-span-2 lg:col-span-4">
           <CardHeader>
             <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>
-              Your latest design checks and brand updates
-            </CardDescription>
+            <CardDescription>Your latest design checks and brand updates</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -318,19 +284,17 @@ const Dashboard = () => {
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center justify-between">
                       <div className="font-semibold">{activity.name}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {format(activity.date, "MMM d")}
-                      </div>
+                      <div className="text-sm text-muted-foreground">{format(activity.date, "MMM d")}</div>
                     </div>
                     <div className="flex items-center text-sm">
                       <div className="text-muted-foreground">{activity.type}</div>
                       <div className="ml-auto">
                         <Badge
                           variant={
-                            activity.status === "Passed" 
-                              ? "default" 
-                              : activity.status === "Failed" 
-                              ? "destructive" 
+                            activity.status === "Passed"
+                              ? "default"
+                              : activity.status === "Failed"
+                              ? "destructive"
                               : "outline"
                           }
                         >

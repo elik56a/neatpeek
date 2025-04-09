@@ -4,7 +4,7 @@
 import { AreaChart as Area } from "@tremor/react";
 import { BarChart as Bar } from "@tremor/react";
 import { LineChart as Line } from "@tremor/react";
-import { PieChart as Pie } from "@tremor/react";
+import { DonutChart as Pie } from "@tremor/react";
 
 export interface ChartProps {
   className?: string;

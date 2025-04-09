@@ -1,15 +1,15 @@
 
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/features/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 
 const RegisterPage = () => {
   const [name, setName] = useState("");
@@ -23,7 +23,7 @@ const RegisterPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!agreedToTerms) {
       toast({
         title: "Terms Agreement Required",
@@ -32,9 +32,9 @@ const RegisterPage = () => {
       });
       return;
     }
-    
+
     setIsLoading(true);
-    
+
     try {
       await register(name, email, password);
       toast({
@@ -55,7 +55,7 @@ const RegisterPage = () => {
 
   const handleGoogleSignUp = async () => {
     setIsLoading(true);
-    
+
     try {
       await loginWithGoogle?.();
       toast({
@@ -88,7 +88,7 @@ const RegisterPage = () => {
             Get started with TailorChecker
           </p>
         </div>
-        
+
         <div className="space-y-6">
           <Button
             variant="outline"
@@ -114,7 +114,7 @@ const RegisterPage = () => {
             Sign up with Google
           </Button>
         </div>
-        
+
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
             <span className="w-full border-t" />
@@ -123,7 +123,7 @@ const RegisterPage = () => {
             <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
           </div>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="name">Full Name</Label>
@@ -137,7 +137,7 @@ const RegisterPage = () => {
               disabled={isLoading}
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -150,7 +150,7 @@ const RegisterPage = () => {
               disabled={isLoading}
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <div className="relative">
@@ -175,7 +175,7 @@ const RegisterPage = () => {
               Password must be at least 8 characters long.
             </p>
           </div>
-          
+
           <div className="flex items-start space-x-2">
             <Checkbox
               id="terms"
@@ -200,7 +200,7 @@ const RegisterPage = () => {
               </Label>
             </div>
           </div>
-          
+
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? (
               <>
@@ -212,7 +212,7 @@ const RegisterPage = () => {
             )}
           </Button>
         </form>
-        
+
         <div className="text-center text-sm">
           <p className="text-muted-foreground">
             Already have an account?{" "}

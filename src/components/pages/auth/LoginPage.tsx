@@ -1,14 +1,14 @@
-
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuth } from "@/context/auth-context";
+import { useAuth } from "@/features/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -17,11 +17,30 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { login, loginWithGoogle } = useAuth();
   const { toast } = useToast();
+  const searchParams = useSearchParams();
+
+  // Check if user just registered
+  useEffect(() => {
+    const registered = searchParams.get('registered');
+    if (registered === 'true') {
+      toast({
+        title: "Registration successful",
+        description: "Your account has been created. Please log in with your credentials.",
+        variant: "default"
+      });
+
+      // Pre-fill the email if it's in the URL
+      const emailParam = searchParams.get('email');
+      if (emailParam) {
+        setEmail(emailParam);
+      }
+    }
+  }, [searchParams, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
       await login(email, password);
       toast({
@@ -41,14 +60,8 @@ const LoginPage = () => {
   };
 
   const handleGoogleLogin = async () => {
-    setIsLoading(true);
-    
     try {
-      await loginWithGoogle?.();
-      toast({
-        title: "Login successful",
-        description: "Welcome back to TailorChecker!",
-      });
+      await loginWithGoogle();
     } catch (error) {
       console.error("Google login failed:", error);
       toast({
@@ -56,8 +69,6 @@ const LoginPage = () => {
         description: "There was an issue logging in with Google. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -75,7 +86,7 @@ const LoginPage = () => {
             Sign in to your TailorChecker account
           </p>
         </div>
-        
+
         <div className="space-y-6">
           <Button
             variant="outline"
@@ -101,7 +112,7 @@ const LoginPage = () => {
             Continue with Google
           </Button>
         </div>
-        
+
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
             <span className="w-full border-t" />
@@ -110,7 +121,7 @@ const LoginPage = () => {
             <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
           </div>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -124,7 +135,7 @@ const LoginPage = () => {
               disabled={isLoading}
             />
           </div>
-          
+
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="password">Password</Label>
@@ -151,7 +162,7 @@ const LoginPage = () => {
               </button>
             </div>
           </div>
-          
+
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? (
               <>
@@ -163,7 +174,7 @@ const LoginPage = () => {
             )}
           </Button>
         </form>
-        
+
         <div className="text-center text-sm">
           <p className="text-muted-foreground">
             Don't have an account?{" "}

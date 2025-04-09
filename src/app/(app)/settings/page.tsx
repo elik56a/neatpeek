@@ -1,8 +1,5 @@
+import { SettingsPage } from "@/features/settings";
 
-"use client";
-
-import Settings from "@/components/pages/app/Settings";
-
-export default function SettingsPage() {
-  return <Settings />;
+export default function Settings() {
+  return <SettingsPage />;
 }

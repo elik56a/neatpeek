@@ -1,25 +1,25 @@
 
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useAuth } from "@/features/auth";
 import { cn } from "@/lib/utils";
 import {
-  LayoutDashboard,
-  Settings,
-  PaintBucket,
-  History,
-  FileCheck,
-  LogOut,
-  ChevronLeft,
-  ChevronRight,
+    ChevronLeft,
+    ChevronRight,
+    FileCheck,
+    History,
+    LayoutDashboard,
+    LogOut,
+    PaintBucket,
+    Settings,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/context/auth-context";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const Sidebar = () => {
   const { user, logout } = useAuth();
@@ -27,30 +27,30 @@ const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
 
   const sidebarLinks = [
-    { 
-      name: "Dashboard", 
-      href: "/dashboard", 
-      icon: LayoutDashboard 
+    {
+      name: "Dashboard",
+      href: "/dashboard",
+      icon: LayoutDashboard
     },
-    { 
-      name: "Brand Setup", 
-      href: "/brand-setup", 
-      icon: PaintBucket 
+    {
+      name: "Brand Setup",
+      href: "/brand-setup",
+      icon: PaintBucket
     },
-    { 
-      name: "Design Checker", 
-      href: "/design-checker", 
-      icon: FileCheck 
+    {
+      name: "Design Checker",
+      href: "/design-checker",
+      icon: FileCheck
     },
-    { 
-      name: "Design History", 
-      href: "/design-history", 
-      icon: History 
+    {
+      name: "Design History",
+      href: "/design-history",
+      icon: History
     },
-    { 
-      name: "Settings", 
-      href: "/settings", 
-      icon: Settings 
+    {
+      name: "Settings",
+      href: "/settings",
+      icon: Settings
     },
   ];
 
@@ -59,7 +59,7 @@ const Sidebar = () => {
   return (
     <aside
       className={cn(
-        "flex flex-col h-screen border-r bg-sidebar transition-all duration-300",
+        "flex flex-col h-screen border-r bg-sidebar transition-all duration-300 sticky top-0",
         collapsed ? "w-16" : "w-64"
       )}
     >
@@ -86,12 +86,12 @@ const Sidebar = () => {
           {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </Button>
       </div>
-      
-      <ScrollArea className="flex-1 py-4">
+
+      <ScrollArea className="flex-1 py-4 overflow-y-auto">
         <nav className="px-2 space-y-1">
           {sidebarLinks.map((link) => {
-            const isActive = pathname === link.href;
-            
+            const isActive =  pathname === link.href;
+
             if (collapsed) {
               return (
                 <TooltipProvider key={link.name}>
@@ -101,11 +101,14 @@ const Sidebar = () => {
                         href={link.href}
                         className={cn(
                           "flex h-10 w-10 mx-auto items-center justify-center rounded-md",
-                          "transition-colors hover:bg-sidebar-accent",
-                          isActive && "bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90"
+                          "transition-all duration-200 ease-in-out hover:bg-sidebar-accent",
+                          isActive ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm" : ""
                         )}
                       >
-                        <link.icon size={20} />
+                        <link.icon size={20} className={cn("transition-transform duration-200", isActive && "scale-110")} />
+                        {isActive && (
+                          <div className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-primary-foreground animate-pulse"></div>
+                        )}
                       </Link>
                     </TooltipTrigger>
                     <TooltipContent side="right">
@@ -115,50 +118,72 @@ const Sidebar = () => {
                 </TooltipProvider>
               );
             }
-            
+
             return (
               <Link
                 key={link.name}
                 href={link.href}
                 className={cn(
                   "flex h-10 items-center gap-3 rounded-md px-3",
-                  "transition-colors hover:bg-sidebar-accent",
-                  isActive && "bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90"
+                  "transition-all duration-200 ease-in-out hover:bg-sidebar-accent",
+                  isActive ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm" : ""
                 )}
               >
-                <link.icon size={20} />
-                <span>{link.name}</span>
+                <link.icon size={20} className={cn("transition-transform duration-200", isActive && "scale-110")} />
+                <span className={cn("transition-all duration-200", isActive && "font-medium")}>{link.name}</span>
+                {isActive && (
+                  <div className="ml-auto h-1.5 w-1.5 rounded-full bg-primary-foreground animate-pulse"></div>
+                )}
               </Link>
             );
           })}
         </nav>
       </ScrollArea>
-      
+
       <div className="p-4 border-t mt-auto">
         {collapsed ? (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="mx-auto"
-                  onClick={logout}
-                >
-                  <LogOut size={20} className="text-muted-foreground" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="right">
-                Logout
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <div className="flex flex-col items-center gap-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Avatar className="h-9 w-9 cursor-pointer border-2 border-transparent hover:border-primary transition-all duration-200">
+                    <AvatarImage src={user?.image} alt={user?.name || ''} />
+                    <AvatarFallback className="bg-primary text-primary-foreground font-medium">
+                      {user?.name ? user.name.split(' ').map(n => n[0]?.toUpperCase()).join('').substring(0, 2) : ''}
+                    </AvatarFallback>
+                  </Avatar>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  {user?.name || user?.email}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="mx-auto"
+                    onClick={logout}
+                  >
+                    <LogOut size={20} className="text-muted-foreground" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  Logout
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
         ) : (
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Avatar className="h-9 w-9">
-                <AvatarImage src={user?.avatar} alt={user?.name} />
-                <AvatarFallback>{user?.name?.[0]}</AvatarFallback>
+                <AvatarImage src={user?.image} alt={user?.name || ''} />
+                <AvatarFallback className="bg-primary text-primary-foreground font-medium">
+                  {user?.name ? user.name.split(' ').map(n => n[0]?.toUpperCase()).join('').substring(0, 2) : ''}
+                </AvatarFallback>
               </Avatar>
               <div className="space-y-0.5 overflow-hidden">
                 <p className="text-sm font-medium leading-none truncate">

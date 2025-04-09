@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -19,6 +18,57 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+
+// Define types for API requests and responses
+interface BrandRequest {
+  brandName: string;
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
+  primaryFont: string;
+  secondaryFont: string;
+  spacing: string;
+  additionalNotes: string;
+  customRules: { id: string; category: string; value: string }[];
+  logo?: File;
+  guidelinesFile?: File;
+  designImages?: File[];
+}
+
+interface BrandResponse {
+  success: boolean;
+  brandId?: string;
+  data?: BrandRequest;
+  error?: string;
+}
+
+// Fetch functions for API interaction
+const fetchBrandData = async (brandId: string): Promise<BrandResponse> => {
+  const response = await fetch(`api/brand-setup?brandId=${brandId}`);
+
+  if (!response.ok) {
+    const error = await response.json();
+    console.error('Error fetching brand data:', error);
+    throw new Error(error.message || 'Failed to fetch brand data');
+  }
+
+  return response.json();
+};
+
+const createOrUpdateBrand = async (formData: FormData): Promise<BrandResponse> => {
+  const response = await fetch(`/api/brand-setup`, {
+    method: "POST",
+    body: formData,
+  });
+  return response.json();
+};
+
+const deleteBrand = async (brandId: string): Promise<BrandResponse> => {
+  const response = await fetch(`/api/brand-setup?brandId=${brandId}`, {
+    method: "DELETE",
+  });
+  return response.json();
+};
 
 interface BrandForm {
   brandName: string;
@@ -212,8 +262,8 @@ const BrandSetup = () => {
         formData.append(`designImage${index}`, image);
       });
       
-      // Mock API request - would be replaced with actual fetch call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      //api call
+      await createOrUpdateBrand(formData);
       
       // Show success message
       toast({
@@ -235,6 +285,22 @@ const BrandSetup = () => {
       setIsSubmitting(false);
     }
   };
+
+  // Example usage of fetchBrandData on component mount
+  useEffect(() => {
+    const loadBrandData = async () => {
+      const brandId = "example-brand-id"; // Replace with actual logic to get brandId
+      const result = await fetchBrandData(brandId);
+      if (result.success && result.data) {
+        console.log("Fetched brand data:", result.data);
+      } else {
+        console.error("Failed to fetch brand data:", result.error);
+      }
+    };
+
+    loadBrandData();
+  }, []);
+
 
   return (
     <div className="space-y-6">

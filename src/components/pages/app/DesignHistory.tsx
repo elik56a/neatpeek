@@ -29,9 +29,10 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { ArrowDown, ArrowUp, ChevronDown, Eye, Filter, Grid, List, MoreHorizontal, Search } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronDown, Eye, Filter,X, Grid, List, MoreHorizontal, Search } from "lucide-react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 // Mock data
 const designChecks = [

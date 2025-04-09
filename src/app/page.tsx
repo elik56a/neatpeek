@@ -1,27 +1,30 @@
-
 "use client";
 
+import { Loader } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import MarketingLayout from "@/components/layout/MarketingLayout";
-import LandingPage from "@/components/pages/marketing/LandingPage";
 
 export default function Home() {
+  const { data: session, status } = useSession();
   const router = useRouter();
-  
+
   useEffect(() => {
-    // Check if user is logged in and redirect to dashboard if needed
-    if (typeof window !== 'undefined') {
-      const isLoggedIn = localStorage.getItem("isLoggedIn");
-      if (isLoggedIn === "true") {
-        router.push("/dashboard");
-      }
+    if (status === "loading") return;
+
+    if (session) {
+      router.push("/dashboard");
+    } else {
+      router.push("/login");
     }
-  }, [router]);
+  }, [session, status, router]);
 
   return (
-    <MarketingLayout>
-      <LandingPage />
-    </MarketingLayout>
+    <div className="h-screen flex items-center justify-center">
+      <div className="flex flex-col items-center">
+        <Loader className="h-10 w-10 animate-spin text-brand-600" />
+        <p className="mt-4 text-lg">Loading...</p>
+      </div>
+    </div>
   );
 }

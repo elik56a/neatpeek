@@ -1,0 +1,588 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Company {
+  id              String           @id @default(cuid())
+  name            String
+  domain          String?          @unique
+  logo            String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  isActive        Boolean          @default(true)
+  settings        Json?
+  brands          Brand[]
+  brandGuidelines BrandGuideline[]
+  invitations     Invitation[]
+  teams           Team[]
+  users           User[]
+}
+
+model User {
+  id                   String                @id @default(cuid())
+  email                String                @unique
+  name                 String?
+  password             String?
+  figmaUserId          String?               @unique
+  figmaAccessToken     String?
+  figmaRefreshToken    String?
+  figmaTokenExpiry     DateTime?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  isActive             Boolean               @default(true)
+  lastLogin            DateTime?
+  emailVerified        DateTime?
+  image                String?
+  role                 String?
+  companyId            String?
+  companyRole          CompanyRole           @default(MEMBER)
+  accounts             Account[]
+  brands               Brand[]
+  brandGuidelines      BrandGuideline[]
+  notificationSettings NotificationSettings?
+  sessions             Session[]
+  subscriptions        Subscription[]
+  ownedTeams           Team[]                @relation("TeamOwner")
+  teams                TeamMember[]
+  usageCounts          UsageCount[]
+  company              Company?              @relation(fields: [companyId], references: [id])
+
+  @@index([email])
+  @@index([companyId])
+}
+
+model Invitation {
+  id          String           @id @default(cuid())
+  email       String
+  companyId   String
+  role        CompanyRole      @default(MEMBER)
+  token       String           @unique
+  expires     DateTime
+  createdAt   DateTime         @default(now())
+  createdById String?
+  status      InvitationStatus @default(PENDING)
+  company     Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([email])
+  @@index([token])
+}
+
+model Team {
+  id              String           @id @default(cuid())
+  name            String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  ownerId         String
+  companyId       String?
+  brands          Brand[]
+  brandGuidelines BrandGuideline[]
+  subscription    Subscription?
+  company         Company?         @relation(fields: [companyId], references: [id])
+  owner           User             @relation("TeamOwner", fields: [ownerId], references: [id])
+  members         TeamMember[]
+  usageCounts     UsageCount[]
+
+  @@index([ownerId])
+  @@index([companyId])
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  teamId    String
+  userId    String
+  role      TeamRole @default(MEMBER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([teamId])
+  @@index([userId])
+}
+
+model Subscription {
+  id                   String             @id @default(cuid())
+  userId               String
+  teamId               String?            @unique
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+  planId               String
+  status               SubscriptionStatus
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean            @default(false)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  plan                 Plan               @relation(fields: [planId], references: [id])
+  team                 Team?              @relation(fields: [teamId], references: [id])
+  user                 User               @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([teamId])
+}
+
+model Plan {
+  id            String         @id @default(cuid())
+  name          String
+  tier          PlanTier
+  stripePriceId String?        @unique
+  monthlyPrice  Int
+  annualPrice   Int?
+  currency      String         @default("usd")
+  features      Json
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  subscriptions Subscription[]
+  usageLimits   UsageLimit[]
+}
+
+model UsageLimit {
+  id          String      @id @default(cuid())
+  planId      String
+  featureKey  String
+  limit       Int
+  resetPeriod ResetPeriod @default(MONTHLY)
+  plan        Plan        @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, featureKey])
+  @@index([planId])
+}
+
+model UsageCount {
+  id          String   @id @default(cuid())
+  userId      String?
+  teamId      String?
+  featureKey  String
+  count       Int      @default(0)
+  periodStart DateTime
+  periodEnd   DateTime
+  lastUpdated DateTime @default(now())
+  team        Team?    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, featureKey, periodStart])
+  @@unique([teamId, featureKey, periodStart])
+  @@index([userId])
+  @@index([teamId])
+  @@index([featureKey])
+  @@index([periodEnd])
+}
+
+model Invoice {
+  id              String        @id @default(cuid())
+  stripeInvoiceId String        @unique
+  customerId      String
+  subscriptionId  String?
+  amount          Int
+  currency        String        @default("usd")
+  status          InvoiceStatus
+  invoiceDate     DateTime
+  paidAt          DateTime?
+  invoicePdf      String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([customerId])
+  @@index([subscriptionId])
+}
+
+model Brand {
+  id             String          @id @default(cuid())
+  name           String
+  description    String?
+  userId         String
+  teamId         String?
+  brandRules     Json
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  companyId      String?
+  company        Company?        @relation(fields: [companyId], references: [id])
+  team           Team?           @relation(fields: [teamId], references: [id])
+  user           User            @relation(fields: [userId], references: [id])
+  brandFiles     BrandFile[]
+  designExamples DesignExample[]
+  projects       Project[]
+
+  @@index([userId])
+  @@index([teamId])
+  @@index([companyId])
+}
+
+model BrandFile {
+  id         String   @id @default(cuid())
+  brandId    String
+  fileName   String
+  fileType   FileType
+  fileUrl    String
+  fileSize   Int
+  uploadedAt DateTime @default(now())
+  brand      Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+}
+
+model DesignExample {
+  id          String   @id @default(cuid())
+  brandId     String
+  name        String
+  imageUrl    String
+  description String?
+  tags        String[]
+  createdAt   DateTime @default(now())
+  brand       Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  @@index([brandId])
+}
+
+model Project {
+  id          String      @id @default(cuid())
+  name        String
+  description String?
+  brandId     String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  figmaFiles  FigmaFile[]
+  brand       Brand       @relation(fields: [brandId], references: [id])
+
+  @@index([brandId])
+}
+
+model FigmaFile {
+  id            String       @id @default(cuid())
+  projectId     String
+  figmaFileKey  String
+  figmaFileName String
+  lastSynced    DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  project       Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  frames        FigmaFrame[]
+
+  @@index([projectId])
+  @@index([figmaFileKey])
+}
+
+model FigmaFrame {
+  id            String         @id @default(cuid())
+  figmaFileId   String
+  frameId       String
+  name          String
+  imageUrl      String
+  screenType    String?
+  platform      String?
+  positionX     Float?
+  positionY     Float?
+  width         Float?
+  height        Float?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  designReviews DesignReview[]
+  figmaComments FigmaComment[]
+  figmaFile     FigmaFile      @relation(fields: [figmaFileId], references: [id], onDelete: Cascade)
+
+  @@index([figmaFileId])
+  @@index([frameId])
+}
+
+model DesignReview {
+  id                   String         @id @default(cuid())
+  frameId              String
+  reviewJson           Json
+  designScore          Int
+  designScoreMax       Int            @default(100)
+  brandComplianceScore Int?
+  visualHarmonyScore   Int?
+  usabilityScore       Int?
+  accessibilityScore   Int?
+  status               ReviewStatus   @default(PENDING)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  frame                FigmaFrame     @relation(fields: [frameId], references: [id], onDelete: Cascade)
+  comments             FigmaComment[]
+
+  @@index([frameId])
+}
+
+model FigmaComment {
+  id                String         @id @default(cuid())
+  reviewId          String
+  frameId           String
+  commentId         String?
+  messageType       CommentType
+  message           String
+  elementType       String?
+  severity          IssueSeverity?
+  positionX         Float
+  positionY         Float
+  isFlagged         Boolean        @default(false)
+  isResolved        Boolean        @default(false)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  originalCommentId String?
+  recheckStatus     RecheckStatus?
+  recheckDetails    String?
+  frame             FigmaFrame     @relation(fields: [frameId], references: [id], onDelete: Cascade)
+  review            DesignReview   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@index([reviewId])
+  @@index([frameId])
+  @@index([commentId])
+}
+
+model FeatureFlag {
+  id              String     @id @default(cuid())
+  key             String     @unique
+  name            String
+  description     String?
+  isEnabled       Boolean    @default(false)
+  enabledForTiers PlanTier[]
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+model ApiUsage {
+  id                  String   @id @default(cuid())
+  userId              String
+  teamId              String?
+  endpoint            String
+  requestPayloadSize  Int
+  responsePayloadSize Int
+  processingTimeMs    Int
+  status              Int
+  errorMessage        String?
+  timestamp           DateTime @default(now())
+
+  @@index([userId])
+  @@index([teamId])
+  @@index([timestamp])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  teamId     String?
+  entityType String
+  entityId   String
+  action     String
+  details    Json?
+  ipAddress  String?
+  userAgent  String?
+  timestamp  DateTime @default(now())
+
+  @@index([userId])
+  @@index([teamId])
+  @@index([entityType, entityId])
+  @@index([timestamp])
+}
+
+model NotificationSettings {
+  id                   String   @id @default(cuid())
+  userId               String   @unique
+  designChecksComplete Boolean  @default(true)
+  designChecksFailed   Boolean  @default(true)
+  commentsOnDesigns    Boolean  @default(true)
+  brandUpdates         Boolean  @default(true)
+  marketingEmails      Boolean  @default(false)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model BrandGuideline {
+  id                String        @id @default(cuid())
+  userId            String
+  name              String
+  description       String?
+  status            String        @default("DRAFT")
+  pdfUrl            String?
+  pdfPath           String?
+  processingStatus  String        @default("PENDING")
+  processingMessage String?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  companyId         String?
+  teamId            String?
+  company           Company?      @relation(fields: [companyId], references: [id])
+  team              Team?         @relation(fields: [teamId], references: [id])
+  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  brandRules        BrandRule[]
+  customRules       CustomRule[]
+  designImages      DesignImage[]
+
+  @@index([userId])
+  @@index([companyId])
+  @@index([teamId])
+}
+
+model DesignImage {
+  id               String         @id @default(cuid())
+  brandGuidelineId String
+  url              String
+  path             String
+  name             String?
+  description      String?
+  createdAt        DateTime       @default(now())
+  brandGuideline   BrandGuideline @relation(fields: [brandGuidelineId], references: [id], onDelete: Cascade)
+
+  @@index([brandGuidelineId])
+}
+
+model CustomRule {
+  id               String         @id @default(cuid())
+  brandGuidelineId String
+  category         String
+  name             String
+  description      String
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  brandGuideline   BrandGuideline @relation(fields: [brandGuidelineId], references: [id], onDelete: Cascade)
+
+  @@index([brandGuidelineId])
+}
+
+model BrandRule {
+  id               String         @id @default(cuid())
+  brandGuidelineId String
+  category         String
+  name             String
+  value            String         @default("")
+  description      String
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  confidence       Float          @default(1.0)
+  source           String         @default("AI")
+  brandGuideline   BrandGuideline @relation(fields: [brandGuidelineId], references: [id], onDelete: Cascade)
+
+  @@index([brandGuidelineId])
+  @@index([category])
+}
+
+enum CompanyRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+  REVOKED
+}
+
+enum TeamRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+  TRIALING
+}
+
+enum PlanTier {
+  FREEMIUM
+  PRO
+  BUSINESS
+}
+
+enum ResetPeriod {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+  NEVER
+}
+
+enum InvoiceStatus {
+  DRAFT
+  OPEN
+  PAID
+  UNCOLLECTIBLE
+  VOID
+}
+
+enum FileType {
+  BRAND_GUIDE_PDF
+  LOGO
+  COLOR_PALETTE
+  TYPOGRAPHY_SAMPLE
+  OTHER
+}
+
+enum ReviewStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  IN_PROGRESS
+}
+
+enum CommentType {
+  BRAND_ISSUE
+  GENERAL_ISSUE
+  POSITIVE_ASPECT
+  RECHECK_RESULT
+  NEW_ISSUE
+}
+
+enum IssueSeverity {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum RecheckStatus {
+  FIXED
+  NOT_FIXED
+  PARTIALLY_FIXED
+}

@@ -1,6 +1,4 @@
 
-"use client";
-
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -46,7 +44,7 @@ export function Header() {
 
         {isMarketing ? (
           <>
-            <div className="hidden md:flex items-center space-x-2">
+            <nav className="hidden md:flex items-center space-x-2">
               {marketingNavItems.map((item) => (
                 <Button 
                   key={item.href} 
@@ -69,7 +67,7 @@ export function Header() {
                   </Link>
                 </Button>
               ))}
-            </div>
+            </nav>
 
             <div className="flex flex-1 items-center justify-end gap-1 md:gap-2">
               <div className="hidden md:flex">

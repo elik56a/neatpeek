@@ -1,9 +1,7 @@
-import * as React from "react"
+"use client"
 
-import type {
-  ToastActionElement,
-  ToastProps,
-} from "@/components/ui/toast"
+import * as React from "react"
+import type { ToastActionElement, ToastProps } from "@/components/ui/toast"
 
 const TOAST_LIMIT = 1
 const TOAST_REMOVE_DELAY = 1000000
@@ -53,6 +51,10 @@ interface State {
   toasts: ToasterToast[]
 }
 
+let memoryState: State = { toasts: [] }
+
+const listeners: Array<(state: State) => void> = []
+
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
 const addToRemoveQueue = (toastId: string) => {
@@ -90,8 +92,6 @@ export const reducer = (state: State, action: Action): State => {
     case "DISMISS_TOAST": {
       const { toastId } = action
 
-      // ! Side effects ! - This could be extracted into a dismissToast() action,
-      // but I'll keep it here for simplicity
       if (toastId) {
         addToRemoveQueue(toastId)
       } else {
@@ -125,10 +125,6 @@ export const reducer = (state: State, action: Action): State => {
       }
   }
 }
-
-const listeners: Array<(state: State) => void> = []
-
-let memoryState: State = { toasts: [] }
 
 function dispatch(action: Action) {
   memoryState = reducer(memoryState, action)

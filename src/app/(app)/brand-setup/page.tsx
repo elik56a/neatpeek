@@ -1,8 +1,9 @@
-
-"use client";
-
-import BrandSetup from "@/components/pages/app/BrandSetup";
+import { BrandGuidelinesList } from "@/features/brand-setup/components";
 
 export default function BrandSetupPage() {
-  return <BrandSetup />;
+  return (
+    <div className="container py-6">
+      <BrandGuidelinesList />
+    </div>
+  );
 }

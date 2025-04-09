@@ -1,7 +1,7 @@
 
 import { CheckIcon, LucideIcon, RefreshCcw, Shield, Zap, Palette, Figma, BarChart, Database, Clock, FileCheck, Lock, Users, Bot, Settings, Code } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import Link  from "next/link";
 
 interface FeatureCardProps {
   title: string;
@@ -111,7 +111,7 @@ const FeaturesPage = () => {
               Discover how TailorChecker transforms your design process with powerful brand compliance features
             </p>
             <Button size="lg" asChild>
-              <Link to="/register">Try For Free</Link>
+              <Link href="/register">Try For Free</Link>
             </Button>
           </div>
         </div>
@@ -294,7 +294,7 @@ const FeaturesPage = () => {
             Join thousands of designers who have improved their workflow with TailorChecker.
           </p>
           <Button size="lg" variant="secondary" asChild>
-            <Link to="/register">Try For Free</Link>
+            <Link href="/register">Try For Free</Link>
           </Button>
         </div>
       </section>
