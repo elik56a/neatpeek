@@ -1,7 +1,7 @@
 "use client";
 
-import { useCompanyContext } from "@/features/company/components/CompanyProvider";
 import { useToast } from "@/hooks/use-toast";
+import { useAppDataContext } from "@/providers";
 import { useCallback, useEffect, useState } from "react";
 import { BrandGuideline } from "../types";
 
@@ -15,7 +15,8 @@ export function useBrandGuidelines() {
   const { toast } = useToast();
 
   // Get company context
-  const { companyId } = useCompanyContext();
+  const { company } = useAppDataContext();
+  const companyId = company?.id;
 
   // Fetch brand guidelines
   const fetchBrandGuidelines = useCallback(async () => {

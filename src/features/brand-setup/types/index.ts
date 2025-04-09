@@ -1,5 +1,9 @@
 /**
  * Types for the brand setup feature
+ *
+ * TODO: Consider migrating these types to use the centralized types from @/types
+ * For now, we're keeping these separate to avoid breaking changes, but we should
+ * eventually migrate to use the centralized types for better consistency.
  */
 
 export interface BrandGuideline {

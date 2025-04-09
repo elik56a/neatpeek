@@ -1,33 +1,9 @@
 "use client";
 
-// Define CompanyRole enum to match the database schema
-enum CompanyRole {
-  OWNER = "OWNER",
-  ADMIN = "ADMIN",
-  MEMBER = "MEMBER"
-}
+import { User } from "@/types";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { createContext } from "react";
-
-interface Company {
-  id: string;
-  name: string;
-  domain?: string;
-  logo?: string;
-}
-
-interface User {
-  id?: string;
-  name?: string;
-  email?: string;
-  image?: string;
-  role?: string;
-  companyId?: string;
-  companyName?: string;
-  companyRole?: CompanyRole;
-  company?: Company;
-}
 
 interface AuthContextType {
   user: User | null;

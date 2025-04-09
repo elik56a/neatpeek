@@ -2,7 +2,6 @@
 "use client";
 
 import { useAuth } from "@/features/auth";
-import { CompanyProvider } from "@/features/company";
 import { AppLayout } from "@/features/layout";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -36,9 +35,5 @@ export default function AppRootLayout({
     redirect("/login");
   }
 
-  return (
-    <CompanyProvider>
-      <AppLayout>{children}</AppLayout>
-    </CompanyProvider>
-  );
+  return <AppLayout>{children}</AppLayout>;
 }

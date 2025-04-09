@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { useCompanyContext } from "@/features/company/components/CompanyProvider";
+import { useAppDataContext } from "@/providers";
 import { AlertCircle, ArrowRight, Building, CheckCircle, FileText, Loader2, Trash2, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useBrandSetupForm } from "../hooks";
@@ -23,8 +23,8 @@ interface BrandSetupFormProps {
 
 export function BrandSetupForm({ brandId, mode = 'create' }: BrandSetupFormProps) {
   const [activeTab, setActiveTab] = useState("basic");
-  const { company, companyId, hasCompany } = useCompanyContext();
-  const [teams, setTeams] = useState<{ id: string; name: string }[]>([]);
+  const { company, companyId, hasCompany } = useAppDataContext();
+  const [teams, setTeams] = useState<Pick<Team, 'id' | 'name'>[]>([]);
   const [isLoadingTeams, setIsLoadingTeams] = useState(false);
 
   // Fetch teams when component mounts

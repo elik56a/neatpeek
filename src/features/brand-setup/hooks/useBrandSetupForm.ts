@@ -1,7 +1,7 @@
 "use client";
 
-import { useCompanyContext } from "@/features/company/components/CompanyProvider";
 import { useToast } from "@/hooks/use-toast";
+import { useAppDataContext } from "@/providers";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { BrandGuideline, BrandSetupFormData } from "../types";
@@ -16,7 +16,7 @@ interface UseBrandSetupFormProps {
  */
 export function useBrandSetupForm({ brandId, mode = 'create' }: UseBrandSetupFormProps = {}) {
   // Get company context
-  const { companyId, company } = useCompanyContext();
+  const { companyId, company } = useAppDataContext();
 
   const [formData, setFormData] = useState<BrandSetupFormData>({
     name: '',

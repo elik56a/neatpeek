@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
-import { useCompanyContext } from "@/features/company/components/CompanyProvider";
+import { useAppDataContext } from "@/providers";
+import { User } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CompanyRole } from "@prisma/client";
 import { Building, Mail, Plus, UserPlus, Users } from "lucide-react";
@@ -17,13 +18,9 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-interface CompanyMember {
-  id: string;
-  name: string;
-  email: string;
-  image?: string;
+type CompanyMember = Pick<User, 'id' | 'name' | 'email' | 'image'> & {
   companyRole: CompanyRole;
-}
+};
 
 const inviteUserSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -35,7 +32,8 @@ type InviteUserFormValues = z.infer<typeof inviteUserSchema>;
 export default function CompanyMembersPage() {
   const { toast } = useToast();
   const router = useRouter();
-  const { company, companyId, isCompanyAdmin } = useCompanyContext();
+  const { company, isCompanyAdmin } = useAppDataContext();
+  const companyId = company?.id;
   const [members, setMembers] = useState<CompanyMember[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);

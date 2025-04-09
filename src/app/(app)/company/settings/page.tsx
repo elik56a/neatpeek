@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { useCompanyContext } from "@/features/company/components/CompanyProvider";
+import { useAppDataContext } from "@/providers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Building } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -24,7 +24,8 @@ type UpdateCompanyFormValues = z.infer<typeof updateCompanySchema>;
 export default function CompanySettingsPage() {
   const { toast } = useToast();
   const router = useRouter();
-  const { company, companyId, isCompanyAdmin, refetchCompany } = useCompanyContext();
+  const { company, isCompanyAdmin, refreshData } = useAppDataContext();
+  const companyId = company?.id;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -106,7 +107,7 @@ export default function CompanySettingsPage() {
         throw new Error(errorData.error || "Failed to update company");
       }
 
-      await refetchCompany();
+      await refreshData();
 
       toast({
         title: "Company updated",

@@ -4,8 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/features/auth";
 import { SessionProvider } from "@/features/auth/components/SessionProvider";
-import { CompanyProvider } from "@/features/company/components/CompanyProvider";
 import { ThemeProvider } from "@/features/theme";
+import { AppDataProvider } from "@/providers";
 import { Inter } from 'next/font/google';
 import type { Metadata } from 'next/types';
 
@@ -28,11 +28,11 @@ export default function RootLayout({
           <ThemeProvider defaultTheme="light" storageKey="tailor-checker-theme">
             <TooltipProvider>
               <AuthProvider>
-                <CompanyProvider>
+                <AppDataProvider>
                   {children}
                   <Toaster />
                   <Sonner />
-                </CompanyProvider>
+                </AppDataProvider>
               </AuthProvider>
             </TooltipProvider>
           </ThemeProvider>

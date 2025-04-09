@@ -1,11 +1,11 @@
 "use client";
 
 import { TeamDashboard } from "@/features/team";
-import { useCompanyContext } from "@/features/company/components/CompanyProvider";
+import { useAppDataContext } from "@/providers";
 import { useEffect, useState } from "react";
 
 export default function TeamDashboardPage({ params }: { params: { id: string } }) {
-  const { companyId, isCompanyAdmin } = useCompanyContext();
+  const { companyId, isCompanyAdmin } = useAppDataContext();
   const [isTeamAdmin, setIsTeamAdmin] = useState(false);
 
   useEffect(() => {

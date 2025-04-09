@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { useCompanyContext } from "@/features/company/components/CompanyProvider";
+import { useAppDataContext } from "@/providers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AlertCircle, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -29,7 +29,7 @@ type EditTeamFormValues = z.infer<typeof editTeamSchema>;
 export function TeamEditForm({ teamId }: TeamEditFormProps) {
   const { toast } = useToast();
   const router = useRouter();
-  const { companyId, isCompanyAdmin } = useCompanyContext();
+  const { companyId, isCompanyAdmin } = useAppDataContext();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);

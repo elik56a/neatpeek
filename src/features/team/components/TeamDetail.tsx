@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
-import { useCompanyContext } from "@/features/company/components/CompanyProvider";
+import { useAppDataContext } from "@/providers";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LayoutDashboard, Mail, Plus, Settings, Trash2, UserPlus, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -38,7 +38,7 @@ type AddMemberFormValues = z.infer<typeof addMemberSchema>;
 export function TeamDetail({ teamId }: TeamDetailProps) {
   const { toast } = useToast();
   const router = useRouter();
-  const { companyId, isCompanyAdmin } = useCompanyContext();
+  const { companyId, isCompanyAdmin } = useAppDataContext();
   const [team, setTeam] = useState<{
     id: string;
     name: string;

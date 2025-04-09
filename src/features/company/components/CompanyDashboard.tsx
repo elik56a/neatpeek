@@ -3,67 +3,32 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCompanyContext } from "@/features/company/components/CompanyProvider";
+import { useAppDataContext } from "@/providers";
 import { Building, FileText, Plus, Settings, Users } from "lucide-react";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+
+import { User } from "@/types";
+
+interface ActivityItem {
+  id: string;
+  type: string;
+  title: string;
+  date: string;
+  user: Pick<User, 'name' | 'email'>;
+}
 
 interface CompanyStats {
   memberCount: number;
   teamCount: number;
   brandCount: number;
-  recentActivity: {
-    id: string;
-    type: string;
-    title: string;
-    date: string;
-    user: {
-      name: string;
-      email: string;
-    };
-  }[];
+  recentActivity: ActivityItem[];
 }
 
 export function CompanyDashboard() {
-  const { company: contextCompany, companyId: contextCompanyId, isCompanyAdmin } = useCompanyContext();
-  const [company, setCompany] = useState(contextCompany);
-  const [companyId, setCompanyId] = useState(contextCompanyId);
-  const [isLoading, setIsLoading] = useState(true);
-  const { data: session } = useSession();
-
-  // Directly fetch the user's company data
-  useEffect(() => {
-    const fetchUserCompany = async () => {
-      try {
-        // First try to get the user's data to find their company ID
-        const userResponse = await fetch('/api/users/me');
-        if (userResponse.ok) {
-          const userData = await userResponse.json();
-
-          if (userData.companyId) {
-            setCompanyId(userData.companyId);
-
-            // Now fetch the company details
-            const companyResponse = await fetch(`/api/companies/${userData.companyId}`);
-            if (companyResponse.ok) {
-              const companyData = await companyResponse.json();
-              setCompany(companyData);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching user company:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchUserCompany();
-  }, [session?.user?.email]);
+  const { company, hasCompany, isCompanyAdmin, isLoading } = useAppDataContext();
 
   // No company state
-  if (!companyId) {
+  if (!isLoading && !hasCompany) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
         <Building className="mb-4 h-12 w-12 text-muted-foreground" />

@@ -9,12 +9,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useAppDataContext } from "@/providers";
 import { Building, ChevronDown, Plus, Settings } from "lucide-react";
 import Link from "next/link";
-import { useCompanyContext } from "./CompanyProvider";
 
 export function CompanySelector() {
-  const { company, hasCompany, isCompanyAdmin } = useCompanyContext();
+  const { company, hasCompany, isCompanyAdmin } = useAppDataContext();
 
   if (!hasCompany) {
     return (

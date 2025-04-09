@@ -1,14 +1,13 @@
 "use client";
 
-import { useCompanyContext } from "@/features/company/components/CompanyProvider";
+import { useAppDataContext } from "@/providers";
+import { Team as CoreTeam } from "@/types";
 import { useCallback, useEffect, useState } from "react";
 
-interface Team {
-  id: string;
-  name: string;
-  description?: string;
-  createdAt: string;
-  updatedAt: string;
+// Extend the core Team type with additional properties needed for this feature
+interface Team extends Omit<CoreTeam, 'createdAt' | 'updatedAt'> {
+  createdAt: string; // Override Date with string for API response
+  updatedAt: string; // Override Date with string for API response
   _count?: {
     members: number;
   };
@@ -22,7 +21,8 @@ interface UseTeamsResult {
 }
 
 export function useTeams(): UseTeamsResult {
-  const { companyId } = useCompanyContext();
+  const { company } = useAppDataContext();
+  const companyId = company?.id;
   const [teams, setTeams] = useState<Team[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
