@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/services/db/prisma';
 import { getServerSession } from 'next-auth';
 import { NextRequest, NextResponse } from 'next/server';
 
@@ -32,6 +32,12 @@ export async function GET(req: NextRequest) {
         role: true,
         companyId: true,
         companyRole: true,
+        brands: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         company: {
           select: {
             id: true,

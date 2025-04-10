@@ -32,7 +32,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowDown, ArrowUp, ChevronDown, Eye, Filter,X, Grid, List, MoreHorizontal, Search } from "lucide-react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 
 // Mock data
 const designChecks = [

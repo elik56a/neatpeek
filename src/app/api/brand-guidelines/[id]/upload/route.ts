@@ -1,5 +1,5 @@
 import { brandSetupService } from "@/features/brand-setup/services";
-import { prisma } from "@/lib/prisma";
+import { prisma } from "@/services/db/prisma";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 

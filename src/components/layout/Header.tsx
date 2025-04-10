@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { MobileNav } from "./MobileNav";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 
 const marketingNavItems = [
   {

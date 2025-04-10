@@ -4,9 +4,18 @@ import { useAppData } from "@/hooks/useAppData";
 import { Company, User } from "@/types";
 import { createContext, useContext } from "react";
 
+// Import the Brand type if it's defined elsewhere
+interface Brand {
+  id: string;
+  name: string;
+  description?: string;
+  brandRules?: any;
+}
+
 interface AppDataContextType {
   user: User | null;
   company: Company | null;
+  brands: Brand[];
   hasCompany: boolean;
   isCompanyOwner: boolean;
   isCompanyAdmin: boolean;

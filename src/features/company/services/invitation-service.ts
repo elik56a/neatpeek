@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/services/db/prisma';
 import { CompanyRole, Invitation, InvitationStatus } from '@prisma/client';
 import { addDays } from 'date-fns';
 import { v4 as uuidv4 } from 'uuid';

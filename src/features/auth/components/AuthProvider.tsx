@@ -13,6 +13,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
+  loginWithFigma: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -61,6 +62,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
     } catch (error) {
       console.error("Google login failed:", error);
+      throw error;
+    }
+  };
+
+  const loginWithFigma = async () => {
+    try {
+      console.log("Attempting Figma login");
+      await signIn("figma", {
+        callbackUrl: "/dashboard",
+        redirect: true
+      });
+    } catch (error) {
+      console.error("Figma login failed:", error);
       throw error;
     }
   };
@@ -125,6 +139,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         logout,
         register,
         loginWithGoogle,
+        loginWithFigma,
       }}
     >
       {children}

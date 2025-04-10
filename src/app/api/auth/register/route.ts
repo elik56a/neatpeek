@@ -1,6 +1,6 @@
-import { prisma } from "@/lib/prisma";
+import { hashPassword } from "@/features/auth/server/auth-utils";
+import { prisma } from "@/services/db/prisma";
 import { CompanyRole } from "@prisma/client";
-import { hash } from "bcrypt";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Hash password
-    const hashedPassword = await hash(password, 10);
+    const hashedPassword = await hashPassword(password);
 
     // Check if the email domain matches any existing company
     const emailDomain = email.split('@')[1];

@@ -26,6 +26,10 @@ export interface User {
   companyName?: string | null;
   companyRole?: CompanyRole | null;
   company?: Company | null;
+  figmaUserId?: string | null;
+  figmaAccessToken?: string | null;
+  figmaRefreshToken?: string | null;
+  figmaTokenExpiry?: Date | null;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -130,4 +134,82 @@ export interface PaginationMeta {
  */
 export interface PaginatedResponse<T> extends ApiResponse<T[]> {
   meta?: PaginationMeta;
+}
+
+/**
+ * Figma File entity
+ */
+export interface FigmaFile {
+  id: string;
+  projectId: string;
+  figmaFileKey: string;
+  figmaFileName: string;
+  lastSynced: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+  frames?: FigmaFrame[];
+}
+
+/**
+ * Figma Frame entity
+ */
+export interface FigmaFrame {
+  id: string;
+  figmaFileId: string;
+  figmaFile?: FigmaFile;
+  frameId: string;
+  name: string;
+  imageUrl: string;
+  screenType?: string;
+  platform?: string;
+  positionX: number;
+  positionY: number;
+  width: number;
+  height: number;
+  createdAt?: Date;
+  updatedAt?: Date;
+  designReviews?: DesignReview[];
+}
+
+/**
+ * Design Review entity
+ */
+export interface DesignReview {
+  id: string;
+  frameId: string;
+  frame?: FigmaFrame;
+  reviewJson: any;
+  designScore: number;
+  designScoreMax: number;
+  brandComplianceScore: number;
+  visualHarmonyScore: number;
+  usabilityScore: number;
+  accessibilityScore: number;
+  status: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  comments?: FigmaComment[];
+}
+
+/**
+ * Figma Comment entity
+ */
+export interface FigmaComment {
+  id: string;
+  reviewId: string;
+  review?: DesignReview;
+  frameId: string;
+  frame?: FigmaFrame;
+  commentId?: string;
+  messageType: string;
+  message: string;
+  elementType?: string;
+  severity: string;
+  positionX: number;
+  positionY: number;
+  isResolved: boolean;
+  recheckStatus?: string;
+  recheckDetails?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 }

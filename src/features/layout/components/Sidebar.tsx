@@ -6,17 +6,17 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuth } from "@/features/auth";
 import { CompanySelector } from "@/features/company";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils/cn";
 import {
-    ChevronLeft,
-    ChevronRight,
-    FileCheck,
-    History,
-    LayoutDashboard,
-    LogOut,
-    PaintBucket,
-    Settings,
-    Users,
+  ChevronLeft,
+  ChevronRight,
+  FileCheck,
+  History,
+  LayoutDashboard,
+  LogOut,
+  PaintBucket,
+  Settings,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -33,6 +33,11 @@ const Sidebar = () => {
       href: "/dashboard",
       icon: LayoutDashboard
     },
+      {
+      name: "Design Review",
+      href: "/design-review",
+      icon: FileCheck
+    },
     {
       name: "Brand Setup",
       href: "/brand-setup",
@@ -43,11 +48,7 @@ const Sidebar = () => {
       href: "/teams",
       icon: Users
     },
-    {
-      name: "Design Checker",
-      href: "/design-checker",
-      icon: FileCheck
-    },
+  
     {
       name: "Design History",
       href: "/design-history",

@@ -39,7 +39,7 @@ export const config = {
     // Protected routes
     "/dashboard/:path*",
     "/brand-setup/:path*",
-    "/design-checker/:path*",
+    "/design-review/:path*",
     "/design-history/:path*",
     "/settings/:path*",
     "/((?!_next/static|_next/image|favicon.ico).*)",

@@ -1,6 +1,5 @@
-import { prisma } from '@/lib/prisma';
+import { prisma } from '@/services/db/prisma';
 import { BrandGuideline, BrandGuidelineStatus, CustomRule, ProcessingStatus } from '../types';
-import { createAIProvider } from './ai';
 import { createStorageProvider } from './storage';
 
 /**
@@ -8,7 +7,18 @@ import { createStorageProvider } from './storage';
  */
 export class BrandSetupService {
   private storageProvider = createStorageProvider();
-  private aiProvider = createAIProvider();
+  private aiProvider: any = null;
+
+  /**
+   * Initialize the AI provider
+   */
+  private async initAIProvider() {
+    if (!this.aiProvider) {
+      const { getAIService } = await import('@/services/ai');
+      this.aiProvider = await getAIService();
+    }
+    return this.aiProvider;
+  }
 
   /**
    * Create a new brand guideline
@@ -253,8 +263,11 @@ export class BrandSetupService {
         },
       });
 
+      // Initialize the AI provider
+      const aiProvider = await this.initAIProvider();
+
       // Call the AI provider to analyze the brand guideline
-      const result = await this.aiProvider.analyzeBrandGuideline({
+      const result = await aiProvider.analyzeBrandGuideline({
         pdfBuffer,
         designImages,
         customRules: customRules.map(rule => ({
