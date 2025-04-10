@@ -37,9 +37,11 @@ export const authOptions: NextAuthOptions = {
         }
       }
     }),
+
     FigmaProvider({
       clientId: process.env.FIGMA_CLIENT_ID!,
       clientSecret: process.env.FIGMA_CLIENT_SECRET!,
+      // Note: callbackUrl is handled automatically by NextAuth.js
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -103,23 +105,65 @@ export const authOptions: NextAuthOptions = {
       return baseUrl;
     },
     async signIn({ user, account }) {
-      // Store Figma tokens in the user record when signing in with Figma
-      if (account?.provider === "figma" && user.email) {
-        try {
-          await prisma.user.update({
-            where: { email: user.email },
-            data: {
-              figmaUserId: user.id,
-              figmaAccessToken: account.access_token,
-              figmaRefreshToken: account.refresh_token,
-              figmaTokenExpiry: account.expires_at
-                ? new Date(account.expires_at * 1000)
-                : undefined,
-            },
-          });
-        } catch (error) {
-          console.error("Error updating user with Figma tokens:", error);
-          // Continue with sign in even if token storage fails
+      // Allow linking accounts by email
+      if (account && account.provider !== 'credentials' && user.email) {
+        // Check if user exists with this email
+        const existingUser = await prisma.user.findUnique({
+          where: { email: user.email },
+          include: { accounts: true },
+        });
+
+        // If user exists but doesn't have this account linked
+        if (existingUser) {
+          console.log(`Found existing user with email ${user.email}, linking ${account.provider} account`);
+
+          // Store Figma tokens in the user record when signing in with Figma
+          if (account.provider === "figma") {
+            try {
+              await prisma.user.update({
+                where: { email: user.email },
+                data: {
+                  figmaUserId: user.id,
+                  figmaAccessToken: account.access_token,
+                  figmaRefreshToken: account.refresh_token,
+                  figmaTokenExpiry: account.expires_at
+                    ? new Date(account.expires_at * 1000)
+                    : undefined,
+                },
+              });
+            } catch (error) {
+              console.error("Error updating user with Figma tokens:", error);
+              // Continue with sign in even if token storage fails
+            }
+          }
+
+          // Create the account link if it doesn't exist
+          const linkedAccount = existingUser.accounts.find(
+            (a) => a.provider === account.provider
+          );
+
+          if (!linkedAccount) {
+            try {
+              await prisma.account.create({
+                data: {
+                  userId: existingUser.id,
+                  type: account.type,
+                  provider: account.provider,
+                  providerAccountId: account.providerAccountId,
+                  refresh_token: account.refresh_token,
+                  access_token: account.access_token,
+                  expires_at: account.expires_at,
+                  token_type: account.token_type,
+                  scope: account.scope,
+                  id_token: account.id_token,
+                  session_state: account.session_state,
+                },
+              });
+              console.log(`Successfully linked ${account.provider} account to existing user`);
+            } catch (error) {
+              console.error(`Error linking ${account.provider} account:`, error);
+            }
+          }
         }
       }
 
