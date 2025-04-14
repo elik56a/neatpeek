@@ -16,15 +16,15 @@ interface UseBrandSetupFormProps {
  */
 export function useBrandSetupForm({ brandId, mode = 'create' }: UseBrandSetupFormProps = {}) {
   // Get company context
-  const { companyId, company } = useAppDataContext();
+  const { company } = useAppDataContext();
 
   const [formData, setFormData] = useState<BrandSetupFormData>({
-    name: '',
+    name: company?.name || '',
     description: '',
     pdfFile: null,
     designImages: [],
     customRules: [],
-    companyId: companyId || undefined,
+    companyId: company?.id,
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -79,6 +79,16 @@ export function useBrandSetupForm({ brandId, mode = 'create' }: UseBrandSetupFor
         });
     }
   }, [brandId, mode, toast]);
+
+  // Set default guideline name to company name
+  useEffect(() => {
+   if(mode === 'create' && formData.name === '' && company?.name) {
+    setFormData((prev) => ({
+      ...prev,
+      name: `${company.name} Main Brand Guideline`,
+    }));
+  }
+  }, [company]);
 
   // Update form data
   const updateFormData = useCallback((data: Partial<BrandSetupFormData>) => {

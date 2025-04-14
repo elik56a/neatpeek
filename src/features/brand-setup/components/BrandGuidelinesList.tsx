@@ -180,7 +180,7 @@ export function BrandGuidelinesList() {
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button variant="ghost" size="icon">
-                      <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </DialogTrigger>
                   <DialogContent>

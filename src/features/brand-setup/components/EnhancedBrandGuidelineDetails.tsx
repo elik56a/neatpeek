@@ -37,102 +37,10 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useBrandGuideline } from "../hooks";
-import { BrandGuidelineStatus, ProcessingStatus, RuleCategory } from "../types";
+import { useBrandGuideline, useBrandGuidelineUI } from "../hooks";
+import { BrandGuidelineStatus, ProcessingStatus } from "../types";
 
-// Animation variants for elements
-const fadeIn = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { duration: 0.5 }
-  }
-};
-
-const slideUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5 }
-  }
-};
-
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
-};
-
-// Helper function to get category icon
-const getCategoryIcon = (category: string) => {
-  switch (category) {
-    case 'COLOR':
-      return <Palette className="h-4 w-4" />;
-    case 'TYPOGRAPHY':
-      return <Type className="h-4 w-4" />;
-    case 'SPACING':
-      return <BookOpen className="h-4 w-4" />;
-    case 'LOGO':
-      return <Image className="h-4 w-4" />;
-    case 'ICON':
-      return <Image className="h-4 w-4" />;
-    case 'LAYOUT':
-      return <Brush className="h-4 w-4" />;
-    case 'GENERAL':
-      return <BookOpen className="h-4 w-4" />;
-    default:
-      return <BookOpen className="h-4 w-4" />;
-  }
-};
-
-// Helper function to get category color
-const getCategoryColor = (category: string) => {
-  switch (category) {
-    case 'COLOR':
-      return "bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200";
-    case 'TYPOGRAPHY':
-      return "bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200";
-    case 'SPACING':
-      return "bg-gradient-to-r from-green-50 to-emerald-50 border-green-200";
-    case 'LOGO':
-      return "bg-gradient-to-r from-red-50 to-rose-50 border-red-200";
-    case 'ICON':
-      return "bg-gradient-to-r from-violet-50 to-purple-50 border-violet-200";
-    case 'LAYOUT':
-      return "bg-gradient-to-r from-cyan-50 to-sky-50 border-cyan-200";
-    case 'GENERAL':
-      return "bg-gradient-to-r from-gray-50 to-slate-50 border-gray-200";
-    default:
-      return "bg-gradient-to-r from-gray-50 to-slate-50 border-gray-200";
-  }
-};
-
-// Helper function to get category badge color
-const getCategoryBadgeColor = (category: string) => {
-  switch (category) {
-    case 'COLOR':
-      return "bg-blue-100 text-blue-800 hover:bg-blue-100";
-    case 'TYPOGRAPHY':
-      return "bg-amber-100 text-amber-800 hover:bg-amber-100";
-    case 'SPACING':
-      return "bg-green-100 text-green-800 hover:bg-green-100";
-    case 'LOGO':
-      return "bg-red-100 text-red-800 hover:bg-red-100";
-    case 'ICON':
-      return "bg-violet-100 text-violet-800 hover:bg-violet-100";
-    case 'LAYOUT':
-      return "bg-cyan-100 text-cyan-800 hover:bg-cyan-100";
-    case 'GENERAL':
-      return "bg-gray-100 text-gray-800 hover:bg-gray-100";
-    default:
-      return "bg-gray-100 text-gray-800 hover:bg-gray-100";
-  }
-};
+import { RuleCategory } from "../types";
 
 interface EnhancedBrandGuidelineDetailsProps {
   id: string;
@@ -140,10 +48,18 @@ interface EnhancedBrandGuidelineDetailsProps {
 
 export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDetailsProps) {
   const { brandGuideline, isLoading, error, startAnalysis, deleteBrandGuideline } = useBrandGuideline(id);
+  const {
+    activeTab,
+    setActiveTab,
+    getCategoryIcon,
+    getCategoryColor,
+    getCategoryBadgeColor,
+    getStatusBadge,
+    groupRulesByCategory
+  } = useBrandGuidelineUI();
   const [isStartingAnalysis, setIsStartingAnalysis] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<string | null>(null);
 
   // Handle start analysis
   const handleStartAnalysis = async () => {
@@ -168,47 +84,7 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
     }
   };
 
-  // Get status badge color
-  const getStatusBadge = (status: BrandGuidelineStatus, processingStatus: ProcessingStatus) => {
-    if (status === BrandGuidelineStatus.DRAFT) {
-      return <Badge variant="outline" className="bg-gray-100 text-gray-800">Draft</Badge>;
-    }
 
-    if (status === BrandGuidelineStatus.PROCESSING) {
-      return <Badge variant="secondary" className="bg-amber-100 text-amber-800 hover:bg-amber-100">Processing</Badge>;
-    }
-
-    if (status === BrandGuidelineStatus.COMPLETED) {
-      return <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-100">Completed</Badge>;
-    }
-
-    if (status === BrandGuidelineStatus.FAILED) {
-      return <Badge variant="destructive">Failed</Badge>;
-    }
-
-    return <Badge variant="outline">Unknown</Badge>;
-  };
-
-  // Group rules by category
-  const groupRulesByCategory = () => {
-    if (!brandGuideline?.brandRules) return {};
-
-    const grouped = brandGuideline.brandRules.reduce((acc, rule) => {
-      const category = rule.category as RuleCategory;
-      if (!acc[category]) {
-        acc[category] = [];
-      }
-      acc[category].push(rule);
-      return acc;
-    }, {} as Record<RuleCategory, any[]>);
-
-    // Set active tab to the first category if not set
-    if (!activeTab && Object.keys(grouped).length > 0) {
-      setActiveTab(Object.keys(grouped)[0]);
-    }
-
-    return grouped;
-  };
 
   if (isLoading) {
     return (
@@ -257,13 +133,12 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
     );
   }
 
-  const rulesByCategory = groupRulesByCategory();
-  const canStartAnalysis = brandGuideline.status !== BrandGuidelineStatus.PROCESSING;
+  const rulesByCategory = groupRulesByCategory(brandGuideline?.brandRules);
 
   return (
     <div className="space-y-8">
       {/* Header with brand name and actions */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg shadow-sm border border-blue-100 animate-in fade-in duration-500">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-lg shadow-sm border border-blue-100 animate-in fade-in duration-500">
         <div className="flex items-center space-x-4">
           <Button variant="outline" size="icon" asChild className="bg-white hover:bg-white/90">
             <Link href="/brand-setup">
@@ -345,7 +220,7 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
         </div>
       </div>
 
-      {/* Processing status message */}
+      {/* Processing status message
       {brandGuideline.processingMessage && (
         <Alert
           variant={brandGuideline.processingStatus === ProcessingStatus.FAILED ? "destructive" : "default"}
@@ -368,7 +243,7 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
           </AlertTitle>
           <AlertDescription>{brandGuideline.processingMessage}</AlertDescription>
         </Alert>
-      )}
+      )} */}
 
       {/* Brand details card */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -457,13 +332,13 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
                       )}
                       onClick={() => setActiveTab(category)}
                     >
-                      {getCategoryIcon(category)}
+                      {getCategoryIcon(category as RuleCategory)}
                       <span className="ml-1.5">{category.charAt(0) + category.slice(1).toLowerCase()}</span>
                     </TabsTrigger>
                   ))}
                 </TabsList>
 
-                {Object.entries(rulesByCategory).map(([category, rules]) => (
+                {Object.entries(rulesByCategory).map(([category, rules] : [RuleCategory, any[]]) => (
                   <TabsContent key={category} value={category} className="space-y-4 pt-2">
                     <div
                       className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-2 duration-500"
@@ -477,7 +352,7 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
                           key={rule.id}
                           className={cn(
                             "border rounded-lg p-4 shadow-sm transition-all duration-300 hover:shadow-md",
-                            getCategoryColor(category)
+                            getCategoryColor(category as RuleCategory)
                           )}
                           style={{
                             animationDelay: `${150 + (index * 50)}ms`,
@@ -489,7 +364,7 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
                               {rule.name}
                             </h3>
                             <Badge variant="secondary" className={cn("font-medium", getCategoryBadgeColor(category))}>
-                              {getCategoryIcon(category)}
+                              {getCategoryIcon(category as RuleCategory)}
                               <span className="ml-1">{category.charAt(0) + category.slice(1).toLowerCase()}</span>
                             </Badge>
                           </div>
@@ -572,7 +447,7 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
           </CardHeader>
           <CardContent className="pt-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {brandGuideline.designImages.map((image, index) => (
+              {brandGuideline.designImages.map((image) => (
                 <div
                   key={image.id}
                   className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 group"
