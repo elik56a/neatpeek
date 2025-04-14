@@ -108,7 +108,7 @@ export class DesignReviewService {
       });
 
       // Save results to database
-       await this.saveAnalysisResults(brandId, metadata, analysisResult);
+      //  await this.saveAnalysisResults(brandId, metadata, analysisResult);
 
       // Add comments to Figma
       this.addCommentsToFigma(metadata, analysisResult);

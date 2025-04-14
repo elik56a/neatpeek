@@ -28,7 +28,7 @@ type CreateTeamFormValues = z.infer<typeof createTeamSchema>;
 export function TeamsList() {
   const { toast } = useToast();
   const router = useRouter();
-  const { companyId, isCompanyAdmin } = useAppDataContext();
+  const { company, isCompanyAdmin } = useAppDataContext();
   const { teams, isLoading, error, refetchTeams } = useTeams();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -42,12 +42,12 @@ export function TeamsList() {
   });
 
   const onSubmit = async (data: CreateTeamFormValues) => {
-    if (!companyId) return;
+    if (!company?.id) return;
 
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`/api/companies/${companyId}/teams`, {
+      const response = await fetch(`/api/companies/${company?.id}/teams`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

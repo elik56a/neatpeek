@@ -27,7 +27,7 @@ export async function GET(
     // Get the user
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true, companyId: true },
+      select: { id: true, companyId: true},
     });
 
     if (!user) {
@@ -139,7 +139,10 @@ export async function POST(
         companyId: id,
         ownerId: user.id,
         members: {
-          connect: { id: user.id },
+          create: {
+            userId: user.id,
+            role: 'OWNER',
+          },
         },
       },
     });

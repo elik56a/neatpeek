@@ -15,6 +15,7 @@ interface Brand {
 interface AppDataContextType {
   user: User | null;
   company: Company | null;
+  companyId: string | null;
   brands: Brand[];
   hasCompany: boolean;
   isCompanyOwner: boolean;

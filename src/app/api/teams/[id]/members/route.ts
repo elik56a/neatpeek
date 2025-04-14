@@ -63,7 +63,7 @@ export async function GET(
       where: {
         teams: {
           some: {
-            id,
+            teamId: id,
           },
         },
       },
@@ -185,14 +185,10 @@ export async function POST(
     }
 
     // Check if the user is already a member of the team
-    const isMember = await prisma.team.findFirst({
+    const isMember = await prisma.teamMember.findFirst({
       where: {
-        id,
-        members: {
-          some: {
-            id: userToAdd.id,
-          },
-        },
+        teamId: id,
+        userId: userToAdd.id,
       },
     });
 
@@ -203,13 +199,12 @@ export async function POST(
       );
     }
 
-    // Add the user to the team
-    await prisma.team.update({
-      where: { id },
+    // Add the user to the team by creating a TeamMember record
+    await prisma.teamMember.create({
       data: {
-        members: {
-          connect: { id: userToAdd.id },
-        },
+        teamId: id,
+        userId: userToAdd.id,
+        role: 'MEMBER',
       },
     });
 

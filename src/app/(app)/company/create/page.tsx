@@ -73,12 +73,6 @@ export default function CreateCompanyPage() {
         duration: 3000,
       });
 
-      // Force a complete session refresh to ensure company data is loaded
-      setTimeout(() => {
-        forceSessionRefresh();
-      }, 1000);
-
-      // Note: The redirect will happen automatically after the page refresh
     } catch (error) {
       console.error("Error creating company:", error);
       toast({

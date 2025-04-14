@@ -78,31 +78,24 @@ export async function DELETE(
     }
 
     // Check if the member is part of the team
-    const isMember = await prisma.team.findFirst({
+    const teamMember = await prisma.teamMember.findFirst({
       where: {
-        id,
-        members: {
-          some: {
-            id: memberId,
-          },
-        },
+        teamId: id,
+        userId: memberId,
       },
     });
 
-    if (!isMember) {
+    if (!teamMember) {
       return NextResponse.json(
         { error: 'User is not a member of this team' },
         { status: 400 }
       );
     }
 
-    // Remove the member from the team
-    await prisma.team.update({
-      where: { id },
-      data: {
-        members: {
-          disconnect: { id: memberId },
-        },
+    // Remove the member from the team by deleting the TeamMember record
+    await prisma.teamMember.delete({
+      where: {
+        id: teamMember.id,
       },
     });
 

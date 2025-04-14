@@ -8,13 +8,16 @@ export default function TeamDashboardPage({ params }: { params: { id: string } }
   const { companyId, isCompanyAdmin } = useAppDataContext();
   const [isTeamAdmin, setIsTeamAdmin] = useState(false);
 
+  // Extract the ID directly to avoid the warning
+  const teamId = params.id;
+
   useEffect(() => {
     const checkTeamAdmin = async () => {
       if (!companyId) return;
 
       try {
-        const response = await fetch(`/api/teams/${params.id}`);
-        
+        const response = await fetch(`/api/teams/${teamId}`);
+
         if (response.ok) {
           const team = await response.json();
           // Check if the current user is the team owner
@@ -26,11 +29,11 @@ export default function TeamDashboardPage({ params }: { params: { id: string } }
     };
 
     checkTeamAdmin();
-  }, [params.id, companyId, isCompanyAdmin]);
+  }, [teamId, companyId, isCompanyAdmin]);
 
   return (
     <div className="container py-10">
-      <TeamDashboard teamId={params.id} isTeamAdmin={isTeamAdmin} />
+      <TeamDashboard teamId={teamId} isTeamAdmin={isTeamAdmin} />
     </div>
   );
 }

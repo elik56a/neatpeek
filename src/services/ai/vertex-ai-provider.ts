@@ -201,7 +201,7 @@ export class VertexAIProvider implements AIService {
         { "name": "Grid System", "value": "...", "description": "..." }
       ],
       "general": [
-        { "name": "Brand Voice", "value": "...", "description": "..." }
+        { "name": "Tone of Voice", "value": "...", "description": "..." }
       ]
     }
 

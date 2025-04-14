@@ -126,6 +126,7 @@ export function useAppData() {
   return {
     user,
     company,
+    companyId: company?.id || null,
     brands,
     hasCompany,
     isCompanyOwner,
