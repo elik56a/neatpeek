@@ -3,6 +3,23 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer utilities {
+  .animate-pulse-subtle {
+    animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-subtle {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.95;
+      transform: scale(1.01);
+    }
+  }
+}
+
 @layer base {
   :root {
     --background: 260 25% 98%;
@@ -100,23 +117,23 @@
   .hero-text-gradient {
     @apply bg-clip-text text-transparent bg-brand-gradient;
   }
-  
+
   .brand-card {
     @apply rounded-xl border bg-card p-6 shadow-sm transition-all duration-300 hover:shadow-md;
   }
-  
+
   .brand-button {
     @apply bg-brand-gradient text-white font-medium rounded-lg px-6 py-3 hover:opacity-90 transition-opacity;
   }
-  
+
   .page-container {
     @apply container mx-auto px-4 py-8 max-w-7xl;
   }
-  
+
   .section-title {
     @apply text-3xl font-bold mb-6 md:text-4xl;
   }
-  
+
   .glass-effect {
     @apply bg-background/70 backdrop-blur-lg border border-border/50;
   }

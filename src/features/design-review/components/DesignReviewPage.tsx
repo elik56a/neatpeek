@@ -2,10 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { CustomLoader } from "@/components/ui/custom-loader";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
-import { BrandGuideline, useBrandGuidelines } from "@/hooks/useBrandGuidelines";
+import { useBrandGuidelines } from "@/hooks/useBrandGuidelines";
 import { useAppDataContext } from "@/providers/AppDataProvider";
 import { AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -79,45 +76,17 @@ export function DesignReviewPage() {
   return (
     <div className="container mx-auto py-8">
       <div className="space-y-6">
-        {/* Brand guideline selector */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Select Brand Guideline</CardTitle>
-            <CardDescription>
-              Choose which brand guidelines to check your designs against
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-2">
-              <Label htmlFor="guidelineSelect">Brand Guideline</Label>
-              <Select
-                value={selectedGuidelineId}
-                onValueChange={handleGuidelineChange}
-              >
-                <SelectTrigger id="guidelineSelect" className="w-full">
-                  <SelectValue placeholder="Select a brand guideline" />
-                </SelectTrigger>
-                <SelectContent>
-                  {guidelines?.map((guideline: BrandGuideline) => (
-                    <SelectItem key={guideline.id} value={guideline.id}>
-                      {guideline.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Separator />
-
         {/* Design Review */}
         {selectedGuidelineId ? (
-          <DesignReview brandId={selectedGuidelineId} />
+          <DesignReview
+            brandId={selectedGuidelineId}
+            allGuidelines={guidelines}
+            onGuidelineChange={handleGuidelineChange}
+          />
         ) : (
           <Card>
             <CardContent className="p-8 text-center">
-              <p className="text-muted-foreground">Please select a brand guideline to continue</p>
+              <p className="text-muted-foreground">Please wait while we load your brand guidelines...</p>
             </CardContent>
           </Card>
         )}

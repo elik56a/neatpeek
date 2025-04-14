@@ -70,30 +70,7 @@ export class VertexAIProvider implements AIService {
     return this.initPromise;
   }
 
-  /**
-   * Helper function to clean the AI response and extract JSON
-   */
-  private extractJsonFromResponse(input: string): string {
-    // First, try to find JSON between code blocks
-    const jsonRegex = /```(?:json)?([\\s\\S]*?)```/;
-    const match = input.match(jsonRegex);
-
-    if (match && match[1]) {
-      // Found JSON in code blocks
-      return match[1].trim();
-    }
-
-    // If no code blocks, try to find the first { and last }
-    const firstBrace = input.indexOf('{');
-    const lastBrace = input.lastIndexOf('}');
-
-    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-      return input.substring(firstBrace, lastBrace + 1);
-    }
-
-    // If all else fails, return the original input
-    return input;
-  }
+  // The extractJsonFromResponse method has been replaced by cleanJsonResponse
 
   /**
    * Analyze a brand guideline PDF using Vertex AI SDK
@@ -136,7 +113,6 @@ export class VertexAIProvider implements AIService {
         contents: [{ role: 'user', parts }],
         generationConfig: {
           temperature: 0.2,
-          maxOutputTokens: 8192,
         },
       });
 
@@ -150,34 +126,28 @@ export class VertexAIProvider implements AIService {
       // Extract and parse the JSON response
       console.log('Raw response from Vertex AI:', responseText);
 
-      // Extract JSON from the response
-      const jsonData = this.extractJsonFromResponse(responseText);
-      console.log('Extracted JSON:', jsonData);
+      // Clean the response by removing code block markers
+      const cleanedResponse = this.cleanJsonResponse(responseText);
 
       try {
         // Try to parse the JSON
-        return JSON.parse(jsonData);
+        return JSON.parse(cleanedResponse);
       } catch (parseError) {
         console.error('Failed to parse JSON response:', parseError);
-        console.error('JSON data that failed to parse:', jsonData);
+        console.error('First 100 chars of response:', cleanedResponse.substring(0, 100));
 
-        // Return a fallback response
+        // Return a default empty response instead of throwing
         return {
-          metadata: { companyName: params.brandName || 'Unknown' },
-          colors: [
-            { name: 'Primary Color', value: '#3B82F6', description: 'Default primary color' }
-          ],
-          typography: [
-            { name: 'Heading Font', value: 'Inter', description: 'Default heading font' }
-          ],
-          general: [
-            { name: 'Brand Voice', value: 'Professional', description: 'Default brand voice' }
-          ]
+          metadata: { companyName: 'Unknown', industry: 'Unknown' },
+          colors: [],
+          typography: [],
+          spacing: [],
+          general: []
         };
       }
     } catch (error) {
       console.error('Failed to analyze brand guideline with Vertex AI:', error);
-      throw error;
+      throw new Error('Failed to analyze brand guideline, please try again.');
     }
   }
 
@@ -206,7 +176,7 @@ export class VertexAIProvider implements AIService {
       }
     }
 
-    prompt += `\n\nPlease return a valid JSON object with the following structure:
+    prompt += `\n\nIMPORTANT: Please return a valid JSON object with the following structure. DO NOT wrap the JSON in code blocks or markdown formatting. DO NOT use backticks around your response. Return ONLY the raw JSON:
     {
       "metadata": {
         "companyName": "...",
@@ -235,7 +205,7 @@ export class VertexAIProvider implements AIService {
       ]
     }
 
-    Return only the JSON code without any backticks or markdown formatting. Don't miss any details from the provided materials.`;
+    IMPORTANT: Return only the raw JSON without any backticks, code blocks, or markdown formatting. DO NOT use backticks around your response. Do not include any explanations or additional text before or after the JSON. Don't miss any details from the provided materials.`;
 
     return prompt;
   }
@@ -247,6 +217,8 @@ export class VertexAIProvider implements AIService {
     try {
       // Initialize the AI service
       await this.initialize();
+
+      console.log('Start analyzeDesign with params:', params);
 
       // Construct the review prompt
       const reviewPrompt = `You are a brand compliance and design reviewer specializing in enforcing brand guidelines while ensuring good UX practices. Your primary focus is to ensure strict adherence to the provided brand rules and guidelines.
@@ -294,7 +266,7 @@ export class VertexAIProvider implements AIService {
       Here are the brand rules:
       ${JSON.stringify(params.brandRules, null, 2)}
 
-      Return the following JSON schema with frame_id included for each image:
+      IMPORTANT: Return the following JSON schema with frame_id included for each image. DO NOT wrap the JSON in code blocks or markdown formatting. DO NOT use backticks around your response. Return ONLY the raw JSON:
       {
         "reviews": [
           {
@@ -376,10 +348,20 @@ export class VertexAIProvider implements AIService {
 
       const responseText = result.response.candidates?.[0]?.content?.parts?.[0]?.text;
       if (!responseText) throw new Error('No response from Gemini.');
+      console.log('Raw response from Vertex AI:', responseText);
 
-      // Clean and parse the response
+      // Clean the response by removing code block markers
       const cleanedResponse = this.cleanJsonResponse(responseText);
-      return JSON.parse(cleanedResponse);
+
+      try {
+        return JSON.parse(cleanedResponse);
+      } catch (parseError) {
+        console.error('Failed to parse JSON response:', parseError.message);
+        console.error('First 100 chars of response:', cleanedResponse.substring(0, 100));
+
+        // Return a default empty response instead of throwing
+        return { reviews: [] };
+      }
     } catch (error) {
       console.error('Error analyzing design:', error);
       throw error;
@@ -438,7 +420,7 @@ export class VertexAIProvider implements AIService {
 
       IMPORTANT: Only analyze and respond about the frames provided above. Do not comment on any other frames in the file.
 
-      Return the following JSON schema:
+      IMPORTANT: Return the following JSON schema. DO NOT wrap the JSON in code blocks or markdown formatting. DO NOT use backticks around your response. Return ONLY the raw JSON:
       {
         "recheck_results": [
           {
@@ -487,9 +469,18 @@ export class VertexAIProvider implements AIService {
       const responseText = result.response.candidates?.[0]?.content?.parts?.[0]?.text;
       if (!responseText) throw new Error('No response from Gemini.');
 
-      // Clean and parse the response
+      // Clean the response by removing code block markers
       const cleanedResponse = this.cleanJsonResponse(responseText);
-      return JSON.parse(cleanedResponse);
+
+      try {
+        return JSON.parse(cleanedResponse);
+      } catch (parseError) {
+        console.error('Failed to parse JSON response:', parseError.message);
+        console.error('First 100 chars of response:', cleanedResponse.substring(0, 100));
+
+        // Return a default empty response instead of throwing
+        return { results: [] };
+      }
     } catch (error) {
       console.error('Error rechecking design:', error);
       throw error;
@@ -497,31 +488,25 @@ export class VertexAIProvider implements AIService {
   }
 
   /**
-   * Clean JSON response from AI
+   * Simple function to remove code block markers from JSON
    */
-  private cleanJsonResponse(responseText: string): string {
+  private cleanJsonResponse(input: string): string {
     try {
-      // Extract JSON from response
-      const jsonMatch = responseText.match(/```json\n([\s\S]*?)\n```/) ||
-                       responseText.match(/```\n([\s\S]*?)\n```/) ||
-                       responseText.match(/\{[\s\S]*\}/);
+      console.log('Cleaning JSON response, input length:', input.length);
 
-      if (jsonMatch) {
-        return jsonMatch[0].replace(/```json\n|```\n|```/g, '');
+      // Check if the input starts with ```json and ends with ```
+      if (input.trim().startsWith('```json') && input.trim().endsWith('```')) {
+        console.log('Found JSON code block, extracting content');
+        // Extract everything between the first ``` and the last ```
+        return input.trim().substring(7, input.trim().length - 3).trim();
       }
 
-      // If no JSON block found, try to find the first { and last }
-      const firstBrace = responseText.indexOf('{');
-      const lastBrace = responseText.lastIndexOf('}');
-
-      if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-        return responseText.substring(firstBrace, lastBrace + 1);
-      }
-
-      throw new Error('Could not extract JSON from response');
-    } catch (error) {
-      console.error('Error cleaning JSON response:', error);
-      throw error;
+      // If no code blocks, just return the input
+      return input;
+    } catch (e) {
+      console.error('Error cleaning JSON response:', e);
+      return input; // Return original input if any error occurs
     }
   }
 }
+

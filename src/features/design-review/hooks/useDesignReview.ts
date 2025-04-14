@@ -4,10 +4,10 @@
 
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { 
-  DesignAnalysisInput, 
-  DesignAnalysisResult, 
-  DesignRecheckInput, 
+import {
+  DesignAnalysisInput,
+  DesignAnalysisResult,
+  DesignRecheckInput,
   DesignRecheckResult,
   FrameSelectionState
 } from '../types';
@@ -48,7 +48,7 @@ export function useDesignReview() {
       }
 
       const data = await response.json();
-      
+
       setFileKey(data.fileKey);
       setFileName(data.fileName);
       setFrames(data.frames.map((frame: any) => ({
@@ -77,10 +77,10 @@ export function useDesignReview() {
    * @param frameId Frame ID
    */
   const toggleFrameSelection = (frameId: string) => {
-    setFrames(prevFrames => 
-      prevFrames.map(frame => 
-        frame.frameId === frameId 
-          ? { ...frame, selected: !frame.selected } 
+    setFrames(prevFrames =>
+      prevFrames.map(frame =>
+        frame.frameId === frameId
+          ? { ...frame, selected: !frame.selected }
           : frame
       )
     );
@@ -90,7 +90,7 @@ export function useDesignReview() {
    * Select all frames
    */
   const selectAllFrames = () => {
-    setFrames(prevFrames => 
+    setFrames(prevFrames =>
       prevFrames.map(frame => ({ ...frame, selected: true }))
     );
   };
@@ -99,22 +99,22 @@ export function useDesignReview() {
    * Deselect all frames
    */
   const deselectAllFrames = () => {
-    setFrames(prevFrames => 
+    setFrames(prevFrames =>
       prevFrames.map(frame => ({ ...frame, selected: false }))
     );
   };
 
   /**
-   * Analyze design
-   * @param input Analysis input
+   * Review design
+   * @param input Review input
    */
-  const analyzeDesign = async (input: DesignAnalysisInput) => {
+  const reviewDesign = async (input: DesignAnalysisInput) => {
     setIsLoading(true);
     setError(null);
     setAnalysisResult(null);
 
     try {
-      const response = await fetch('/api/design-review/analyze', {
+      const response = await fetch('/api/design-review/review', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -124,15 +124,15 @@ export function useDesignReview() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to analyze design');
+        throw new Error(errorData.error || 'Failed to review design');
       }
 
       const data = await response.json();
       setAnalysisResult(data);
 
       toast({
-        title: 'Analysis Complete',
-        description: 'Design analysis has been completed successfully.',
+        title: 'Review Complete',
+        description: 'Design review has been completed successfully.',
       });
 
       return data;
@@ -140,7 +140,7 @@ export function useDesignReview() {
       setError(error);
       toast({
         title: 'Error',
-        description: error.message || 'Failed to analyze design',
+        description: error.message || 'Failed to review design',
         variant: 'destructive',
       });
       return null;
@@ -218,7 +218,8 @@ export function useDesignReview() {
     toggleFrameSelection,
     selectAllFrames,
     deselectAllFrames,
-    analyzeDesign,
+    analyzeDesign: reviewDesign, // Keep old name for backward compatibility
+    reviewDesign,
     recheckDesign,
     reset,
   };

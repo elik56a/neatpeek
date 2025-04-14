@@ -35,9 +35,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!user.figmaAccessToken) {
+    const figmaToken = user.figmaAccessToken 
+    
+    if (!figmaToken) {
       return NextResponse.json(
-        { error: "Figma access token not found. Please connect your Figma account." },
+        { error: "Figma access token not found. Please connect your Figma account or set FIGMA_PERSONAL_ACCESS_TOKEN in environment variables." },
         { status: 400 }
       );
     }
@@ -56,8 +58,8 @@ export async function POST(req: NextRequest) {
     // Dynamically import the FigmaService
     const { FigmaService } = await import('@/features/design-review/services/figma-service');
 
-    // Create Figma service
-    const figmaService = new FigmaService(user.figmaAccessToken);
+    // Create Figma service with the token
+    const figmaService = new FigmaService(figmaToken);
 
     // Extract designs from Figma
     const { metadata } = await figmaService.extractDesignsFromFigma(figmaUrl);

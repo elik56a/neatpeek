@@ -86,6 +86,38 @@ export interface DesignScoreBreakdown {
 }
 
 /**
+ * Score category type
+ */
+export type ScoreCategory = 'brand_compliance' | 'visual_harmony' | 'usability' | 'accessibility';
+
+/**
+ * Severity level for design issues
+ */
+export type SeverityLevel = 'low' | 'medium' | 'high';
+
+/**
+ * Export options for design review
+ */
+export interface DesignReviewExportOptions {
+  fileName: string;
+  fileType: 'csv' | 'xlsx';
+  includeTimestamp?: boolean;
+  includeFigmaFileName?: boolean;
+}
+
+/**
+ * Export data row for design review
+ */
+export interface DesignReviewExportRow {
+  frame: string;
+  issueType: string;
+  category: string;
+  severity: string;
+  description: string;
+  recommendation: string;
+}
+
+/**
  * Review for a single image/frame
  */
 export interface DesignReviewResult {

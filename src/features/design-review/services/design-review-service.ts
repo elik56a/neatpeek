@@ -17,6 +17,7 @@ import {
   FigmaMetadata
 } from '../types';
 import { FigmaService } from './figma-service';
+import { BrandGuideline } from '@/types';
 
 /**
  * Design Review Service
@@ -45,11 +46,11 @@ export class DesignReviewService {
   }
 
   /**
-   * Analyze a design against brand rules
-   * @param input Analysis input
-   * @returns Analysis result
+   * Review a design against brand rules
+   * @param input Review input with optional selectedFrameIds
+   * @returns Review result
    */
-  async analyzeDesign(input: DesignAnalysisInput): Promise<DesignAnalysisResult> {
+  async analyzeDesign(input: DesignAnalysisInput & { selectedFrameIds?: string[] }): Promise<DesignAnalysisResult> {
     try {
       const { figmaUrl, brandId } = input;
 
@@ -58,21 +59,43 @@ export class DesignReviewService {
       }
 
       // Get brand rules
-      const brand = await prisma.brand.findUnique({
+      const brandGuideline  = await prisma.brandGuideline.findUnique({
         where: { id: brandId },
-        // Brand rules are stored in the brandRules field of the Brand model
-        // which is a JSON field, not a relation
+        include: {
+          brandRules: true,
+        },
       });
 
-      if (!brand) {
-        throw new Error('Brand not found');
+      if (!brandGuideline) {
+        throw new Error('brandGuideline not found');
       }
 
       // Extract designs from Figma
       const { imageUrls, metadata } = await this.figmaService.extractDesignsFromFigma(figmaUrl);
 
-      // Process images for AI
-      const imageParts = await Promise.all(imageUrls.map(url => this.figmaService.urlToInlineData(url)));
+      // Filter frames if selectedFrameIds is provided
+      const { selectedFrameIds } = input;
+      let filteredImageUrls = imageUrls;
+
+      if (selectedFrameIds && selectedFrameIds.length > 0) {
+        // Create a map of frame IDs to image URLs
+        const frameIdToImageUrl = metadata.frames.reduce<Record<string, string>>((map, frame) => {
+          if (frame.id && frame.url) {
+            map[frame.id] = frame.url;
+          }
+          return map;
+        }, {});
+
+        // Filter image URLs based on selected frame IDs
+        filteredImageUrls = selectedFrameIds
+          .map(frameId => frameIdToImageUrl[frameId])
+          .filter(Boolean) as string[];
+
+        console.log(`Filtered ${imageUrls.length} frames down to ${filteredImageUrls.length} selected frames`);
+      }
+
+      // Process images for AI - use filtered URLs if available
+      const imageParts = await Promise.all(filteredImageUrls.map(url => this.figmaService.urlToInlineData(url)));
 
       // Initialize AI service
       const aiService = await this.initAIService();
@@ -81,11 +104,11 @@ export class DesignReviewService {
       const analysisResult = await aiService.analyzeDesign({
         imageParts,
         metadata,
-        brandRules: brand.brandRules
+        brandRules: brandGuideline.brandRules
       });
 
       // Save results to database
-      await this.saveAnalysisResults(brandId, metadata, analysisResult);
+       await this.saveAnalysisResults(brandId, metadata, analysisResult);
 
       // Add comments to Figma
       await this.addCommentsToFigma(metadata, analysisResult);

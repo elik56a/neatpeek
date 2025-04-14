@@ -8,7 +8,7 @@ import { signIn } from "next-auth/react";
 import { useState } from "react";
 
 interface FigmaConnectPromptProps {
-  user: User;
+  user?: User;
   onConnect?: () => void;
 }
 
@@ -17,6 +17,7 @@ interface FigmaConnectPromptProps {
  * if they haven't already
  */
 export function FigmaConnectPrompt({ user, onConnect }: FigmaConnectPromptProps) {
+  // If user is undefined, we'll still show the connect prompt
   const [isConnecting, setIsConnecting] = useState(false);
   const { toast } = useToast();
 
@@ -27,7 +28,7 @@ export function FigmaConnectPrompt({ user, onConnect }: FigmaConnectPromptProps)
         callbackUrl: window.location.href,
         redirect: true
       });
-      
+
       if (onConnect) {
         onConnect();
       }
@@ -67,8 +68,8 @@ export function FigmaConnectPrompt({ user, onConnect }: FigmaConnectPromptProps)
         </ul>
       </CardContent>
       <CardFooter>
-        <Button 
-          onClick={handleConnectFigma} 
+        <Button
+          onClick={handleConnectFigma}
           disabled={isConnecting}
           className="w-full"
         >

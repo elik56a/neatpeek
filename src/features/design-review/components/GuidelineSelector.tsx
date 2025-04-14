@@ -1,0 +1,113 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ChevronDown } from "lucide-react";
+import { useState } from "react";
+
+// Define a generic guideline interface with the minimum required properties
+interface Guideline {
+  id: string;
+  name: string;
+}
+
+interface GuidelineSelectorProps {
+  guidelines: Guideline[];
+  selectedId: string;
+  onSelect: (id: string) => void;
+  companyName?: string;
+}
+
+export function GuidelineSelector({
+  guidelines,
+  selectedId,
+  onSelect,
+  companyName,
+}: GuidelineSelectorProps) {
+  const [open, setOpen] = useState(false);
+
+  // Get the currently selected guideline
+  const selectedGuideline = guidelines.find(g => g.id === selectedId);
+
+  // Get the display name and initial
+  const displayName = selectedGuideline?.name || companyName || "Your Brand";
+  const initial = displayName.charAt(0);
+
+  // If there's only one guideline, show a simple display
+  if (guidelines.length <= 1) {
+    return (
+      <div className="flex items-center space-x-3 px-4 py-2.5 rounded-md border bg-background shadow-sm">
+        <div className="flex-shrink-0 h-8 w-8 rounded-full bg-accent flex items-center justify-center border border-border">
+          <span className="text-sm font-medium">{initial}</span>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-sm font-medium">{displayName}</span>
+          <span className="text-xs text-muted-foreground">Active Guideline</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Otherwise, show the dropdown selector
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="flex justify-between w-[240px] px-4 py-2.5 border-border hover:border-border/80 hover:bg-accent/5 transition-all duration-200 shadow-sm hover:shadow group"
+        >
+          <div className="flex items-center">
+            <div className="flex-shrink-0 h-8 w-8 rounded-full bg-accent flex items-center justify-center mr-3 border border-border">
+              <span className="text-sm font-medium">{initial}</span>
+            </div>
+            <div className="flex flex-col items-start">
+              <span className="text-sm font-medium truncate max-w-[140px]">{displayName}</span>
+              <span className="text-xs text-muted-foreground">Active Guideline</span>
+            </div>
+          </div>
+          <ChevronDown className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors duration-200" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[240px] p-0 border-border shadow-md" align="end">
+        <Command className="rounded-lg overflow-hidden">
+          <CommandInput placeholder="Search guidelines..." className="h-10 border-none focus:ring-0" />
+          <CommandList className="max-h-[300px] overflow-auto py-1">
+            <CommandEmpty className="py-4 text-center text-sm text-muted-foreground">No guidelines found</CommandEmpty>
+            <CommandGroup className="px-1 py-1">
+              {guidelines.map((guideline) => (
+                <CommandItem
+                  key={guideline.id}
+                  value={guideline.id}
+                  onSelect={() => {
+                    onSelect(guideline.id);
+                    setOpen(false);
+                  }}
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-md aria-selected:bg-accent/10 hover:bg-accent/5 transition-colors duration-150 cursor-pointer"
+                >
+                  <div className="flex-shrink-0 h-7 w-7 rounded-full bg-accent flex items-center justify-center border border-border">
+                    <span className="text-sm font-medium">{guideline.name.charAt(0)}</span>
+                  </div>
+                  <span className="truncate font-medium">{guideline.name}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+}
