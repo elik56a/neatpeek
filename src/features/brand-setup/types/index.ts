@@ -19,7 +19,7 @@ export interface BrandGuideline {
   designImages?: DesignImage[];
   customRules?: CustomRule[];
   brandRules?: BrandRule[];
-  processingStatus: ProcessingStatus;
+  processingStatus: BrandGuidelineStatus;
   processingMessage?: string;
   companyId?: string;
   teamId?: string;

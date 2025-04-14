@@ -111,7 +111,7 @@ export class DesignReviewService {
        await this.saveAnalysisResults(brandId, metadata, analysisResult);
 
       // Add comments to Figma
-      await this.addCommentsToFigma(metadata, analysisResult);
+      this.addCommentsToFigma(metadata, analysisResult);
 
       return analysisResult;
     } catch (error) {

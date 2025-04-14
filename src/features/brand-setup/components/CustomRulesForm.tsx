@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { AlertCircle, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { RuleCategory } from "../types";
 
 interface CustomRule {
   category: string;
@@ -66,7 +67,7 @@ export function CustomRulesForm({
   };
 
   // Get category label
-  const getCategoryLabel = (category: string) => {
+  const getCategoryLabel = (category: RuleCategory) => {
     switch (category) {
       case "COLOR":
         return "Color";
@@ -88,7 +89,7 @@ export function CustomRulesForm({
   };
 
   // Get category color
-  const getCategoryColor = (category: string) => {
+  const getCategoryColor = (category: RuleCategory) => {
     switch (category) {
       case "COLOR":
         return "bg-red-100 text-red-800";
@@ -232,7 +233,7 @@ export function CustomRulesForm({
                   onClick={() => onRemoveRule(index)}
                   className="flex-shrink-0"
                 >
-                  <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                  <Trash2 className="h-4 w-4 " />
                 </Button>
               </div>
             ))}

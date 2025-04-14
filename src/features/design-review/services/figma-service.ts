@@ -313,17 +313,14 @@ export class FigmaService {
     framePosition: FramePosition
   ): Promise<string> {
     try {
-      // Convert relative coordinates to absolute
-      const absoluteX = framePosition.x + (coordinates.x * framePosition.width);
-      const absoluteY = framePosition.y + (coordinates.y * framePosition.height);
 
       const requestBody = {
         message,
         client_meta: {
           node_id: frameId,
           node_offset: {
-            x: absoluteX,
-            y: absoluteY
+            x: coordinates.x * framePosition.width,
+            y: coordinates.y * framePosition.height
           }
         }
       };

@@ -220,30 +220,26 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
         </div>
       </div>
 
-      {/* Processing status message
-      {brandGuideline.processingMessage && (
+      {brandGuideline.processingMessage && brandGuideline.processingStatus !== BrandGuidelineStatus.COMPLETED && (
         <Alert
-          variant={brandGuideline.processingStatus === ProcessingStatus.FAILED ? "destructive" : "default"}
+          variant={brandGuideline.processingStatus === BrandGuidelineStatus.FAILED ? "destructive" : "default"}
           className={cn(
             "animate-in fade-in duration-500",
-            brandGuideline.processingStatus === ProcessingStatus.PROCESSING ? "bg-amber-50 border-amber-200" :
-            brandGuideline.processingStatus === ProcessingStatus.COMPLETED ? "bg-green-50 border-green-200" :
-            brandGuideline.processingStatus === ProcessingStatus.FAILED ? "bg-red-50 border-red-200" : ""
+            brandGuideline.processingStatus === BrandGuidelineStatus.PROCESSING ? "bg-amber-50 border-amber-200" :
+            brandGuideline.processingStatus === BrandGuidelineStatus.FAILED ? "bg-red-50 border-red-200" : ""
           )}
         >
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>
-            {brandGuideline.processingStatus === ProcessingStatus.PROCESSING
+            {brandGuideline.processingStatus === BrandGuidelineStatus.PROCESSING
               ? "Processing"
-              : brandGuideline.processingStatus === ProcessingStatus.COMPLETED
-              ? "Completed"
-              : brandGuideline.processingStatus === ProcessingStatus.FAILED
+              : brandGuideline.processingStatus === BrandGuidelineStatus.FAILED
               ? "Failed"
               : "Status"}
           </AlertTitle>
           <AlertDescription>{brandGuideline.processingMessage}</AlertDescription>
         </Alert>
-      )} */}
+      )}
 
       {/* Brand details card */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
