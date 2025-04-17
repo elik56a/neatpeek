@@ -20,10 +20,16 @@ const nextConfig = {
   },
   // Configure domain/subdomain routing
   async rewrites() {
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    // In production, we'll use DNS for routing between app.domain.com and domain.com
+    if (isProduction) {
+      return [];
+    }
+
+    // In development, we use rewrites to simulate the subdomain routing
     return {
       beforeFiles: [
-        // When in development, we want to route all requests to the same Next.js app
-        // In production, these would be handled by DNS configuration
         {
           source: '/:path*',
           has: [
