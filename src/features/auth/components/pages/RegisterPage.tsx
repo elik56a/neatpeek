@@ -232,13 +232,13 @@ const RegisterPage = () => {
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
                 I agree to the{" "}
-                <a href="#" className="text-brand-600 dark:text-brand-400 hover:underline">
+                <Link href="/terms" className="text-brand-600 dark:text-brand-400 hover:underline">
                   terms of service
-                </a>{" "}
+                </Link>{" "}
                 and{" "}
-                <a href="#" className="text-brand-600 dark:text-brand-400 hover:underline">
+                <Link href="/privacy" className="text-brand-600 dark:text-brand-400 hover:underline">
                   privacy policy
-                </a>
+                </Link>
                 .
               </Label>
             </div>
