@@ -22,7 +22,7 @@ const nextConfig = {
   async rewrites() {
     const isProduction = process.env.NODE_ENV === 'production';
 
-    // In production, we'll use DNS for routing between app.domain.com and domain.com
+    // In production, we'll use Netlify redirects for routing between app.domain.com and domain.com
     if (isProduction) {
       return [];
     }
