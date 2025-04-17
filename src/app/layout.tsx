@@ -8,11 +8,12 @@ import { ThemeProvider } from "@/features/theme";
 import { AppDataProvider } from "@/providers";
 import { Inter } from 'next/font/google';
 import type { Metadata } from 'next/types';
+import { appConfig } from '@/config/app';
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "TailorChecker - Brand Consistency Checker",
+  title: `${appConfig.name} - ${appConfig.description}`,
   description: "Ensure all your designs meet your brand guidelines",
 };
 
@@ -25,7 +26,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <SessionProvider>
-          <ThemeProvider defaultTheme="light" storageKey="tailor-checker-theme">
+          <ThemeProvider defaultTheme="light" storageKey={appConfig.storage.theme}>
             <TooltipProvider>
               <AuthProvider>
                 <AppDataProvider>

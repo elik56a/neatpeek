@@ -1,5 +1,6 @@
 
 import Link  from "next/link";
+import { appConfig } from "@/config/app";
 
 const Footer = () => {
   return (
@@ -9,9 +10,9 @@ const Footer = () => {
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center gap-2 mb-4">
               <div className="h-8 w-8 rounded-lg bg-brand-gradient flex items-center justify-center">
-                <span className="text-white font-bold">TC</span>
+                <span className="text-white font-bold">{appConfig.name.substring(0, 1)}</span>
               </div>
-              <span className="font-bold text-xl">TailorChecker</span>
+              <span className="font-bold text-xl">{appConfig.name}</span>
             </Link>
             <p className="text-sm text-muted-foreground max-w-sm">
               Ensuring every design perfectly aligns with your brand guidelines and visual identity.
@@ -117,7 +118,7 @@ const Footer = () => {
           </div>
         </div>
         <div className="mt-12 border-t pt-8 text-center text-sm text-muted-foreground">
-          &copy; {new Date().getFullYear()} TailorChecker. All rights reserved.
+          &copy; {new Date().getFullYear()} {appConfig.name}. All rights reserved.
         </div>
       </div>
     </footer>

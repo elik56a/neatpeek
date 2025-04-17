@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import { appConfig } from "@/config/app";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check, Info, ArrowRight, CheckCircle2, X, CreditCard } from "lucide-react";
@@ -150,17 +151,17 @@ const PricingPage = () => {
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
   const [processingTier, setProcessingTier] = useState<string | null>(null);
   const { toast } = useToast();
-  
+
   const handlePriceClick = async (tier: Tier) => {
     if (tier.id === 'free') {
       window.location.href = '/register'; // Redirect to register page for free tier
       return;
     }
-    
-    const priceId = billingInterval === 'yearly' 
-      ? tier.stripeYearlyPriceId 
+
+    const priceId = billingInterval === 'yearly'
+      ? tier.stripeYearlyPriceId
       : tier.stripeMonthlyPriceId;
-    
+
     if (tier.id === 'business') {
       toast({
         title: "Contact sales",
@@ -168,7 +169,7 @@ const PricingPage = () => {
       });
       return;
     }
-    
+
     if (!priceId) {
       toast({
         title: "Not available",
@@ -177,27 +178,27 @@ const PricingPage = () => {
       });
       return;
     }
-    
+
     try {
       setProcessingTier(tier.id);
-      
+
       toast({
         title: "Processing payment",
         description: "Taking you to our secure checkout page.",
       });
-      
+
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ priceId })
       });
-      
+
       if (!response.ok) {
         throw new Error('Network response was not ok');
       }
-      
+
       const { url } = await response.json();
-      
+
       if (url) {
         window.location.href = url;
       } else {
@@ -214,7 +215,7 @@ const PricingPage = () => {
       setProcessingTier(null);
     }
   };
-  
+
   return (
     <div className="container py-12 md:py-24 space-y-16">
       <div className="space-y-6 text-center max-w-3xl mx-auto">
@@ -223,7 +224,7 @@ const PricingPage = () => {
           Choose the plan that's right for you and your design workflow
         </p>
       </div>
-      
+
       <div className="flex justify-center">
         <div className="rounded-full p-1 bg-muted">
           <Tabs
@@ -242,16 +243,16 @@ const PricingPage = () => {
           </Tabs>
         </div>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {tiers.map((tier, i) => (
-          <motion.div 
+          <motion.div
             key={tier.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: i * 0.1 }}
           >
-            <Card 
+            <Card
               className={`relative flex h-full flex-col transition-all duration-200 hover:shadow-lg ${tier.mostPopular ? 'border-primary shadow-md' : ''}`}
             >
               {tier.mostPopular && (
@@ -259,12 +260,12 @@ const PricingPage = () => {
                   Most Popular
                 </div>
               )}
-              
+
               <CardHeader className="flex flex-col space-y-1.5">
                 <CardTitle>{tier.name}</CardTitle>
                 <CardDescription>{tier.description}</CardDescription>
               </CardHeader>
-              
+
               <CardContent className="flex-1 space-y-6">
                 <div>
                   <div className="flex items-baseline">
@@ -281,7 +282,7 @@ const PricingPage = () => {
                     </p>
                   )}
                 </div>
-                
+
                 <div className="space-y-2">
                   {tier.features.map((feature) => (
                     <div key={feature} className="flex items-center gap-2">
@@ -291,10 +292,10 @@ const PricingPage = () => {
                   ))}
                 </div>
               </CardContent>
-              
+
               <CardFooter>
-                <Button 
-                  onClick={() => handlePriceClick(tier)} 
+                <Button
+                  onClick={() => handlePriceClick(tier)}
                   className="w-full group relative overflow-hidden"
                   variant={tier.mostPopular ? 'default' : 'outline'}
                   disabled={processingTier === tier.id}
@@ -318,10 +319,10 @@ const PricingPage = () => {
           </motion.div>
         ))}
       </div>
-      
+
       <div className="space-y-8">
         <h2 className="text-3xl font-bold text-center">Compare Plans</h2>
-        
+
         <div className="overflow-hidden rounded-lg border border-muted shadow-sm">
           <div className="grid grid-cols-4 border-b bg-muted/80">
             <div className="px-6 py-4 text-base font-medium">Features</div>
@@ -329,7 +330,7 @@ const PricingPage = () => {
             <div className="px-6 py-4 text-base font-medium text-center bg-primary/5">Pro</div>
             <div className="px-6 py-4 text-base font-medium text-center">Business</div>
           </div>
-          
+
           <div className="divide-y">
             {featureComparison.map((feature, i) => (
               <div key={i} className="grid grid-cols-4 hover:bg-muted/30 transition-colors duration-150">
@@ -375,11 +376,11 @@ const PricingPage = () => {
           </div>
         </div>
       </div>
-      
+
       <div className="rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 p-8 text-center">
         <h3 className="text-2xl font-bold mb-4">Need a custom plan?</h3>
         <p className="text-muted-foreground max-w-2xl mx-auto mb-6">
-          We offer custom plans for larger teams and enterprise organizations. 
+          We offer custom plans for larger teams and enterprise organizations.
           Contact our sales team to discuss your specific needs.
         </p>
         <Button className="transition-all duration-300 hover:shadow-lg">

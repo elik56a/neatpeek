@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { appConfig } from "@/config/app";
 
 const RegisterPage = () => {
   const [name, setName] = useState("");
@@ -38,7 +39,7 @@ const RegisterPage = () => {
       await register(name, email, password);
       toast({
         title: "Account created successfully",
-        description: "Welcome to TailorChecker!",
+        description: `Welcome to ${appConfig.name}!`,
       });
     } catch (error) {
       console.error("Registration failed:", error);
@@ -59,7 +60,7 @@ const RegisterPage = () => {
       await loginWithGoogle?.();
       toast({
         title: "Account created successfully",
-        description: "Welcome to TailorChecker!",
+        description: `Welcome to ${appConfig.name}!`,
       });
     } catch (error) {
       console.error("Google sign up failed:", error);
@@ -80,7 +81,7 @@ const RegisterPage = () => {
       await loginWithFigma();
       toast({
         title: "Account created successfully",
-        description: "Welcome to TailorChecker!",
+        description: `Welcome to ${appConfig.name}!`,
       });
     } catch (error) {
       console.error("Figma sign up failed:", error);
@@ -105,7 +106,7 @@ const RegisterPage = () => {
           </Link>
           <h2 className="text-2xl font-bold">Create your account</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Get started with TailorChecker
+            Get started with {appConfig.name}
           </p>
         </div>
 

@@ -2,6 +2,7 @@
 "use client";
 
 import Link from "next/link";
+import { appConfig } from "@/config/app";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Check, LineChart, Shield, Zap } from "lucide-react";
@@ -18,7 +19,7 @@ const LandingPage = () => {
                 Ensure Your Design Meets Your <span className="text-primary">Brand Guidelines</span>
               </h1>
               <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
-                TailorChecker helps design teams maintain consistent branding by automatically checking designs against your brand guidelines.
+                {appConfig.name} helps design teams maintain consistent branding by automatically checking designs against your brand guidelines.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
@@ -44,7 +45,7 @@ const LandingPage = () => {
           <div className="grid gap-12">
             <div className="text-center space-y-4">
               <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
-                How TailorChecker Works
+                How {appConfig.name} Works
               </h2>
               <p className="mx-auto max-w-[700px] text-muted-foreground">
                 Our platform simplifies brand consistency across all your designs
@@ -101,7 +102,7 @@ const LandingPage = () => {
                 Maintain Perfect Brand Consistency
               </h2>
               <p className="text-muted-foreground">
-                TailorChecker helps design teams create cohesive brand experiences that build trust and recognition.
+                {appConfig.name} helps design teams create cohesive brand experiences that build trust and recognition.
               </p>
               <ul className="grid gap-3">
                 <li className="flex items-center gap-2">
@@ -153,7 +154,7 @@ const LandingPage = () => {
                 Ready to Perfect Your Brand Consistency?
               </h2>
               <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
-                Join thousands of design teams already using TailorChecker
+                Join thousands of design teams already using {appConfig.name}
               </p>
             </div>
             <div className="pt-4">

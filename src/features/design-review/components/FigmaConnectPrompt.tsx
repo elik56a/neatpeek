@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { User } from "@/types";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
+import { appConfig } from "@/config/app";
 
 interface FigmaConnectPromptProps {
   user?: User;
@@ -59,7 +60,7 @@ export function FigmaConnectPrompt({ user, onConnect }: FigmaConnectPromptProps)
       </CardHeader>
       <CardContent>
         <p className="text-sm text-muted-foreground mb-4">
-          Connecting your Figma account allows TailorChecker to:
+          Connecting your Figma account allows {appConfig.name} to:
         </p>
         <ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
           <li>Access your Figma files (read-only)</li>

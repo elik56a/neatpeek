@@ -1,8 +1,8 @@
-# Tailor Checker - Design QA Analysis SaaS
+# Nitpicking - Design QA Analysis SaaS
 
 ## Project Overview
 
-Tailor Checker is a SaaS platform that analyzes design frames against brand guidelines and provides feedback through Figma comments. It uses AI-powered analysis to ensure design consistency and adherence to brand guidelines.
+Nitpicking is a SaaS platform that analyzes design frames against brand guidelines and provides feedback through Figma comments. It uses AI-powered analysis to ensure design consistency and adherence to brand guidelines.
 
 ## Technical Stack
 
@@ -23,20 +23,20 @@ Tailor Checker is a SaaS platform that analyzes design frames against brand guid
 
 1. Install PostgreSQL on your machine or use a cloud service (like Railway, Supabase, etc.)
 
-2. Create a database named `tailordb`:
+2. Create a database named `nitpickingdb`:
    ```
-   CREATE DATABASE tailordb;
+   CREATE DATABASE nitpickingdb;
    ```
 
 3. Create a user and grant privileges (adjust as needed for your setup):
    ```
-   CREATE USER tailoruser WITH PASSWORD 'your_secure_password';
-   GRANT ALL PRIVILEGES ON DATABASE tailordb TO tailoruser;
+   CREATE USER nitpickinguser WITH PASSWORD 'your_secure_password';
+   GRANT ALL PRIVILEGES ON DATABASE nitpickingdb TO nitpickinguser;
    ```
 
 4. Update the `.env` file with your database credentials:
    ```
-   DATABASE_URL="postgresql://tailoruser:your_secure_password@localhost:5432/tailordb?schema=public"
+   DATABASE_URL="postgresql://nitpickinguser:your_secure_password@localhost:5432/nitpickingdb?schema=public"
    ```
 
 ### Installation
@@ -44,7 +44,7 @@ Tailor Checker is a SaaS platform that analyzes design frames against brand guid
 1. Clone the repository
    ```
    git clone <repository-url>
-   cd tailor-checker
+   cd nitpicking
    ```
 
 2. Install dependencies

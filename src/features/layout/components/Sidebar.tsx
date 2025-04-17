@@ -7,6 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useAuth } from "@/features/auth";
 import { CompanySelector } from "@/features/company";
 import { cn } from "@/utils/cn";
+import { appConfig } from "@/config/app";
 import {
   ChevronLeft,
   ChevronRight,
@@ -48,7 +49,7 @@ const Sidebar = () => {
       href: "/teams",
       icon: Users
     },
-  
+
     {
       name: "Design History",
       href: "/design-history",
@@ -74,14 +75,14 @@ const Sidebar = () => {
         {!collapsed && (
           <Link href="/dashboard" className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-brand-gradient flex items-center justify-center">
-              <span className="text-white font-bold">TC</span>
+              <span className="text-white font-bold">{appConfig.name.substring(0, 1)}</span>
             </div>
-            <span className="font-bold text-lg">TailorChecker</span>
+            <span className="font-bold text-lg">{appConfig.name}</span>
           </Link>
         )}
         {collapsed && (
           <div className="h-8 w-8 mx-auto rounded-lg bg-brand-gradient flex items-center justify-center">
-            <span className="text-white font-bold">TC</span>
+            <span className="text-white font-bold">{appConfig.name.substring(0, 1)}</span>
           </div>
         )}
         <Button

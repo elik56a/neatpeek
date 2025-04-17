@@ -7,62 +7,63 @@ import {
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import Link  from "next/link";
+import { appConfig } from "@/config/app";
 
 const faqs = [
   {
-    question: "What is TailorChecker?",
+    question: `What is ${appConfig.name}?`,
     answer:
-      "TailorChecker is a design compliance platform that helps teams ensure their designs adhere to brand guidelines. It analyzes designs, provides feedback on inconsistencies, and helps maintain brand integrity across all design assets.",
+      `${appConfig.name} is a design compliance platform that helps teams ensure their designs adhere to brand guidelines. It analyzes designs, provides feedback on inconsistencies, and helps maintain brand integrity across all design assets.`,
   },
   {
-    question: "How does TailorChecker work?",
+    question: `How does ${appConfig.name} work?`,
     answer:
-      "TailorChecker works in three simple steps: 1) You set up your brand by uploading brand guidelines, example designs, or manually entering brand rules. 2) Upload your designs or connect to Figma for analysis. 3) Receive detailed feedback on what elements need adjustment to match your brand guidelines.",
+      `${appConfig.name} works in three simple steps: 1) You set up your brand by uploading brand guidelines, example designs, or manually entering brand rules. 2) Upload your designs or connect to Figma for analysis. 3) Receive detailed feedback on what elements need adjustment to match your brand guidelines.`,
   },
   {
-    question: "Do I need to be a designer to use TailorChecker?",
+    question: `Do I need to be a designer to use ${appConfig.name}?`,
     answer:
-      "No, TailorChecker is designed to be user-friendly for both designers and non-designers. Design managers, brand managers, and marketing teams can all benefit from using our platform to ensure brand consistency.",
+      `No, ${appConfig.name} is designed to be user-friendly for both designers and non-designers. Design managers, brand managers, and marketing teams can all benefit from using our platform to ensure brand consistency.`,
   },
   {
     question: "What file formats can I upload for checking?",
     answer:
-      "TailorChecker supports common design formats including PNG, JPG, PDF, and AI files. You can also connect directly to Figma to check designs without exporting them.",
+      `${appConfig.name} supports common design formats including PNG, JPG, PDF, and AI files. You can also connect directly to Figma to check designs without exporting them.`,
   },
   {
     question: "How accurate is the design analysis?",
     answer:
-      "Our AI-powered analysis achieves high accuracy in detecting brand inconsistencies. The system continuously improves with use as it learns more about your specific brand guidelines and preferences.",
+      `Our AI-powered analysis achieves high accuracy in detecting brand inconsistencies. The system continuously improves with use as it learns more about your specific brand guidelines and preferences.`,
   },
   {
     question: "Can I check multiple designs at once?",
     answer:
-      "Yes, you can batch upload multiple designs for checking. This is especially useful for reviewing entire campaigns or projects at once.",
+      `Yes, you can batch upload multiple designs for checking. This is especially useful for reviewing entire campaigns or projects at once.`,
   },
   {
     question: "How does the Figma integration work?",
     answer:
-      "Our Figma integration allows you to select frames or artboards directly in Figma. TailorChecker then analyzes these designs and can place comments directly on the Figma file pointing out areas that need adjustment.",
+      `Our Figma integration allows you to select frames or artboards directly in Figma. ${appConfig.name} then analyzes these designs and can place comments directly on the Figma file pointing out areas that need adjustment.`,
   },
   {
     question: "Can I have multiple brand profiles?",
     answer:
-      "Yes, depending on your plan, you can set up multiple brand profiles. This is perfect for agencies working with multiple clients or companies with sub-brands.",
+      `Yes, depending on your plan, you can set up multiple brand profiles. This is perfect for agencies working with multiple clients or companies with sub-brands.`,
   },
   {
     question: "How long does it take to check a design?",
     answer:
-      "Most designs are analyzed within seconds. Complex designs or large batches may take a minute or two. You'll receive immediate notifications when your analysis is complete.",
+      `Most designs are analyzed within seconds. Complex designs or large batches may take a minute or two. You'll receive immediate notifications when your analysis is complete.`,
   },
   {
     question: "Can I customize the rules for my brand?",
     answer:
-      "Absolutely! In addition to automatically extracting rules from your brand guidelines, you can add custom rules and preferences to fine-tune the analysis to your specific needs.",
+      `Absolutely! In addition to automatically extracting rules from your brand guidelines, you can add custom rules and preferences to fine-tune the analysis to your specific needs.`,
   },
   {
     question: "Is my data secure?",
     answer:
-      "Yes, we take data security seriously. All uploads are encrypted, and we never share your designs or brand guidelines with third parties. You can delete your data at any time.",
+      `Yes, we take data security seriously. All uploads are encrypted, and we never share your designs or brand guidelines with third parties. You can delete your data at any time.`,
   },
   {
     question: "Do you offer enterprise solutions?",
@@ -77,7 +78,7 @@ const FaqPage = () => {
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold mb-4">Frequently Asked Questions</h1>
         <p className="text-xl text-muted-foreground">
-          Find answers to common questions about TailorChecker
+          Find answers to common questions about {appConfig.name}
         </p>
       </div>
 
@@ -101,7 +102,7 @@ const FaqPage = () => {
         </p>
         <div className="flex flex-col sm:flex-row justify-center gap-4">
           <Button size="lg" asChild>
-            <a href="mailto:support@tailorchecker.com">Contact Support</a>
+            <a href={`mailto:${appConfig.supportEmail}`}>Contact Support</a>
           </Button>
           <Button size="lg" variant="outline" asChild>
             <Link href="/register">Try It Free</Link>

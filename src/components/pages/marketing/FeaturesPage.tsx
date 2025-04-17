@@ -4,6 +4,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { appConfig } from "@/config/app";
 import {
   Paintbrush,
   LineChart,
@@ -185,7 +186,7 @@ const FeaturesPage = () => {
             Ready to ensure perfect brand consistency?
           </h2>
           <p className="text-muted-foreground">
-            Start your free trial today and see how TailorChecker can transform
+            Start your free trial today and see how {appConfig.name} can transform
             your brand management process.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

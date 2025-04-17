@@ -6,6 +6,7 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { MobileNav } from "./MobileNav";
 import { cn } from "@/utils/cn";
+import { appConfig } from "@/config/app";
 
 const marketingNavItems = [
   {
@@ -39,21 +40,21 @@ export function Header() {
     <header className="border-b bg-background sticky top-0 z-50">
       <div className="container flex h-16 items-center px-4 sm:px-8">
         <Link href="/" className="flex items-center mr-6">
-          <span className="text-lg font-bold flex-shrink-0">TailorChecker</span>
+          <span className="text-lg font-bold flex-shrink-0">{appConfig.name}</span>
         </Link>
 
         {isMarketing ? (
           <>
             <nav className="hidden md:flex items-center space-x-2">
               {marketingNavItems.map((item) => (
-                <Button 
-                  key={item.href} 
-                  variant="ghost" 
+                <Button
+                  key={item.href}
+                  variant="ghost"
                   asChild
                   className={cn(
                     "transition-colors duration-200",
-                    pathname === item.href ? 
-                      "bg-muted text-foreground font-medium" : 
+                    pathname === item.href ?
+                      "bg-muted text-foreground font-medium" :
                       "hover:bg-muted/70 hover:text-foreground"
                   )}
                 >

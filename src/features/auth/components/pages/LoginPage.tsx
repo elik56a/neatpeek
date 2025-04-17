@@ -9,6 +9,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { appConfig } from "@/config/app";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -45,7 +46,7 @@ const LoginPage = () => {
       await login(email, password);
       toast({
         title: "Login successful",
-        description: "Welcome back to TailorChecker!",
+        description: `Welcome back to ${appConfig.name}!`,
       });
     } catch (error) {
       console.error("Login failed:", error);
@@ -96,7 +97,7 @@ const LoginPage = () => {
           </Link>
           <h2 className="text-2xl font-bold">Welcome back</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Sign in to your TailorChecker account
+            Sign in to your {appConfig.name} account
           </p>
         </div>
 
