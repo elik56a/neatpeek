@@ -1,7 +1,6 @@
 "use client";
 
-import { Company } from "@/types";
-import { CompanyRole } from "@prisma/client";
+import { Company, CompanyRole } from "@/types";
 import { useSession } from "next-auth/react";
 import { useCallback } from "react";
 

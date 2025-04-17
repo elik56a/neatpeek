@@ -9,9 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
 import { useAppDataContext } from "@/providers";
-import { User } from "@/types";
+import { User, CompanyRole } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CompanyRole } from "@prisma/client";
 import { Building, Mail, Plus, UserPlus, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";

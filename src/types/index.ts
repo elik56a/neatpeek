@@ -5,7 +5,12 @@
  * All components should import these types instead of defining their own.
  */
 
-import { CompanyRole } from "@prisma/client";
+// Define CompanyRole enum to avoid importing from Prisma on the client side
+export enum CompanyRole {
+  OWNER = "OWNER",
+  ADMIN = "ADMIN",
+  MEMBER = "MEMBER"
+}
 
 // User roles
 export enum UserRole {
