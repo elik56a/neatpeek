@@ -3,6 +3,8 @@
   publish = ".next"
 
 [build.environment]
+  # Skip Prisma binary download during build
+  PRISMA_SKIP_POSTINSTALL_GENERATE = "true"
   NETLIFY_NEXT_PLUGIN_SKIP = "true"
 
 [[plugins]]
