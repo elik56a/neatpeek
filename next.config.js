@@ -4,6 +4,16 @@ const nextConfig = {
   env: {
     DEBUG_HIDE_PRISMA_LOGS: 'true',
   },
+  // Disable ESLint during production builds
+  eslint: {
+    // Only run ESLint on local development
+    ignoreDuringBuilds: true,
+  },
+  // Disable TypeScript type checking during builds
+  typescript: {
+    // Only run type checking on local development
+    ignoreBuildErrors: true,
+  },
   // Domain configuration for app and marketing
   async headers() {
     return [

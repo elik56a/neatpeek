@@ -1,18 +1,20 @@
 
-import Link  from "next/link";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
-import { useLocation } from "next/link";
+import { useRouter } from "next/router";
 
 const NotFound = () => {
-  const location = useLocation();
+  const router = useRouter();
 
   useEffect(() => {
-    console.error(
-      "404 Error: User attempted to access non-existent route:",
-      location.pathname
-    );
-  }, [location.pathname]);
+    if (router.isReady) {
+      console.error(
+        "404 Error: User attempted to access non-existent route:",
+        router.asPath
+      );
+    }
+  }, [router.isReady, router.asPath]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center text-center px-4">
