@@ -10,7 +10,7 @@ export const appConfig = {
   /**
    * Application description
    */
-  description: "Brand Consistency Checker",
+  description: "AI-Powered Brand Compliance Platform",
 
   /**
    * Application email

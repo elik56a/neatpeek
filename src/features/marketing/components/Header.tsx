@@ -2,7 +2,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { ThemeToggle } from "@/features/theme/components/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { MobileNav } from "./MobileNav";
 import { cn } from "@/utils/cn";
