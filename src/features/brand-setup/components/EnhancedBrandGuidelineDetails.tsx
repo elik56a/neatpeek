@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ColorValueDisplay } from "@/components/ui/color-value-display";
 import { cn } from "@/utils/cn";
 import {
     AlertCircle,
@@ -38,9 +39,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useBrandGuideline, useBrandGuidelineUI } from "../hooks";
-import { BrandGuidelineStatus, ProcessingStatus } from "../types";
-
+import { BrandGuidelineStatus, BrandRule, ProcessingStatus } from "../types";
 import { RuleCategory } from "../types";
+import { EditableBrandRule } from "./EditableBrandRule";
 
 interface EnhancedBrandGuidelineDetailsProps {
   id: string;
@@ -148,7 +149,7 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
           <div>
             <h1 className="text-2xl font-bold text-gray-900">{brandGuideline.name}</h1>
             <div className="flex items-center mt-1 space-x-2">
-              {getStatusBadge(brandGuideline.status as BrandGuidelineStatus, brandGuideline.processingStatus as ProcessingStatus)}
+              {getStatusBadge(brandGuideline.status as BrandGuidelineStatus)}
               <span className="text-sm text-gray-500">
                 Created on {new Date(brandGuideline.createdAt).toLocaleDateString()}
               </span>
@@ -334,7 +335,7 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
                   ))}
                 </TabsList>
 
-                {Object.entries(rulesByCategory).map(([category, rules] : [RuleCategory, any[]]) => (
+                {Object.entries(rulesByCategory).map(([category, rules] : [RuleCategory, BrandRule[]]) => (
                   <TabsContent key={category} value={category} className="space-y-4 pt-2">
                     <div
                       className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-2 duration-500"
@@ -343,50 +344,16 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
                         animationDelay: '150ms'
                       }}
                     >
-                      {rules.map((rule, index) => (
-                        <div
+                      {rules.map((rule) => (
+                        <EditableBrandRule
                           key={rule.id}
-                          className={cn(
-                            "border rounded-lg p-4 shadow-sm transition-all duration-300 hover:shadow-md",
-                            getCategoryColor(category as RuleCategory)
-                          )}
-                          style={{
-                            animationDelay: `${150 + (index * 50)}ms`,
-                            animationFillMode: 'both'
-                          }}
-                        >
-                          <div className="flex justify-between items-start">
-                            <h3 className="font-medium text-gray-900 flex items-center">
-                              {rule.name}
-                            </h3>
-                            <Badge variant="secondary" className={cn("font-medium", getCategoryBadgeColor(category))}>
-                              {getCategoryIcon(category as RuleCategory)}
-                              <span className="ml-1">{category.charAt(0) + category.slice(1).toLowerCase()}</span>
-                            </Badge>
-                          </div>
-
-                          {rule.value && (
-                            <div className="mt-2">
-                              {category === 'COLOR' ? (
-                                <div className="flex items-center space-x-2">
-                                  <div
-                                    className="w-6 h-6 rounded-full border border-gray-200"
-                                    style={{ backgroundColor: rule.value }}
-                                  />
-                                  <p className="text-sm font-medium">{rule.value}</p>
-                                </div>
-                              ) : (
-                                <p className="text-sm font-medium text-gray-800">{rule.value}</p>
-                              )}
-                            </div>
-                          )}
-
-                          {rule.description && (
-                            <p className="text-sm mt-2 pt-2 border-t border-gray-100 text-gray-600">
-                              {rule.description}
-                            </p>
-                          )}
-                        </div>
+                          rule={rule}
+                          category={category as RuleCategory}
+                          getCategoryBadgeColor={getCategoryBadgeColor}
+                          getCategoryIcon={getCategoryIcon}
+                          getCategoryColor={getCategoryColor}
+                          brandGuidelineId={id}
+                        />
                       ))}
                     </div>
                   </TabsContent>

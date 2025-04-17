@@ -201,9 +201,12 @@ export class VertexAIProvider implements AIService {
         { "name": "Grid System", "value": "...", "description": "..." }
       ],
       "general": [
-        { "name": "Tone of Voice", "value": "...", "description": "..." }
+        { "name": "Tone of Voice", "value": "...", "description": "..." },
+        { "name": "Social Media Guidelines", "value": "...", "description": "..." },
       ]
     }
+
+    IMPORTANT: AT THE TYPOGRAPHY SECTION, INCLUDE THE FONT NAME AND WEIGHTS.
 
     IMPORTANT: Return only the raw JSON without any backticks, code blocks, or markdown formatting. DO NOT use backticks around your response. Do not include any explanations or additional text before or after the JSON. Don't miss any details from the provided materials.`;
 
@@ -225,7 +228,7 @@ export class VertexAIProvider implements AIService {
 
       MAIN OBJECTIVE: Your primary task is to identify any deviations from or violations of the brand guidelines. This includes but is not limited to:
       - Correct usage of brand colors
-      - Typography compliance
+      - Typography compliance, including font, size, and weight!! very important!!  
       - Logo usage and placement
       - Brand voice and messaging
       - Visual style consistency
@@ -233,12 +236,18 @@ export class VertexAIProvider implements AIService {
       - Target audience alignment
       - Brand values representation
       - Brand benefits communication
+      - Social media guidelines 
+      - Brand tone and voice consistency
+   
 
       Secondary objective: Identify general UI/UX and accessibility issues that might affect user experience.
 
       For each image, analyze:
       1. Brand compliance (PRIMARY FOCUS)
       2. General UI/UX best practices (SECONDARY FOCUS)
+      3. Accessibility issues (SECONDARY FOCUS)
+      4. Visual harmony and aesthetics (SECONDARY FOCUS)
+      5. Positive aspects of the design (SECONDARY FOCUS)
 
       COORDINATE SYSTEM:
       When specifying coordinates for issues, use relative coordinates within the frame (0 to 1).

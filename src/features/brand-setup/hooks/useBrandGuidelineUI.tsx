@@ -92,7 +92,7 @@ export function useBrandGuidelineUI() {
   /**
    * Get status badge based on brand guideline status
    */
-  const getStatusBadge = (status: BrandGuidelineStatus, processingStatus: ProcessingStatus): ReactNode => {
+  const getStatusBadge = (status: BrandGuidelineStatus): ReactNode => {
     if (status === BrandGuidelineStatus.DRAFT) {
       return <Badge variant="outline" className="bg-gray-100 text-gray-800">Draft</Badge>;
     }

@@ -439,8 +439,7 @@ export class BrandSetupService {
           brandGuidelineId,
           category: rule.category,
           name: rule.name,
-          // Use the value from the AI response if available, otherwise use a default value
-          value: rule.value || (rule.name.includes('Color') ? '#3B82F6' : 'Default Value'),
+          value: rule.value ,
           description: rule.description,
         },
       });

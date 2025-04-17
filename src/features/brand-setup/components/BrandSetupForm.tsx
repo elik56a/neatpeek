@@ -13,8 +13,11 @@ import { AlertCircle, ArrowRight, Building, CheckCircle, FileText, Loader2, Tras
 import { useEffect, useState } from "react";
 import { useBrandSetupForm } from "../hooks";
 import { CustomRule } from "../types";
+
 import { CustomRulesForm } from "./CustomRulesForm";
 import { FileUploader } from "./FileUploader";
+import { Team } from "@/types";
+
 
 interface BrandSetupFormProps {
   brandId?: string;
@@ -25,14 +28,11 @@ export function BrandSetupForm({ brandId, mode = 'create' }: BrandSetupFormProps
   const [activeTab, setActiveTab] = useState("basic");
   const { company, companyId, hasCompany } = useAppDataContext();
   const [teams, setTeams] = useState<Pick<Team, 'id' | 'name'>[]>([]);
-  const [isLoadingTeams, setIsLoadingTeams] = useState(false);
 
   // Fetch teams when component mounts
   useEffect(() => {
     const fetchTeams = async () => {
       if (!companyId) return;
-
-      setIsLoadingTeams(true);
 
       try {
         const response = await fetch(`/api/companies/${companyId}/teams`);
@@ -43,8 +43,6 @@ export function BrandSetupForm({ brandId, mode = 'create' }: BrandSetupFormProps
         }
       } catch (error) {
         console.error('Error fetching teams:', error);
-      } finally {
-        setIsLoadingTeams(false);
       }
     };
 
@@ -225,13 +223,13 @@ export function BrandSetupForm({ brandId, mode = 'create' }: BrandSetupFormProps
                 </div>
                 <Select
                   value={formData.teamId || ''}
-                  onValueChange={(value) => updateFormData({ teamId: value || undefined })}
+                  onValueChange={(value) => updateFormData({ teamId: value === 'none' ? undefined : value })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a team" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">None</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     {teams.map((team) => (
                       <SelectItem key={team.id} value={team.id}>
                         {team.name}
