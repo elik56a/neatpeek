@@ -5,22 +5,22 @@ export const appConfig = {
   /**
    * Application name
    */
-  name: "Nitpicking",
-  
+  name: "NeatPeak",
+
   /**
    * Application description
    */
   description: "Brand Consistency Checker",
-  
+
   /**
    * Application email
    */
-  supportEmail: "support@nitpicking.com",
-  
+  supportEmail: "support@neatpeak.com",
+
   /**
    * Storage keys
    */
   storage: {
-    theme: "nitpicking-theme",
+    theme: "neatpeak-theme",
   }
 };

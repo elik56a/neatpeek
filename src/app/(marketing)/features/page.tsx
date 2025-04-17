@@ -1,13 +1,8 @@
 
 "use client";
 
-import MarketingLayout from "@/components/layout/MarketingLayout";
-import FeaturesPage from "@/components/pages/marketing/FeaturesPage";
+import { FeaturesPage } from "@/features/marketing";
 
 export default function Features() {
-  return (
-    <MarketingLayout>
-      <FeaturesPage />
-    </MarketingLayout>
-  );
+  return <FeaturesPage />;
 }

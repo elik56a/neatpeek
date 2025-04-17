@@ -1,13 +1,8 @@
 
 "use client";
 
-import MarketingLayout from "@/components/layout/MarketingLayout";
-import AboutPage from "@/components/pages/marketing/AboutPage";
+import { AboutPage } from "@/features/marketing";
 
 export default function About() {
-  return (
-    <MarketingLayout>
-      <AboutPage />
-    </MarketingLayout>
-  );
+  return <AboutPage />;
 }

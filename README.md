@@ -1,8 +1,8 @@
-# Nitpicking - Design QA Analysis SaaS
+# NeatPeak - Design QA Analysis SaaS
 
 ## Project Overview
 
-Nitpicking is a SaaS platform that analyzes design frames against brand guidelines and provides feedback through Figma comments. It uses AI-powered analysis to ensure design consistency and adherence to brand guidelines.
+NeatPeak is a SaaS platform that analyzes design frames against brand guidelines and provides feedback through Figma comments. It uses AI-powered analysis to ensure design consistency and adherence to brand guidelines.
 
 ## Technical Stack
 
@@ -23,20 +23,20 @@ Nitpicking is a SaaS platform that analyzes design frames against brand guidelin
 
 1. Install PostgreSQL on your machine or use a cloud service (like Railway, Supabase, etc.)
 
-2. Create a database named `nitpickingdb`:
+2. Create a database named `neatpeakdb`:
    ```
-   CREATE DATABASE nitpickingdb;
+   CREATE DATABASE neatpeakdb;
    ```
 
 3. Create a user and grant privileges (adjust as needed for your setup):
    ```
-   CREATE USER nitpickinguser WITH PASSWORD 'your_secure_password';
-   GRANT ALL PRIVILEGES ON DATABASE nitpickingdb TO nitpickinguser;
+   CREATE USER neatpeakuser WITH PASSWORD 'your_secure_password';
+   GRANT ALL PRIVILEGES ON DATABASE neatpeakdb TO neatpeakuser;
    ```
 
 4. Update the `.env` file with your database credentials:
    ```
-   DATABASE_URL="postgresql://nitpickinguser:your_secure_password@localhost:5432/nitpickingdb?schema=public"
+   DATABASE_URL="postgresql://neatpeakuser:your_secure_password@localhost:5432/neatpeakdb?schema=public"
    ```
 
 ### Installation
@@ -44,7 +44,7 @@ Nitpicking is a SaaS platform that analyzes design frames against brand guidelin
 1. Clone the repository
    ```
    git clone <repository-url>
-   cd nitpicking
+   cd neatpeak
    ```
 
 2. Install dependencies
