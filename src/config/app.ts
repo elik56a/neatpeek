@@ -5,7 +5,7 @@ export const appConfig = {
   /**
    * Application name
    */
-  name: "NeatPeak",
+  name: "NeatPeek",
 
   /**
    * Application description
@@ -15,12 +15,12 @@ export const appConfig = {
   /**
    * Application email
    */
-  supportEmail: "support@neatpeak.com",
+  supportEmail: "support@neatpeek.com",
 
   /**
    * Storage keys
    */
   storage: {
-    theme: "neatpeak-theme",
+    theme: "neatpeek-theme",
   }
 };

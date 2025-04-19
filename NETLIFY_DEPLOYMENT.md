@@ -1,6 +1,6 @@
 # Netlify Deployment Guide
 
-This guide explains how to deploy the NeatPeak application to Netlify and set up the production database.
+This guide explains how to deploy the NeatPeek application to Netlify and set up the production database.
 
 ## Initial Deployment
 
@@ -31,7 +31,7 @@ This will deploy the application without database functionality. The next steps 
    - Add a new variable with the key `DATABASE_URL` and your connection string as the value
 
 4. Set up other required environment variables:
-   - `NEXTAUTH_URL`: Your Netlify site URL (e.g., https://neatpeak.netlify.app)
+   - `NEXTAUTH_URL`: Your Netlify site URL (e.g., https://neatpeek.netlify.app)
    - `NEXTAUTH_SECRET`: A random string for NextAuth.js (generate with `openssl rand -base64 32`)
    - `STRIPE_SECRET_KEY`: Your Stripe secret key (if using Stripe)
    - Any other API keys needed by your application
@@ -43,7 +43,7 @@ This will deploy the application without database functionality. The next steps 
      netlify env:set SEED_DATABASE true # Optional, if you want to seed the database
      netlify functions:invoke setup-prod-db
      ```
-   
+
    - Option 2: Manually via Netlify UI
      - Go to Site settings > Functions > Trigger deploy
      - This will rebuild the site and run the database setup

@@ -23,7 +23,7 @@
   to = "/app/:splat"
   status = 200
   force = true
-  conditions = {host = "app.neatpeak.netlify.app"}
+  conditions = {host = "app.neatpeek.netlify.app"}
 
 # Fallback for 404 pages
 [[redirects]]

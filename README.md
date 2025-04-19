@@ -1,8 +1,8 @@
-# NeatPeak - Design QA Analysis SaaS
+# NeatPeek - Design QA Analysis SaaS
 
 ## Project Overview
 
-NeatPeak is a SaaS platform that analyzes design frames against brand guidelines and provides feedback through Figma comments. It uses AI-powered analysis to ensure design consistency and adherence to brand guidelines.
+NeatPeek is a SaaS platform that analyzes design frames against brand guidelines and provides feedback through Figma comments. It uses AI-powered analysis to ensure design consistency and adherence to brand guidelines.
 
 ## Technical Stack
 
@@ -23,20 +23,20 @@ NeatPeak is a SaaS platform that analyzes design frames against brand guidelines
 
 1. Install PostgreSQL on your machine or use a cloud service (like Railway, Supabase, etc.)
 
-2. Create a database named `neatpeakdb`:
+2. Create a database named `neatpeekdb`:
    ```
-   CREATE DATABASE neatpeakdb;
+   CREATE DATABASE neatpeekdb;
    ```
 
 3. Create a user and grant privileges (adjust as needed for your setup):
    ```
-   CREATE USER neatpeakuser WITH PASSWORD 'your_secure_password';
-   GRANT ALL PRIVILEGES ON DATABASE neatpeakdb TO neatpeakuser;
+   CREATE USER neatpeekuser WITH PASSWORD 'your_secure_password';
+   GRANT ALL PRIVILEGES ON DATABASE neatpeekdb TO neatpeekuser;
    ```
 
 4. Update the `.env` file with your database credentials:
    ```
-   DATABASE_URL="postgresql://neatpeakuser:your_secure_password@localhost:5432/neatpeakdb?schema=public"
+   DATABASE_URL="postgresql://neatpeekuser:your_secure_password@localhost:5432/neatpeekdb?schema=public"
    ```
 
 ### Installation
@@ -44,7 +44,7 @@ NeatPeak is a SaaS platform that analyzes design frames against brand guidelines
 1. Clone the repository
    ```
    git clone <repository-url>
-   cd neatpeak
+   cd neatpeek
    ```
 
 2. Install dependencies
