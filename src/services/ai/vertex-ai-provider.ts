@@ -3,13 +3,14 @@
  */
 
 // This service is server-side only and should not be imported on the client
-
+import { auth } from 'google-auth-library';
 import { AIAnalysisResult } from "@/features/brand-setup/types";
 import { DesignAnalysisResult, DesignRecheckResult } from "@/features/design-review/types";
 import { AIService, AnalyzeBrandGuidelineParams, AnalyzeDesignParams, RecheckDesignParams } from "./types";
+import { VertexAI } from '@google-cloud/vertexai';
 
 export class VertexAIProvider implements AIService {
-  private vertexAI: any;
+  private vertexAI: VertexAI;
   private generativeModel: any;
   private isInitialized: boolean = false;
   private initPromise: Promise<void> | null = null;
@@ -48,13 +49,28 @@ export class VertexAIProvider implements AIService {
 
     this.initPromise = (async () => {
       try {
-        // Dynamically import VertexAI
-        const { VertexAI } = await import('@google-cloud/vertexai');
 
-        this.vertexAI = new VertexAI({
+        const serviceAccount = {
+          type: process.env.GOOGLE_TYPE,
+          project_id: process.env.GOOGLE_PROJECT_ID,
+          private_key_id: process.env.GOOGLE_PRIVATE_KEY_ID,
+          private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+          client_email: process.env.GOOGLE_CLIENT_EMAIL,
+          client_id: process.env.GOOGLE_CLIENT_ID,
+          auth_uri: process.env.GOOGLE_AUTH_URI,
+          token_uri: process.env.GOOGLE_TOKEN_URI,
+          auth_provider_x509_cert_url: process.env.GOOGLE_AUTH_PROVIDER_CERT_URL,
+          client_x509_cert_url: process.env.GOOGLE_CLIENT_CERT_URL,
+          universe_domain: process.env.GOOGLE_UNIVERSE_DOMAIN,
+              };
+
+              const authClient =  auth.fromJSON(serviceAccount);
+
+       this.vertexAI = new VertexAI({
           project: this.project,
-          location: this.location
-        });
+          location: this.location,
+          googleAuthOptions: { credentials: serviceAccount }
+        })
 
         this.generativeModel = this.vertexAI.getGenerativeModel({
           model: this.modelName,
