@@ -4,7 +4,7 @@
 
 NeatPeek is a SaaS platform that analyzes design frames against brand guidelines and provides feedback through Figma comments. It uses AI-powered analysis to ensure design consistency and adherence to brand guidelines.
 
-## Technical Stack
+## Technical Stack & Tools
 
 - Next.js 14+ (App Router)
 - PostgreSQL as the database
