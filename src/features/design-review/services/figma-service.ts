@@ -7,7 +7,7 @@
  * - Adding and managing comments
  */
 
-import { FrameMetadata, FramePosition, FigmaMetadata, FigmaInfo, FrameInfo, FrameImageData } from '../types';
+import { FigmaInfo, FigmaMetadata, FrameImageData, FrameInfo, FrameMetadata, FramePosition } from '../types';
 
 // Constants
 const FIGMA_API_BASE_URL = 'https://api.figma.com';
@@ -43,11 +43,6 @@ export class FigmaService {
       'Content-Type': 'application/json',
       ...options.headers
     };
-
-    console.log({
-      url,
-      headers
-    })
 
     try {
       const response = await fetch(url, {

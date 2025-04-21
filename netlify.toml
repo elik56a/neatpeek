@@ -6,6 +6,14 @@
   # Skip Prisma binary download during build
   PRISMA_SKIP_POSTINSTALL_GENERATE = "false"
   NETLIFY_NEXT_PLUGIN_SKIP = "true"
+  # Add Vertex AI logging
+  NODE_ENV = "production"
+  DEBUG = "vertex-ai:*"
+
+[functions]
+  # Increase build time if needed for the test
+  node_bundler = "esbuild"
+  external_node_modules = ["@google-cloud/vertexai"]
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"

@@ -18,9 +18,10 @@
     "prisma:migrate:reset": "prisma migrate reset",
     "prisma:studio": "prisma studio",
     "prisma:run-migrations": "prisma migrate deploy",
-    "netlify-build": "prisma generate && prisma migrate deploy && next build && node scripts/test-db-connection.js",
+    "netlify-build": "npm run test-vertex && next build",
     "prisma:seed": "prisma db seed",
-    "setup-prod-db": "node scripts/setup-production-db.js"
+    "setup-prod-db": "node scripts/setup-production-db.js",
+    "test-vertex": "ts-node scripts/test-vertex-ai.ts"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
