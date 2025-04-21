@@ -16,12 +16,12 @@ export class CompanyService {
   }): Promise<Company> {
     const { name, domain, logo, ownerId } = params;
 
-    // Create the company
+    // Create the company - handle empty domain to avoid unique constraint issues
     const company = await prisma.company.create({
       data: {
         name,
-        domain,
-        logo,
+        domain: domain && domain.trim() !== '' ? domain : null,
+        logo: logo && logo.trim() !== '' ? logo : null,
         isActive: true,
       },
     });
@@ -68,6 +68,15 @@ export class CompanyService {
     settings?: any;
   }): Promise<Company> {
     const { id, ...data } = params;
+
+    // Handle empty domain and logo values
+    if (data.domain !== undefined) {
+      data.domain = data.domain && data.domain.trim() !== '' ? data.domain : null;
+    }
+
+    if (data.logo !== undefined) {
+      data.logo = data.logo && data.logo.trim() !== '' ? data.logo : null;
+    }
 
     return prisma.company.update({
       where: { id },

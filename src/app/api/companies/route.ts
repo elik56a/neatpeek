@@ -67,8 +67,17 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('Error creating company:', error);
+
+    // Check for Prisma unique constraint error
+    if (error.code === 'P2002' && error.meta?.target?.includes('domain')) {
+      return NextResponse.json(
+        { error: 'A company with this domain already exists' },
+        { status: 400 }
+      );
+    }
+
     return NextResponse.json(
-      { error: 'Failed to create company' },
+      { error: 'Failed to create company: ' + (error.message || 'Unknown error') },
       { status: 500 }
     );
   }

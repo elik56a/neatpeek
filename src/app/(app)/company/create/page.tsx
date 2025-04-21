@@ -40,12 +40,19 @@ export default function CreateCompanyPage() {
     setIsSubmitting(true);
 
     try {
+      // Trim input values and convert empty strings to undefined
+      const cleanedData = {
+        name: data.name.trim(),
+        domain: data.domain?.trim() || undefined,
+        logo: data.logo?.trim() || undefined,
+      };
+
       const response = await fetch("/api/companies", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(cleanedData),
       });
 
       if (!response.ok) {
