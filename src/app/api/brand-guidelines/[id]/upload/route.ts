@@ -54,26 +54,50 @@ export async function POST(
       );
     }
 
-    // Parse the multipart form data
+    // Parse the multipart form data using the raw request to avoid File API
     const formData = await req.formData();
 
     // Get the PDF file if available
     const pdfFile = formData.get('pdfFile');
     if (pdfFile && typeof pdfFile !== 'string') {
-      // Convert the blob/file to a buffer
-      const arrayBuffer = await (pdfFile as unknown as { arrayBuffer(): Promise<ArrayBuffer> }).arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
+      try {
+        // Use a more generic approach to get the buffer
+        let buffer: Buffer;
 
-      // Get filename and mimetype safely
-      const filename = (pdfFile as any).name || 'document.pdf';
-      const mimeType = (pdfFile as any).type || 'application/pdf';
+        // Different ways to get the buffer depending on what's available
+        if ('arrayBuffer' in pdfFile && typeof pdfFile.arrayBuffer === 'function') {
+          // Modern approach
+          const arrayBuffer = await (pdfFile as any).arrayBuffer();
+          buffer = Buffer.from(arrayBuffer);
+        } else if ('stream' in pdfFile && typeof pdfFile.stream === 'function') {
+          // Stream approach
+          const chunks: Buffer[] = [];
+          for await (const chunk of (pdfFile as any).stream()) {
+            chunks.push(Buffer.from(chunk));
+          }
+          buffer = Buffer.concat(chunks);
+        } else {
+          // Fallback for other blob-like objects
+          throw new Error('Unable to read file data');
+        }
 
-      await brandSetupService.uploadBrandGuidelinePdf({
-        brandGuidelineId: id,
-        buffer,
-        filename,
-        mimeType,
-      });
+        // Get filename and mimetype safely
+        const filename = (pdfFile as any).name || 'document.pdf';
+        const mimeType = (pdfFile as any).type || 'application/pdf';
+
+        await brandSetupService.uploadBrandGuidelinePdf({
+          brandGuidelineId: id,
+          buffer,
+          filename,
+          mimeType,
+        });
+      } catch (error) {
+        console.error('Error processing PDF file:', error);
+        return NextResponse.json(
+          { error: "Failed to process PDF file" },
+          { status: 500 }
+        );
+      }
     }
 
     // Get the design images if available
@@ -87,25 +111,47 @@ export async function POST(
 
     for (const [key, value] of formData.entries()) {
       if (key.startsWith('designImages') && typeof value !== 'string') {
-        // Convert the blob/file to a buffer
-        const arrayBuffer = await (value as unknown as { arrayBuffer(): Promise<ArrayBuffer> }).arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
+        try {
+          // Use a more generic approach to get the buffer
+          let buffer: Buffer;
 
-        // Get filename and mimetype safely
-        const filename = (value as any).name || 'image.jpg';
-        const mimeType = (value as any).type || 'image/jpeg';
+          // Different ways to get the buffer depending on what's available
+          if ('arrayBuffer' in value && typeof (value as any).arrayBuffer === 'function') {
+            // Modern approach
+            const arrayBuffer = await (value as any).arrayBuffer();
+            buffer = Buffer.from(arrayBuffer);
+          } else if ('stream' in value && typeof (value as any).stream === 'function') {
+            // Stream approach
+            const chunks: Buffer[] = [];
+            for await (const chunk of (value as any).stream()) {
+              chunks.push(Buffer.from(chunk));
+            }
+            buffer = Buffer.concat(chunks);
+          } else {
+            // Skip this file if we can't read it
+            console.warn(`Skipping file for key ${key}: Unable to read file data`);
+            continue;
+          }
 
-        // Get the image name and description if available
-        const nameKey = key.replace('designImages', 'designImageNames');
-        const descriptionKey = key.replace('designImages', 'designImageDescriptions');
+          // Get filename and mimetype safely
+          const filename = (value as any).name || 'image.jpg';
+          const mimeType = (value as any).type || 'image/jpeg';
 
-        designImages.push({
-          buffer,
-          filename,
-          mimeType,
-          name: formData.get(nameKey) as string || undefined,
-          description: formData.get(descriptionKey) as string || undefined,
-        });
+          // Get the image name and description if available
+          const nameKey = key.replace('designImages', 'designImageNames');
+          const descriptionKey = key.replace('designImages', 'designImageDescriptions');
+
+          designImages.push({
+            buffer,
+            filename,
+            mimeType,
+            name: formData.get(nameKey) as string || undefined,
+            description: formData.get(descriptionKey) as string || undefined,
+          });
+        } catch (error) {
+          console.error(`Error processing image file for key ${key}:`, error);
+          // Continue with other files instead of failing completely
+        }
       }
     }
 
