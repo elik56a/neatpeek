@@ -1,12 +1,11 @@
 import { prisma } from '@/services/db/prisma';
 import { BrandGuideline, BrandGuidelineStatus, CustomRule, ProcessingStatus } from '../types';
-import { createStorageProvider } from './storage';
+import { storageProvider } from '@/services/storage';
 
 /**
  * Service for brand setup functionality
  */
 export class BrandSetupService {
-  private storageProvider = createStorageProvider();
   private aiProvider: any = null;
 
   /**
@@ -70,7 +69,7 @@ export class BrandSetupService {
     mimeType: string;
   }): Promise<BrandGuideline> {
     // Save the file
-    const result = await this.storageProvider.saveFile({
+    const result = await storageProvider.saveFile({
       buffer: params.buffer,
       filename: params.filename,
       mimeType: params.mimeType,
@@ -99,7 +98,7 @@ export class BrandSetupService {
     description?: string;
   }): Promise<BrandGuideline> {
     // Save the file
-    const result = await this.storageProvider.saveFile({
+    const result = await storageProvider.saveFile({
       buffer: params.buffer,
       filename: params.filename,
       mimeType: params.mimeType,
@@ -231,7 +230,7 @@ export class BrandSetupService {
       // Get the PDF file if it exists
       if (brandGuideline.pdfPath) {
         try {
-          pdfBuffer = await this.storageProvider.getFile(brandGuideline.pdfPath);
+          pdfBuffer = await storageProvider.getFile(brandGuideline.pdfPath);
         } catch (error) {
           console.error('Error fetching PDF file:', error);
           // Continue without the PDF
@@ -243,7 +242,7 @@ export class BrandSetupService {
         for (const image of brandGuideline.designImages) {
           if (image.path) {
             try {
-              const buffer = await this.storageProvider.getFile(image.path);
+              const buffer = await storageProvider.getFile(image.path);
               const mimeType = this.getMimeTypeFromFilename(image.path);
               designImages.push({ buffer, mimeType });
             } catch (error) {
@@ -538,7 +537,7 @@ export class BrandSetupService {
     // Delete the PDF file if it exists
     if (brandGuideline.pdfPath) {
       try {
-        await this.storageProvider.deleteFile(brandGuideline.pdfPath);
+        await storageProvider.deleteFile(brandGuideline.pdfPath);
       } catch (error) {
         console.error('Error deleting PDF file:', error);
       }
@@ -548,7 +547,7 @@ export class BrandSetupService {
     for (const image of brandGuideline.designImages) {
       try {
         if (image.path) {
-          await this.storageProvider.deleteFile(image.path);
+          await storageProvider.deleteFile(image.path);
         }
       } catch (error) {
         console.error('Error deleting image file:', error);
