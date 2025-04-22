@@ -58,14 +58,21 @@ export async function POST(
     const formData = await req.formData();
 
     // Get the PDF file if available
-    const pdfFile = formData.get('pdfFile') as File | null;
-    if (pdfFile) {
-      const buffer = Buffer.from(await pdfFile.arrayBuffer());
+    const pdfFile = formData.get('pdfFile');
+    if (pdfFile && typeof pdfFile !== 'string') {
+      // Convert the blob/file to a buffer
+      const arrayBuffer = await (pdfFile as unknown as { arrayBuffer(): Promise<ArrayBuffer> }).arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      // Get filename and mimetype safely
+      const filename = (pdfFile as any).name || 'document.pdf';
+      const mimeType = (pdfFile as any).type || 'application/pdf';
+
       await brandSetupService.uploadBrandGuidelinePdf({
         brandGuidelineId: id,
         buffer,
-        filename: pdfFile.name,
-        mimeType: pdfFile.type,
+        filename,
+        mimeType,
       });
     }
 
@@ -79,9 +86,14 @@ export async function POST(
     }> = [];
 
     for (const [key, value] of formData.entries()) {
-      if (key.startsWith('designImages') && value instanceof File) {
-        const file = value as File;
-        const buffer = Buffer.from(await file.arrayBuffer());
+      if (key.startsWith('designImages') && typeof value !== 'string') {
+        // Convert the blob/file to a buffer
+        const arrayBuffer = await (value as unknown as { arrayBuffer(): Promise<ArrayBuffer> }).arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+
+        // Get filename and mimetype safely
+        const filename = (value as any).name || 'image.jpg';
+        const mimeType = (value as any).type || 'image/jpeg';
 
         // Get the image name and description if available
         const nameKey = key.replace('designImages', 'designImageNames');
@@ -89,8 +101,8 @@ export async function POST(
 
         designImages.push({
           buffer,
-          filename: file.name,
-          mimeType: file.type,
+          filename,
+          mimeType,
           name: formData.get(nameKey) as string || undefined,
           description: formData.get(descriptionKey) as string || undefined,
         });
