@@ -9,8 +9,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 // Import components dynamically with SSR disabled to avoid useLayoutEffect warnings
-const DesignReviewSession = dynamic(
-  () => import("@/features/design-review/components/DesignReviewSession").then(mod => ({ default: mod.DesignReviewSession })),
+const DesignReviewWithId = dynamic(
+  () => import("@/features/design-review/components/DesignReviewWithId").then(mod => ({ default: mod.DesignReviewWithId })),
   { ssr: false, loading: () => <LoadingState /> }
 );
 
@@ -39,9 +39,9 @@ const ErrorState = dynamic(
   { ssr: false }
 );
 
-export default function DesignReviewSessionPage() {
+export default function DesignReviewByIdPage() {
   const params = useParams();
-  const sessionId = params.id as string;
+  const reviewId = params.id as string;
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const { toast } = useToast();
@@ -50,12 +50,12 @@ export default function DesignReviewSessionPage() {
   useEffect(() => {
     const fetchReview = async () => {
       try {
-        // Validate sessionId
-        if (!sessionId) {
-          throw new Error("Session ID is required");
+        // Validate reviewId
+        if (!reviewId) {
+          throw new Error("Review ID is required");
         }
 
-        // We don't need to fetch the review data here since the DesignReviewSession component
+        // We don't need to fetch the review data here since the DesignReviewWithId component
         // will handle that. We just need to make sure the ID is valid.
         setIsLoading(false);
       } catch (error) {
@@ -72,7 +72,7 @@ export default function DesignReviewSessionPage() {
     };
 
     fetchReview();
-  }, [sessionId, toast]);
+  }, [reviewId, toast]);
 
   if (isLoading) {
     return <LoadingState />;
@@ -91,5 +91,5 @@ export default function DesignReviewSessionPage() {
     );
   }
 
-  return <DesignReviewSession sessionId={sessionId} />;
+  return <DesignReviewWithId reviewId={reviewId} />;
 }

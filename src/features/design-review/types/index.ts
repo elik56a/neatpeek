@@ -3,59 +3,44 @@
  */
 
 // Core types are imported in specific files where needed
-import { ExportFileType } from './file-type';
-import { HistoryChanges, IssueSummary } from './review-history';
 import {
+  ReviewJson,
   BaseIssue,
   BrandIssue,
-  DesignScore,
-  FrameImage,
   GeneralIssue,
+  DesignScore,
+  ScoreBreakdown,
+  FrameImage,
   IssueCoordinates,
-  IssueSeverity,
   IssueStatus,
-  IssueType,
-  RecheckReviewJson,
-  ReviewJson,
-  ScoreBreakdown
+  IssueSeverity,
+  IssueType
 } from './review-json';
+import { ReviewHistoryAction, HistoryChanges, IssueSummary } from './review-history';
 import { ReviewStatus } from './review-status';
 import { ScoreCategory } from './score-category';
-import {
-  CreateSessionInput,
-  DesignReviewSession,
-  DesignReviewSessionWithRelations,
-  DesignReviewWithFrame,
-  SessionAnalysisInput,
-  SessionAnalysisResult,
-  DesignReview as SessionDesignReview,
-  SessionHistoryEntry,
-  SessionRecheckInput,
-  SessionRecheckResult
-} from './session';
+import { ExportFileType } from './file-type';
 
 // Re-export the review-json types
 export type {
+  ReviewJson,
   BaseIssue,
-  BrandIssue, DesignScore, FrameImage, GeneralIssue, IssueCoordinates,
-  RecheckReviewJson, ReviewJson, ScoreBreakdown
+  BrandIssue,
+  GeneralIssue,
+  DesignScore,
+  ScoreBreakdown,
+  FrameImage,
+  IssueCoordinates
 };
 
 // Re-export the review-history types
-    export type {
-    HistoryChanges,
-    IssueSummary
-  };
-
-// Re-export the session types
-    export type {
-    CreateSessionInput, DesignReviewSession,
-    DesignReviewSessionWithRelations, DesignReviewWithFrame, SessionAnalysisInput, SessionAnalysisResult, SessionDesignReview, SessionHistoryEntry, SessionRecheckInput, SessionRecheckResult
-  };
+export type {
+  HistoryChanges,
+  IssueSummary
+};
 
 // Re-export enums (these don't need 'export type' since they're values, not just types)
-    export { ExportFileType, IssueSeverity, IssueStatus, IssueType, ReviewStatus, ScoreCategory };
-    export { ReviewHistoryAction } from '@prisma/client';
+export { IssueStatus, IssueSeverity, IssueType, ReviewHistoryAction, ReviewStatus, ScoreCategory, ExportFileType };
 
 /**
  * Frame position in a Figma file
@@ -137,9 +122,9 @@ export interface DesignReviewResult {
  */
 export interface DesignAnalysisResult {
   reviews: DesignReviewResult[];
-  sessionId: string;
-  brandId: string;
-  figmaUrl: string;
+  reviewId?: string;
+  brandId?: string;
+  figmaUrl?: string;
   fileName?: string;
 }
 
@@ -227,4 +212,16 @@ export interface FrameInfo {
   name: string;
   type: string;
   absoluteBoundingBox: FramePosition;
+}
+
+/**
+ * Review history entry
+ */
+export interface ReviewHistoryEntry {
+  id: string;
+  designReviewId: string;
+  action: ReviewHistoryAction;
+  summary: string;
+  changes?: HistoryChanges;
+  timestamp: Date;
 }

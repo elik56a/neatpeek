@@ -1,9 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -11,6 +9,7 @@ import { DesignAnalysisResult } from "../../types";
 import { AlertCircle, ExternalLink, ThumbsUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { extractHexColors, sortIssuesBySeverity } from "../../utils/export-utils";
+import { getStatusIcon, getStatusLabel } from "../../utils/enum-mappers";
 
 interface AnalysisDetailsProps {
   result: DesignAnalysisResult;
@@ -22,19 +21,11 @@ interface AnalysisDetailsProps {
 /**
  * Component for displaying detailed analysis results
  */
-export function AnalysisDetails({ result, className, activeFrameId }: AnalysisDetailsProps) {
-  // State for active frame, use the prop if provided, otherwise use internal state
-  const [internalActiveReview, setInternalActiveReview] = useState<string | null>(
-    result.reviews.length > 0 ? result.reviews[0].image.frame_id : null
-  );
-
-  // Use the prop if provided, otherwise use internal state
-  const activeReview = activeFrameId || internalActiveReview;
-
-  // Get the active review
+export function AnalysisDetails({ result, className, figmaFileName, activeFrameId }: AnalysisDetailsProps) {
+  // Get the active review based on the activeFrameId prop
   const currentReview = result.reviews.find(
-    (review) => review.image.frame_id === activeReview
-  );
+    (review) => review.image.frame_id === activeFrameId
+  ) || (result.reviews.length > 0 ? result.reviews[0] : null);
 
   // Render score card with animation
   const renderScoreCard = (score: number, label: string) => (
@@ -75,27 +66,21 @@ export function AnalysisDetails({ result, className, activeFrameId }: AnalysisDe
 
   return (
     <div className={className}>
-      {/* We're now using FrameRecheckSelector for navigation, so we hide the tabs */}
-      <Tabs
-        value={activeReview || ""}
-        onValueChange={activeFrameId ? undefined : setInternalActiveReview}
-        className="w-full"
-      >
-
-        {result.reviews.map((review) => (
-          <TabsContent key={review.image.frame_id} value={review.image.frame_id} className="space-y-6">
+      {/* Display only the current review */}
+      {currentReview && (
+        <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Frame preview */}
               <Card className="overflow-hidden">
                 <div className="aspect-video bg-muted">
                   <img
-                    src={`${review.image.url}?t=${Date.now()}`} /* Add cache-busting parameter */
-                    alt={review.image.name}
+                    src={`${currentReview.image.url}?t=${Date.now()}`} /* Add cache-busting parameter */
+                    alt={currentReview.image.name}
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <CardHeader className="pb-2">
-                  <CardTitle>{review.image.name}</CardTitle>
+                  <CardTitle>{currentReview.image.name}</CardTitle>
                   <CardDescription>
                     Frame from Figma design
                   </CardDescription>
@@ -103,20 +88,20 @@ export function AnalysisDetails({ result, className, activeFrameId }: AnalysisDe
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
                     <Badge variant="outline">
-                      {review.image.screen_type || "Screen"}
+                      {currentReview.image.screen_type || "Screen"}
                     </Badge>
                     <Badge variant="outline">
-                      {review.image.platform || "Platform"}
+                      {currentReview.image.platform || "Platform"}
                     </Badge>
                     <Badge variant="outline">
-                      {review.image.position.width}x{review.image.position.height}
+                      {currentReview.image.position.width}x{currentReview.image.position.height}
                     </Badge>
                   </div>
                 </CardContent>
                 <CardFooter>
                   <Button variant="outline" className="w-full" asChild>
                     <a
-                      href={result.figmaUrl}
+                      href={`https://www.figma.com/file/${currentReview.image.frame_id}`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -131,10 +116,10 @@ export function AnalysisDetails({ result, className, activeFrameId }: AnalysisDe
               <div className="space-y-4">
                 <h3 className="text-xl font-bold mb-4">Design Scores</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in-50 duration-500">
-                  {renderScoreCard(review.design_score?.total || 0, "Overall Score")}
-                  {renderScoreCard(review.design_score?.breakdown?.brand_compliance || 0, "Brand Compliance")}
-                  {renderScoreCard(review.design_score?.breakdown?.visual_harmony || 0, "Visual Harmony")}
-                  {renderScoreCard(review.design_score?.breakdown?.usability || 0, "Usability")}
+                  {renderScoreCard(currentReview.design_score?.total || 0, "Overall Score")}
+                  {renderScoreCard(currentReview.design_score?.breakdown?.brand_compliance || 0, "Brand Compliance")}
+                  {renderScoreCard(currentReview.design_score?.breakdown?.visual_harmony || 0, "Visual Harmony")}
+                  {renderScoreCard(currentReview.design_score?.breakdown?.usability || 0, "Usability")}
                 </div>
               </div>
             </div>
@@ -147,57 +132,46 @@ export function AnalysisDetails({ result, className, activeFrameId }: AnalysisDe
               <div>
                 <h3 className="text-xl font-bold mb-4 flex items-center">
                   <AlertCircle className="mr-2 h-5 w-5 text-red-500" />
-                  Brand Consistency Issues ({review.brand_issues.length})
+                  Brand Consistency Issues ({currentReview.brand_issues.length})
                 </h3>
-                {review.brand_issues.length > 0 ? (
+                {currentReview.brand_issues.length > 0 ? (
                   <Accordion type="multiple" className="w-full">
                     {/* Sort issues by severity: high first, then medium, then low */}
-                    {sortIssuesBySeverity(review.brand_issues)
+                    {sortIssuesBySeverity(currentReview.brand_issues)
                       .map((issue, index) => {
                       // Extract hex colors from the issue text
                       const colorHexCodes = extractHexColors(issue.description + (issue.brand_rule_violation || ""));
                       const severity = issue.severity.toUpperCase();
 
                       return (
-                        <AccordionItem
-                          key={index}
-                          value={`brand-issue-${index}`}
-                          className={`${issue.status === 'fixed' ? 'bg-green-50' : issue.status === 'partially_fixed' ? 'bg-amber-50' : ''} transition-colors duration-500`}
-                        >
+                        <AccordionItem key={index} value={`brand-issue-${index}`}>
                           <AccordionTrigger className="hover:no-underline">
                             <div className="flex items-center justify-between w-full pr-4">
                               <div className="flex items-center">
-                                <div className="flex items-center gap-1">
-                                  <Badge
-                                    variant={
-                                      issue.severity === "high" ? "destructive" :
-                                      issue.severity === "medium" ? "default" :
-                                      "outline"
-                                    }
-                                    className="mr-2"
-                                  >
-                                    {severity}
-                                  </Badge>
-                                  {issue.status === 'fixed' && (
-                                    <Badge variant="outline" className="bg-green-100 text-green-800 animate-pulse">
-                                      Fixed
-                                    </Badge>
-                                  )}
-                                  {issue.status === 'partially_fixed' && (
-                                    <Badge variant="outline" className="bg-amber-100 text-amber-800 animate-pulse">
-                                      Partially Fixed
-                                    </Badge>
-                                  )}
-                                  {/* New issue badge - uncomment when is_new property is added to the type
-                                  {issue.is_new && (
-                                    <Badge variant="outline" className="bg-blue-100 text-blue-800 animate-pulse">
-                                      New
-                                    </Badge>
-                                  )}
-                                  */}
-                                </div>
-                                <span className="font-medium truncate">{'Brand Issue'}</span>
+                                <Badge
+                                  variant={
+                                    issue.severity === "high" ? "destructive" :
+                                    issue.severity === "medium" ? "default" :
+                                    "outline"
+                                  }
+                                  className="mr-2"
+                                >
+                                  {severity}
+                                </Badge>
+                                <span className="font-medium truncate">Brand Issue</span>
                               </div>
+                              {issue.status && (() => {
+                                const StatusIcon = getStatusIcon(issue.status);
+                                return (
+                                  <Badge
+                                    variant="outline"
+                                    className={`text-xs px-2 py-0.5 flex items-center ${issue.status === 'fixed' ? 'bg-green-50 text-green-700 border-green-200' : issue.status === 'not_fixed' ? 'bg-orange-50 text-orange-700 border-orange-200' : ''}`}
+                                  >
+                                    <StatusIcon className="h-3 w-3 mr-1" />
+                                    {getStatusLabel(issue.status)}
+                                  </Badge>
+                                );
+                              })()}
                             </div>
                           </AccordionTrigger>
                           <AccordionContent className="space-y-2 px-2">
@@ -239,54 +213,43 @@ export function AnalysisDetails({ result, className, activeFrameId }: AnalysisDe
               <div>
                 <h3 className="text-xl font-bold mb-4 flex items-center">
                   <AlertCircle className="mr-2 h-5 w-5 text-amber-500" />
-                  UX & Accessibility Issues ({review.general_issues.length})
+                  UX & Accessibility Issues ({currentReview.general_issues.length})
                 </h3>
-                {review.general_issues.length > 0 ? (
+                {currentReview.general_issues.length > 0 ? (
                   <Accordion type="multiple" className="w-full">
                     {/* Sort issues by severity: high first, then medium, then low */}
-                    {sortIssuesBySeverity(review.general_issues)
+                    {sortIssuesBySeverity(currentReview.general_issues)
                       .map((issue, index) => {
                       const severity = issue.severity.toUpperCase();
                       return (
-                        <AccordionItem
-                          key={index}
-                          value={`general-issue-${index}`}
-                          className={`${issue.status === 'fixed' ? 'bg-green-50' : issue.status === 'partially_fixed' ? 'bg-amber-50' : ''} transition-colors duration-500`}
-                        >
+                        <AccordionItem key={index} value={`general-issue-${index}`}>
                           <AccordionTrigger className="hover:no-underline">
                             <div className="flex items-center justify-between w-full pr-4">
                               <div className="flex items-center">
-                                <div className="flex items-center gap-1">
-                                  <Badge
-                                    variant={
-                                      issue.severity === "high" ? "destructive" :
-                                      issue.severity === "medium" ? "default" :
-                                      "outline"
-                                    }
-                                    className="mr-2"
-                                  >
-                                    {severity}
-                                  </Badge>
-                                  {issue.status === 'fixed' && (
-                                    <Badge variant="outline" className="bg-green-100 text-green-800 animate-pulse">
-                                      Fixed
-                                    </Badge>
-                                  )}
-                                  {issue.status === 'partially_fixed' && (
-                                    <Badge variant="outline" className="bg-amber-100 text-amber-800 animate-pulse">
-                                      Partially Fixed
-                                    </Badge>
-                                  )}
-                                  {/* New issue badge - uncomment when is_new property is added to the type
-                                  {issue.is_new && (
-                                    <Badge variant="outline" className="bg-blue-100 text-blue-800 animate-pulse">
-                                      New
-                                    </Badge>
-                                  )}
-                                  */}
-                                </div>
-                                <span className="font-medium truncate">{'General Issue'}</span>
+                                <Badge
+                                  variant={
+                                    issue.severity === "high" ? "destructive" :
+                                    issue.severity === "medium" ? "default" :
+                                    "outline"
+                                  }
+                                  className="mr-2"
+                                >
+                                  {severity}
+                                </Badge>
+                                <span className="font-medium truncate">UX Issue</span>
                               </div>
+                              {issue.status && (() => {
+                                const StatusIcon = getStatusIcon(issue.status);
+                                return (
+                                  <Badge
+                                    variant="outline"
+                                    className={`text-xs px-2 py-0.5 flex items-center ${issue.status === 'fixed' ? 'bg-green-50 text-green-700 border-green-200' : issue.status === 'not_fixed' ? 'bg-orange-50 text-orange-700 border-orange-200' : ''}`}
+                                  >
+                                    <StatusIcon className="h-3 w-3 mr-1" />
+                                    {getStatusLabel(issue.status)}
+                                  </Badge>
+                                );
+                              })()}
                             </div>
                           </AccordionTrigger>
                           <AccordionContent className="space-y-2 px-2">
@@ -314,11 +277,11 @@ export function AnalysisDetails({ result, className, activeFrameId }: AnalysisDe
             <div>
               <h3 className="text-xl font-bold mb-4 flex items-center">
                 <ThumbsUp className="mr-2 h-5 w-5 text-green-500" />
-                Positive Aspects ({review.positive_aspects.length})
+                Positive Aspects ({currentReview.positive_aspects.length})
               </h3>
-              {review.positive_aspects.length > 0 ? (
+              {currentReview.positive_aspects.length > 0 ? (
                 <Accordion type="multiple" className="w-full">
-                  {review.positive_aspects.map((aspect, index) => (
+                  {currentReview.positive_aspects.map((aspect: any, index: number) => (
                     <AccordionItem key={index} value={`positive-aspect-${index}`}>
                       <AccordionTrigger className="hover:no-underline">
                         <div className="flex items-center justify-between w-full pr-4">
@@ -352,9 +315,9 @@ export function AnalysisDetails({ result, className, activeFrameId }: AnalysisDe
               <CardContent className="space-y-4">
                 <div className="rounded-lg border p-4 bg-muted/50">
                   <p className="text-sm">
-                    {review.design_score.total > 80
+                    {currentReview.design_score.total > 80
                       ? "Your design shows strong brand consistency! There are just a few minor issues to address."
-                      : review.design_score.total > 60
+                      : currentReview.design_score.total > 60
                       ? "Your design has good brand consistency with some issues that should be addressed."
                       : "Your design needs significant improvements to align with your brand guidelines."}
                   </p>
@@ -362,9 +325,9 @@ export function AnalysisDetails({ result, className, activeFrameId }: AnalysisDe
                   <div className="mt-4 text-sm">
                     <p className="font-medium">Key areas to improve:</p>
                     <ul className="list-disc pl-5 mt-2 space-y-1">
-                      {review.design_score.breakdown.brand_compliance < 90 && <li>Brand compliance</li>}
-                      {review.design_score.breakdown.visual_harmony < 85 && <li>Visual harmony</li>}
-                      {review.design_score.breakdown.usability < 80 && <li>Usability</li>}
+                      {currentReview.design_score.breakdown.brand_compliance < 90 && <li>Brand compliance</li>}
+                      {currentReview.design_score.breakdown.visual_harmony < 85 && <li>Visual harmony</li>}
+                      {currentReview.design_score.breakdown.usability < 80 && <li>Usability</li>}
                     </ul>
                   </div>
                 </div>
@@ -375,38 +338,37 @@ export function AnalysisDetails({ result, className, activeFrameId }: AnalysisDe
                     <div>
                       <div className="flex justify-between mb-1">
                         <span className="text-sm">Brand Compliance</span>
-                        <span className="text-sm font-medium">{review.design_score.breakdown.brand_compliance}%</span>
+                        <span className="text-sm font-medium">{currentReview.design_score.breakdown.brand_compliance}%</span>
                       </div>
-                      <Progress value={review.design_score.breakdown.brand_compliance} className="h-2" />
+                      <Progress value={currentReview.design_score.breakdown.brand_compliance} className="h-2" />
                     </div>
                     <div>
                       <div className="flex justify-between mb-1">
                         <span className="text-sm">Visual Harmony</span>
-                        <span className="text-sm font-medium">{review.design_score.breakdown.visual_harmony}%</span>
+                        <span className="text-sm font-medium">{currentReview.design_score.breakdown.visual_harmony}%</span>
                       </div>
-                      <Progress value={review.design_score.breakdown.visual_harmony} className="h-2" />
+                      <Progress value={currentReview.design_score.breakdown.visual_harmony} className="h-2" />
                     </div>
                     <div>
                       <div className="flex justify-between mb-1">
                         <span className="text-sm">Usability</span>
-                        <span className="text-sm font-medium">{review.design_score.breakdown.usability}%</span>
+                        <span className="text-sm font-medium">{currentReview.design_score.breakdown.usability}%</span>
                       </div>
-                      <Progress value={review.design_score.breakdown.usability} className="h-2" />
+                      <Progress value={currentReview.design_score.breakdown.usability} className="h-2" />
                     </div>
                     <div>
                       <div className="flex justify-between mb-1">
                         <span className="text-sm">Accessibility</span>
-                        <span className="text-sm font-medium">{review.design_score.breakdown.accessibility}%</span>
+                        <span className="text-sm font-medium">{currentReview.design_score.breakdown.accessibility}%</span>
                       </div>
-                      <Progress value={review.design_score.breakdown.accessibility} className="h-2" />
+                      <Progress value={currentReview.design_score.breakdown.accessibility} className="h-2" />
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-        ))}
-      </Tabs>
+        </div>
+      )}
     </div>
   );
 }

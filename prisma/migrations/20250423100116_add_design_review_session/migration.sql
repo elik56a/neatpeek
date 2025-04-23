@@ -26,7 +26,17 @@ DROP INDEX "DesignReview_userId_idx";
 -- DropIndex
 DROP INDEX "ReviewHistory_designReviewId_idx";
 
--- Create DesignReviewSession table first
+-- AlterTable
+ALTER TABLE "DesignReview" DROP COLUMN "brandGuidelineId",
+DROP COLUMN "originalFigmaUrl",
+ADD COLUMN     "sessionId" TEXT NOT NULL,
+ALTER COLUMN "userId" DROP NOT NULL;
+
+-- AlterTable
+ALTER TABLE "ReviewHistory" DROP COLUMN "designReviewId",
+ADD COLUMN     "frameId" TEXT,
+ADD COLUMN     "sessionId" TEXT NOT NULL;
+
 -- CreateTable
 CREATE TABLE "DesignReviewSession" (
     "id" TEXT NOT NULL,
@@ -41,63 +51,6 @@ CREATE TABLE "DesignReviewSession" (
 
     CONSTRAINT "DesignReviewSession_pkey" PRIMARY KEY ("id")
 );
-
--- Create a session for each existing design review
-INSERT INTO "DesignReviewSession" ("id", "userId", "brandGuidelineId", "figmaUrl", "figmaFileKey", "figmaFileName", "status", "createdAt", "updatedAt")
-SELECT
-    dr."id" || '_session', -- Create a unique ID for the session
-    dr."userId",
-    dr."brandGuidelineId",
-    COALESCE(dr."originalFigmaUrl", 'https://figma.com/unknown'), -- Use originalFigmaUrl or default
-    ff."figmaFileKey", -- Get from related FigmaFrame
-    ff."figmaFileName", -- Get from related FigmaFrame
-    dr."status",
-    dr."createdAt",
-    dr."updatedAt"
-FROM "DesignReview" dr
-JOIN "FigmaFrame" ff ON dr."frameId" = ff."id";
-
--- Now alter the DesignReview table to add sessionId
--- AlterTable
-ALTER TABLE "DesignReview"
-ADD COLUMN "sessionId" TEXT;
-
--- Update existing design reviews to link to their sessions
-UPDATE "DesignReview"
-SET "sessionId" = "id" || '_session'
-WHERE "sessionId" IS NULL;
-
--- Now make sessionId required
-ALTER TABLE "DesignReview"
-ALTER COLUMN "sessionId" SET NOT NULL,
-ALTER COLUMN "userId" DROP NOT NULL;
-
--- Finally drop the columns we don't need anymore
-ALTER TABLE "DesignReview"
-DROP COLUMN "brandGuidelineId",
-DROP COLUMN "originalFigmaUrl";
-
--- AlterTable for ReviewHistory
-ALTER TABLE "ReviewHistory"
-ADD COLUMN "frameId" TEXT,
-ADD COLUMN "sessionId" TEXT;
-
--- Update existing history entries to link to the new sessions
-UPDATE "ReviewHistory" rh
-SET "sessionId" = dr."sessionId",
-    "frameId" = dr."frameId"
-FROM "DesignReview" dr
-WHERE rh."designReviewId" = dr."id";
-
--- Now make sessionId required
-ALTER TABLE "ReviewHistory"
-ALTER COLUMN "sessionId" SET NOT NULL;
-
--- Finally drop the designReviewId column
-ALTER TABLE "ReviewHistory"
-DROP COLUMN "designReviewId";
-
--- CreateTable already done above
 
 -- CreateIndex
 CREATE INDEX "DesignReviewSession_userId_idx" ON "DesignReviewSession"("userId");

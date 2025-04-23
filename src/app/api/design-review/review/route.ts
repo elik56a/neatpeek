@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
 
     // Get request body
     const body = await req.json();
-    const { figmaUrl, brandId, selectedFrameIds } = body;
+    const { figmaUrl, brandId, designType, selectedFrameIds } = body;
 
     if (!figmaUrl) {
       return NextResponse.json(
@@ -63,18 +63,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Dynamically import the DesignReviewSessionService
-    const { DesignReviewSessionService } = await import('@/features/design-review/services/design-review-session-service');
+    // Dynamically import the DesignReviewService
+    const { DesignReviewService } = await import('@/features/design-review/services/design-review-service');
 
-    // Create design review session service
-    const sessionService = new DesignReviewSessionService(figmaToken);
+    // Create design review service
+    const designReviewService = new DesignReviewService(figmaToken);
 
-    // Analyze designs
-    const reviewResult = await sessionService.analyzeDesigns({
+    // Review design with selected frames
+    const reviewResult = await designReviewService.analyzeDesign({
       figmaUrl,
       brandId,
-      userId: user.id,
-      selectedFrameIds // Pass the selected frame IDs to the service
+      designType,
+      selectedFrameIds, // Pass the selected frame IDs to the service
+      userId: user.id // Pass the user ID to the service
     });
 
     return NextResponse.json(reviewResult);

@@ -5,6 +5,13 @@
 /**
  * Figma Frame entity
  */
+
+export enum CompanyRole {
+  OWNER = 'OWNER',
+  ADMIN = 'ADMIN',
+  MEMBER = 'MEMBER'
+}
+
 export interface FigmaFrame {
   id: string;
   brandGuidelineId: string;
@@ -78,7 +85,7 @@ export interface User {
   lastLogin?: Date;
   role?: string;
   companyId?: string;
-  companyRole?: CompanyRole;
+  companyRole?: string;
   figmaUserId?: string;
   figmaAccessToken?: string;
   figmaRefreshToken?: string;
@@ -224,13 +231,4 @@ export interface DesignImage {
   description?: string;
   createdAt?: Date;
   brandGuideline?: BrandGuideline;
-}
-
-/**
- * Company Role enum
- */
-export enum CompanyRole {
-  OWNER = 'OWNER',
-  ADMIN = 'ADMIN',
-  MEMBER = 'MEMBER'
 }

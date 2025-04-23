@@ -6,9 +6,14 @@
 /**
  * Enum for review history action
  * This should match the ReviewHistoryAction enum in the Prisma schema
- * We're now importing this directly from Prisma
  */
-export { ReviewHistoryAction } from '@prisma/client';
+export enum ReviewHistoryAction {
+  INITIAL_REVIEW = 'INITIAL_REVIEW',
+  RECHECK = 'RECHECK',
+  NEW_ISSUES_FOUND = 'NEW_ISSUES_FOUND',
+  ISSUES_FIXED = 'ISSUES_FIXED',
+  ISSUES_PARTIALLY_FIXED = 'ISSUES_PARTIALLY_FIXED',
+}
 
 /**
  * Interface for issue summary in history changes
@@ -32,6 +37,4 @@ export interface HistoryChanges {
   general_issues_count?: number;
   total_issues_count?: number;
   design_score?: number;
-  // Additional data for session-based history
-  additional_data?: Record<string, any>;
 }

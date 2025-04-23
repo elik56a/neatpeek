@@ -13,9 +13,9 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(req: NextRequest) {
   try {
     // Get the current user session
-    const authSession = await getServerSession();
+    const session = await getServerSession();
 
-    if (!authSession?.user?.email) {
+    if (!session?.user?.email) {
       return NextResponse.json(
         { error: "You must be logged in to recheck designs" },
         { status: 401 }
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 
     // Get the user
     const user = await prisma.user.findUnique({
-      where: { email: authSession.user.email },
+      where: { email: session.user.email },
       select: { id: true, figmaAccessToken: true },
     });
 
@@ -60,36 +60,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get the session ID for this Figma file
-    const designSession = await prisma.designReviewSession.findFirst({
-      where: {
-        figmaUrl,
-        brandGuidelineId: brandId,
-        userId: user.id
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
+    // Dynamically import the DesignReviewService
+    const { DesignReviewService } = await import('@/features/design-review/services/design-review-service');
 
-    if (!designSession) {
-      return NextResponse.json(
-        { error: "No session found for this Figma URL. Please run an initial review first." },
-        { status: 404 }
-      );
-    }
-
-    // Dynamically import the DesignReviewSessionService
-    const { DesignReviewSessionService } = await import('@/features/design-review/services/design-review-session-service');
-
-    // Create design review session service
-    const sessionService = new DesignReviewSessionService(user.figmaAccessToken);
+    // Create design review service
+    const designReviewService = new DesignReviewService(user.figmaAccessToken);
 
     // Recheck design
-    const recheckResult = await sessionService.recheckDesigns({
-      sessionId: designSession.id,
-      frameIds,
-      userId: user.id
+    const recheckResult = await designReviewService.recheckDesign({
+      figmaUrl,
+      brandId,
+      userId: user.id,
+      frameIds // Include the frame IDs
     });
 
     return NextResponse.json(recheckResult);

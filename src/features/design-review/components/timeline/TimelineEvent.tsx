@@ -1,13 +1,13 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { ReviewHistoryAction, SessionHistoryEntry } from "../../types";
+import { ReviewHistoryEntry } from "../../types";
 import { formatDistanceToNow } from "date-fns";
 import { AlertCircle, CheckCircle2, FileSearch, PlusCircle, ThumbsUp } from "lucide-react";
 import { getActionBadgeVariant, getActionColor, getActionIcon, getActionLabel } from "../../utils/enum-mappers";
 
 interface TimelineEventProps {
-  event: SessionHistoryEntry;
+  event: ReviewHistoryEntry;
   isFirst: boolean;
 }
 
@@ -18,20 +18,17 @@ export function TimelineEvent({ event, isFirst }: TimelineEventProps) {
   // Format the timestamp
   const formattedTime = formatDistanceToNow(new Date(event.timestamp), { addSuffix: true });
 
-  // Convert action to ReviewHistoryAction enum
-  const action = event.action as unknown as ReviewHistoryAction;
-
   // Get the icon for this action
-  const Icon = getActionIcon(action);
+  const Icon = getActionIcon(event.action);
 
   // Get the color for this action
-  const iconColor = getActionColor(action);
+  const iconColor = getActionColor(event.action);
 
   // Get the badge variant for this action
-  const badgeVariant = getActionBadgeVariant(action);
+  const badgeVariant = getActionBadgeVariant(event.action);
 
   // Get the action text
-  const actionText = getActionLabel(action);
+  const actionText = getActionLabel(event.action);
 
   return (
     <div className="flex items-start gap-3">
@@ -41,15 +38,7 @@ export function TimelineEvent({ event, isFirst }: TimelineEventProps) {
       <div className="flex-1">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-1">
           <div className="flex items-center gap-2 mb-1 sm:mb-0">
-            <Badge
-              variant={badgeVariant === 'success' || badgeVariant === 'warning' ? 'default' : badgeVariant as 'default' | 'secondary' | 'destructive' | 'outline'}
-              className={`
-                ${badgeVariant === 'success' ? 'bg-green-500 hover:bg-green-500/80' : ''}
-                ${badgeVariant === 'warning' ? 'bg-amber-500 hover:bg-amber-500/80' : ''}
-              `}
-            >
-              {actionText}
-            </Badge>
+            <Badge variant={badgeVariant as any}>{actionText}</Badge>
             {isFirst && <Badge variant="outline" className="bg-primary/10">Latest</Badge>}
           </div>
           <span className="text-xs text-muted-foreground">{formattedTime}</span>

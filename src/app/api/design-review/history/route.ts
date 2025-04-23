@@ -35,49 +35,42 @@ export async function GET(req: NextRequest) {
 
     // Get query parameters
     const url = new URL(req.url);
-    const sessionId = url.searchParams.get('sessionId');
-
-    if (!sessionId) {
+    const reviewId = url.searchParams.get('reviewId');
+    
+    if (!reviewId) {
       return NextResponse.json(
         { error: "Review ID is required" },
         { status: 400 }
       );
     }
 
-    // First check if the reviewId is a session ID
-    const designSession = await prisma.designReviewSession.findUnique({
-      where: { id: sessionId },
+    // Check if the review belongs to the user
+    const review = await prisma.designReview.findUnique({
+      where: { id: reviewId },
       select: { userId: true },
     });
 
-    console.log({
-      designSession,
-      user
-    })
-
-    if (!designSession) {
+    if (!review) {
       return NextResponse.json(
         { error: "Review not found" },
         { status: 404 }
       );
     }
 
-      // This is a session ID
-      if (designSession.userId !== user.id) {
-        return NextResponse.json(
-          { error: "You don't have permission to view this review history" },
-          { status: 403 }
-        );
-      }
+    if (review.userId !== user.id) {
+      return NextResponse.json(
+        { error: "You don't have permission to view this review history" },
+        { status: 403 }
+      );
+    }
 
-      // Fetch review history for the session
-      const history = await prisma.reviewHistory.findMany({
-        where: { sessionId },
-        orderBy: { timestamp: 'desc' },
-      });
+    // Fetch review history
+    const history = await prisma.reviewHistory.findMany({
+      where: { designReviewId: reviewId },
+      orderBy: { timestamp: 'desc' },
+    });
 
-      return NextResponse.json(history);
-
+    return NextResponse.json(history);
   } catch (error: any) {
     console.error("Error fetching review history:", error);
     return NextResponse.json(

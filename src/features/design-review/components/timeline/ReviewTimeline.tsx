@@ -4,11 +4,11 @@ import { useState, useEffect } from "react";
 import { Separator } from "@/components/ui/separator";
 import { CustomLoader } from "@/components/ui/custom-loader";
 import { AlertCircle } from "lucide-react";
-import { SessionHistoryEntry } from "../../types";
+import { ReviewHistoryEntry } from "../../types";
 import { TimelineEvent } from "../timeline";
 
 interface ReviewTimelineProps {
-  sessionId: string;
+  reviewId: string;
   isVisible: boolean;
   onToggle?: () => void;
 }
@@ -16,21 +16,21 @@ interface ReviewTimelineProps {
 /**
  * Component for displaying a review timeline
  */
-export function ReviewTimeline({ sessionId, isVisible }: ReviewTimelineProps) {
-  const [history, setHistory] = useState<SessionHistoryEntry[]>([]);
+export function ReviewTimeline({ reviewId, isVisible }: ReviewTimelineProps) {
+  const [history, setHistory] = useState<ReviewHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   // Fetch history when the component mounts or reviewId changes
   useEffect(() => {
     const fetchHistory = async () => {
-      if (!sessionId || !isVisible) return;
+      if (!reviewId || !isVisible) return;
 
       setIsLoading(true);
       setError(null);
 
       try {
-        const response = await fetch(`/api/design-review/history?sessionId=${sessionId}`);
+        const response = await fetch(`/api/design-review/history?reviewId=${reviewId}`);
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -48,7 +48,7 @@ export function ReviewTimeline({ sessionId, isVisible }: ReviewTimelineProps) {
     };
 
     fetchHistory();
-  }, [sessionId, isVisible]);
+  }, [reviewId, isVisible]);
 
   return (
     <div className="relative">

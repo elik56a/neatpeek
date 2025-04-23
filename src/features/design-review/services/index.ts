@@ -4,5 +4,5 @@ export * from './figma-service';
 
 // Export types from server-only services
 export type { AIService } from './ai';
-export type { DesignReviewSessionService } from './design-review-session-service';
+export type { DesignReviewService } from './design-review-service';
 

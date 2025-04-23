@@ -8,65 +8,18 @@ import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { AnalysisResults } from "./AnalysisResults";
-import { DesignAnalysisResult, DesignReviewResult } from "../types";
+import { DesignAnalysisResult } from "../types";
 import { useRouter } from "next/navigation";
 import { useAppDataContext } from "@/providers/AppDataProvider";
 
-/**
- * Adapts a session response to the DesignAnalysisResult format
- * expected by the AnalysisResults component
- */
-function adaptSessionToAnalysisResult(session: any): DesignAnalysisResult {
-  // If it's already in the right format, return it
-  if (session.reviews) {
-    return session as DesignAnalysisResult;
-  }
-  
-  // Convert frameReviews to the reviews format expected by AnalysisResults
-  const reviews: DesignReviewResult[] = session.frameReviews?.map((review: any) => {
-    // Extract the reviewJson which contains most of the data we need
-    const reviewJson = review.reviewJson || {};
-    
-    return {
-      image: {
-        frame_id: review.frame.frameId,
-        name: review.frame.name,
-        url: review.frame.imageUrl,
-        ...((reviewJson.image || {}) as any)
-      },
-      brand_issues: reviewJson.brand_issues || [],
-      general_issues: reviewJson.general_issues || [],
-      positive_aspects: reviewJson.positive_aspects || [],
-      design_score: reviewJson.design_score || {
-        total: review.designScore,
-        max_score: review.designScoreMax,
-        breakdown: {
-          brand_compliance: review.brandComplianceScore,
-          visual_harmony: review.visualHarmonyScore,
-          usability: review.usabilityScore,
-          accessibility: review.accessibilityScore
-        }
-      }
-    };
-  }) || [];
-  
-  return {
-    reviews,
-    sessionId: session.id,
-    brandId: session.brandGuidelineId,
-    figmaUrl: session.figmaUrl,
-    fileName: session.figmaFileName
-  };
-}
-
-interface DesignReviewSessionProps {
-  sessionId: string;
+interface DesignReviewWithIdProps {
+  reviewId: string;
 }
 
 /**
- * Component for displaying a design review session
+ * Component for displaying a design review by ID
  */
-function DesignReviewSession({ sessionId }: DesignReviewSessionProps) {
+function DesignReviewWithId({ reviewId }: DesignReviewWithIdProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isRecheckLoading, setIsRecheckLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -79,8 +32,8 @@ function DesignReviewSession({ sessionId }: DesignReviewSessionProps) {
   useEffect(() => {
     const fetchReview = async () => {
       try {
-        // Fetch the review data - try the session endpoint first
-        const response = await fetch(`/api/design-review/session/${sessionId}`);
+        // Fetch the review data
+        const response = await fetch(`/api/design-review/${reviewId}`);
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -88,17 +41,8 @@ function DesignReviewSession({ sessionId }: DesignReviewSessionProps) {
         }
 
         const data = await response.json();
-
-        // Adapt the session data to the format expected by AnalysisResults
-        const adaptedData = adaptSessionToAnalysisResult(data);
-
-        setReviewData(adaptedData);
+        setReviewData(data);
         setIsLoading(false);
-
-        // Update the browser title with the file name
-        if (adaptedData.fileName) {
-          document.title = `${adaptedData.fileName} - Design Review`;
-        }
       } catch (error) {
         console.error("Error fetching design review:", error);
         setError(error instanceof Error ? error : new Error("Failed to fetch design review"));
@@ -112,10 +56,10 @@ function DesignReviewSession({ sessionId }: DesignReviewSessionProps) {
       }
     };
 
-    if (sessionId) {
+    if (reviewId) {
       fetchReview();
     }
-  }, [sessionId, toast]);
+  }, [reviewId, toast]);
 
   // Handle recheck
   const handleRecheck = async (frameIds?: string[]) => {
@@ -166,50 +110,22 @@ function DesignReviewSession({ sessionId }: DesignReviewSessionProps) {
 
       const data = await response.json();
 
-      // Update the URL to include the session ID if it's not already there
-      if (data.sessionId && data.sessionId !== sessionId) {
-        // Use replace to update the URL without adding to history stack
-        router.replace(`/design-review/${data.sessionId}`, { scroll: false });
-
-        // Update the browser title with the file name
-        if (data.fileName) {
-          document.title = `${data.fileName} - Design Review`;
-        }
+      // Update the URL to include the review ID if it's not already there
+      if (data.reviewId && data.reviewId !== reviewId) {
+        router.replace(`/design-review/${data.reviewId}`);
       }
 
-      // Show success toast with detailed information
-      const fixedCount = data.changes?.fixed_count || 0;
-      const partiallyFixedCount = data.changes?.partially_fixed_count || 0;
-      const notFixedCount = data.changes?.not_fixed_count || 0;
-      const newIssuesCount = data.changes?.new_issues_count || 0;
-
-      let description = "Your design has been rechecked successfully.";
-
-      if (fixedCount > 0 || partiallyFixedCount > 0 || notFixedCount > 0 || newIssuesCount > 0) {
-        description = `${fixedCount} issues fixed, ${partiallyFixedCount} partially fixed, ${notFixedCount} not fixed`;
-        if (newIssuesCount > 0) {
-          description += `, ${newIssuesCount} new issues found`;
-        }
-      }
-
+      // Show success toast
       toast({
         title: "Recheck Complete",
-        description,
-        variant: newIssuesCount > 0 ? "destructive" : "default",
+        description: "Your design has been rechecked successfully.",
       });
 
-      // Refresh the review data - try the session endpoint first
-      let refreshResponse = await fetch(`/api/design-review/session/${sessionId}`);
-
-      // If the session endpoint fails, try the generic endpoint
-      if (!refreshResponse.ok) {
-        refreshResponse = await fetch(`/api/design-review/${sessionId}`);
-      }
-
+      // Refresh the review data
+      const refreshResponse = await fetch(`/api/design-review/${reviewId}`);
       if (refreshResponse.ok) {
         const refreshData = await refreshResponse.json();
-        const adaptedData = adaptSessionToAnalysisResult(refreshData);
-        setReviewData(adaptedData);
+        setReviewData(refreshData);
       }
     } catch (error) {
       console.error("Error rechecking design:", error);
@@ -305,4 +221,4 @@ function DesignReviewSession({ sessionId }: DesignReviewSessionProps) {
   );
 }
 
-export { DesignReviewSession };
+export { DesignReviewWithId };

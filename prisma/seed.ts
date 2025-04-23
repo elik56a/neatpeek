@@ -261,68 +261,8 @@ async function main() {
     }
   });
 
-  // Create Figma file
-  const figmaFile = await prisma.figmaFile.create({
-    data: {
-      projectId: project.id,
-      figmaFileKey: 'abcd1234efgh5678',
-      figmaFileName: 'Website Design',
-    }
-  });
+  
 
-  // Create Figma frame
-  const figmaFrame = await prisma.figmaFrame.create({
-    data: {
-      figmaFileId: figmaFile.id,
-      frameId: 'frame123',
-      name: 'Homepage',
-      imageUrl: 'https://example.com/frames/homepage.png',
-      screenType: 'desktop',
-    }
-  });
-
-  // Create design review
-  const designReview = await prisma.designReview.create({
-    data: {
-      frameId: figmaFrame.id,
-      reviewJson: JSON.stringify({
-        colorAnalysis: { score: 85, issues: [] },
-        typographyAnalysis: { score: 90, issues: [] },
-        accessibilityAnalysis: { score: 75, issues: [] },
-      }),
-      designScore: 85,
-      brandComplianceScore: 88,
-      visualHarmonyScore: 90,
-      usabilityScore: 82,
-      accessibilityScore: 75,
-      status: 'COMPLETED',
-    }
-  });
-
-  // Create comments
-  await prisma.figmaComment.createMany({
-    data: [
-      {
-        reviewId: designReview.id,
-        frameId: figmaFrame.id,
-        messageType: 'BRAND_ISSUE',
-        message: 'The button color does not match the brand guidelines.',
-        elementType: 'button',
-        severity: 'MEDIUM',
-        positionX: 0.7,
-        positionY: 0.5,
-      },
-      {
-        reviewId: designReview.id,
-        frameId: figmaFrame.id,
-        messageType: 'POSITIVE_ASPECT',
-        message: 'Great use of typography hierarchy.',
-        elementType: 'text',
-        positionX: 0.3,
-        positionY: 0.2,
-      },
-    ],
-  });
 
   // Create a few feature flags
   await prisma.featureFlag.createMany({

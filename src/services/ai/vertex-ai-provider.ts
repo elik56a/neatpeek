@@ -290,6 +290,9 @@ export class VertexAIProvider implements AIService {
       Here are the brand rules:
       ${JSON.stringify(params.brandRules, null, 2)}
 
+      IMPORTTANT:
+      THE SEVERITY OF THE ISSUES SHOULD BE BASED ON THE BRAND RULES AND GUIDELINES. IF THE ISSUE IS A VIOLATION OF A BRAND RULE, THE SEVERITY SHOULD BE HIGH. IF THE ISSUE IS A VIOLATION OF A GENERAL RULE, THE SEVERITY SHOULD BE MEDIUM. IF THE ISSUE IS A VIOLATION OF A GENERAL RULE BUT THE BRAND RULES ARE NOT VIOLATED, THE SEVERITY SHOULD BE LOW.
+
       IMPORTANT: Return the following JSON schema with frame_id included for each image. DO NOT wrap the JSON in code blocks or markdown formatting. DO NOT use backticks around your response. Return ONLY the raw JSON:
       {
         "reviews": [
@@ -443,6 +446,9 @@ export class VertexAIProvider implements AIService {
       ${JSON.stringify(params.brandRules, null, 2)}
 
       IMPORTANT: Only analyze and respond about the frames provided above. Do not comment on any other frames in the file.
+
+      VERY IMPORTENT!!!
+      BEFORE SET THE ISSURE TO FIXED, MAKE SURE VERY CAREFULLY CHECK THE DESIGN AND MAKE SURE THE ISSUE IS FIXED. SAME FOR NEW ISSUES.
 
       IMPORTANT: Return the following JSON schema. DO NOT wrap the JSON in code blocks or markdown formatting. DO NOT use backticks around your response. Return ONLY the raw JSON:
       {

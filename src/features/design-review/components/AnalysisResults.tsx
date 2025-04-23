@@ -37,11 +37,8 @@ export function AnalysisResults({
   isRecheckLoading = false
 }: AnalysisResultsProps) {
   const [isTimelineVisible, setIsTimelineVisible] = useState(false);
-  // Ensure we have a valid result object with reviews
-  const hasReviews = result?.reviews?.length > 0;
-
   const [activeFrameId, setActiveFrameId] = useState<string | null>(
-    hasReviews ? result.reviews[0].image.frame_id : null
+    result.reviews.length > 0 ? result.reviews[0].image.frame_id : null
   );
 
   // Timeline visibility is now controlled by the Dialog component
@@ -51,7 +48,7 @@ export function AnalysisResults({
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Design Review Results</h2>
         <div className="flex gap-2 items-center">
-          {result.sessionId && showTimeline && (
+          {result.reviewId && showTimeline && (
             <>
               <TooltipProvider>
                 <Tooltip>
@@ -71,7 +68,7 @@ export function AnalysisResults({
 
               {/* Custom timeline drawer that slides in from the right */}
               <TimelineDrawer
-                sessionId={result.sessionId}
+                reviewId={result.reviewId}
                 isOpen={isTimelineVisible}
                 onClose={() => setIsTimelineVisible(false)}
               />

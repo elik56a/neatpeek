@@ -13,9 +13,9 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(req: NextRequest) {
   try {
     // Get the current user session
-    const authSession = await getServerSession();
+    const session = await getServerSession();
 
-    if (!authSession?.user?.email) {
+    if (!session?.user?.email) {
       return NextResponse.json(
         { error: "You must be logged in to analyze designs" },
         { status: 401 }
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 
     // Get the user
     const user = await prisma.user.findUnique({
-      where: { email: authSession.user.email },
+      where: { email: session.user.email },
       select: { id: true, figmaAccessToken: true },
     });
 
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
 
     // Get request body
     const body = await req.json();
-    const { figmaUrl, brandId, selectedFrameIds } = body;
+    const { figmaUrl, brandId, designType } = body;
 
     if (!figmaUrl) {
       return NextResponse.json(
@@ -60,18 +60,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Dynamically import the DesignReviewSessionService
-    const { DesignReviewSessionService } = await import('@/features/design-review/services/design-review-session-service');
+    // Dynamically import the DesignReviewService
+    const { DesignReviewService } = await import('@/features/design-review/services/design-review-service');
 
-    // Create design review session service
-    const sessionService = new DesignReviewSessionService(user.figmaAccessToken);
+    // Create design review service
+    const designReviewService = new DesignReviewService(user.figmaAccessToken);
 
-    // Analyze designs
-    const analysisResult = await sessionService.analyzeDesigns({
+    // Analyze design
+    const analysisResult = await designReviewService.analyzeDesign({
       figmaUrl,
       brandId,
-      userId: user.id,
-      selectedFrameIds
+      designType,
+      userId: user.id // Pass the user ID to the service
     });
 
     return NextResponse.json(analysisResult);

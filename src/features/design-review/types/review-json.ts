@@ -50,8 +50,6 @@ export interface BaseIssue {
   status?: IssueStatus; // Status of the issue (for rechecks)
   recheck_details?: string; // Additional details from recheck
   created_at?: string; // ISO timestamp when the issue was created
-  discovered_at?: string; // ISO timestamp when the issue was discovered during recheck
-  last_checked?: string; // ISO timestamp of last recheck
 }
 
 /**
@@ -116,15 +114,4 @@ export interface ReviewJson {
   summary?: string;
   created_at: string; // ISO timestamp
   updated_at?: string; // ISO timestamp for rechecks
-}
-
-/**
- * Extended ReviewJson interface for recheck results
- */
-export interface RecheckReviewJson extends ReviewJson {
-  last_rechecked?: string; // ISO timestamp of last recheck
-  fixed_issues_count?: number;
-  partially_fixed_issues_count?: number;
-  not_fixed_issues_count?: number;
-  new_issues_count?: number;
 }

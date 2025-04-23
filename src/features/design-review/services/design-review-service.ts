@@ -16,26 +16,40 @@ import {
   DesignRecheckResult,
   FigmaMetadata,
   ReviewHistoryAction,
+  HistoryChanges,
+  BrandIssue,
+  GeneralIssue,
   ReviewStatus
 } from '../types';
-import { createSession, createHistoryEntry, updateSessionStatus } from '../utils/session-utils';
-import { DesignReviewCoreService } from './design-review-core-service';
+import { FigmaService } from './figma-service';
 import { DesignRecheckService } from './design-recheck-service';
 
 /**
  * Design Review Service
  */
 export class DesignReviewService {
-  private coreService: DesignReviewCoreService;
+  private figmaService: FigmaService;
   private recheckService: DesignRecheckService;
+  private aiService: any = null;
 
   /**
    * Create a new DesignReviewService
    * @param figmaToken Figma API token
    */
   constructor(figmaToken: string) {
-    this.coreService = new DesignReviewCoreService(figmaToken);
-    this.recheckService = new DesignRecheckService(this.coreService);
+    this.figmaService = new FigmaService(figmaToken);
+    this.recheckService = new DesignRecheckService(this.figmaService);
+  }
+
+  /**
+   * Initialize the AI service
+   */
+  private async initAIService() {
+    if (!this.aiService) {
+      const { getAIService } = await import('@/services/ai');
+      this.aiService = await getAIService();
+    }
+    return this.aiService;
   }
 
   /**
@@ -43,130 +57,84 @@ export class DesignReviewService {
    * @param input Review input with optional selectedFrameIds and userId
    * @returns Review result
    */
-  // async analyzeDesign(input: DesignAnalysisInput & { selectedFrameIds?: string[], userId: string }): Promise<DesignAnalysisResult & { sessionId?: string }> {
-  //   try {
-  //     const { figmaUrl, brandId, userId } = input;
+  async analyzeDesign(input: DesignAnalysisInput & { selectedFrameIds?: string[], userId: string }): Promise<DesignAnalysisResult> {
+    try {
+      const { figmaUrl, brandId, userId } = input;
 
-  //     if (!figmaUrl) {
-  //       throw new Error('Figma URL is required');
-  //     }
+      if (!figmaUrl) {
+        throw new Error('Figma URL is required');
+      }
 
-  //     if (!userId) {
-  //       throw new Error('User ID is required');
-  //     }
+      if (!userId) {
+        throw new Error('User ID is required');
+      }
 
-  //     // Get brand rules
-  //     const brandGuideline = await prisma.brandGuideline.findUnique({
-  //       where: { id: brandId },
-  //       include: {
-  //         brandRules: true,
-  //       },
-  //     });
+      // Get brand rules
+      const brandGuideline = await prisma.brandGuideline.findUnique({
+        where: { id: brandId },
+        include: {
+          brandRules: true,
+        },
+      });
 
-  //     if (!brandGuideline) {
-  //       throw new Error('brandGuideline not found');
-  //     }
+      if (!brandGuideline) {
+        throw new Error('brandGuideline not found');
+      }
 
-  //     // Extract designs from Figma
-  //     const { imageUrls, metadata } = await this.coreService.extractDesignsFromFigma(figmaUrl);
+      // Extract designs from Figma
+      const { imageUrls, metadata } = await this.figmaService.extractDesignsFromFigma(figmaUrl);
 
-  //     // Filter frames if selectedFrameIds is provided
-  //     const { selectedFrameIds } = input;
-  //     let filteredImageUrls = imageUrls;
+      // Filter frames if selectedFrameIds is provided
+      const { selectedFrameIds } = input;
+      let filteredImageUrls = imageUrls;
 
-  //     if (selectedFrameIds && selectedFrameIds.length > 0) {
-  //       // Create a map of frame IDs to image URLs
-  //       const frameIdToImageUrl = metadata.frames.reduce<Record<string, string>>((map, frame) => {
-  //         if (frame.id && frame.url) {
-  //           map[frame.id] = frame.url;
-  //         }
-  //         return map;
-  //       }, {});
+      if (selectedFrameIds && selectedFrameIds.length > 0) {
+        // Create a map of frame IDs to image URLs
+        const frameIdToImageUrl = metadata.frames.reduce<Record<string, string>>((map, frame) => {
+          if (frame.id && frame.url) {
+            map[frame.id] = frame.url;
+          }
+          return map;
+        }, {});
 
-  //       // Filter image URLs based on selected frame IDs
-  //       filteredImageUrls = selectedFrameIds
-  //         .map(frameId => frameIdToImageUrl[frameId])
-  //         .filter(Boolean) as string[];
+        // Filter image URLs based on selected frame IDs
+        filteredImageUrls = selectedFrameIds
+          .map(frameId => frameIdToImageUrl[frameId])
+          .filter(Boolean) as string[];
 
-  //       console.log(`Filtered ${imageUrls.length} frames down to ${filteredImageUrls.length} selected frames`);
-  //     }
+        console.log(`Filtered ${imageUrls.length} frames down to ${filteredImageUrls.length} selected frames`);
+      }
 
-  //     // Process images for AI - use filtered URLs if available
-  //     const imageParts = await this.coreService.processImagesForAI(filteredImageUrls);
+      // Process images for AI - use filtered URLs if available
+      const imageParts = await Promise.all(filteredImageUrls.map(url => this.figmaService.urlToInlineData(url)));
 
-  //     // Initialize AI service
-  //     const aiService = await this.coreService.initAIService();
+      // Initialize AI service
+      const aiService = await this.initAIService();
 
-  //     // Analyze designs
-  //     const analysisResult = await aiService.analyzeDesign({
-  //       imageParts,
-  //       metadata,
-  //       brandRules: brandGuideline.brandRules
-  //     });
+      // Analyze designs
+      const analysisResult = await aiService.analyzeDesign({
+        imageParts,
+        metadata,
+        brandRules: brandGuideline.brandRules
+      });
 
-  //     // Create a session for this analysis
-  //     const session = await createSession({
-  //       userId,
-  //       brandGuidelineId: brandId,
-  //       figmaUrl,
-  //       figmaFileKey: metadata.fileKey,
-  //       figmaFileName: metadata.fileName
-  //     });
+      // Save results to database and get review IDs
+      const reviewIds = await this.saveAnalysisResults(brandId, userId, metadata, analysisResult, figmaUrl);
 
-  //     // Save results to database and get review IDs
-  //     const reviewIds = await this.saveAnalysisResults(session.id, brandId, userId, metadata, analysisResult);
+      // Add the first review ID to the result
+      if (reviewIds.length > 0) {
+        analysisResult.reviewId = reviewIds[0];
+        analysisResult.brandId = brandId;
+        analysisResult.figmaUrl = figmaUrl;
+        analysisResult.fileName = metadata.fileName;
+      }
 
-  //     // Convert reviewIds to an array if it's not already
-  //     const reviewIdArray = Array.isArray(reviewIds) ? reviewIds : [reviewIds];
-
-  //     // Create initial history entry for the session
-  //     await createHistoryEntry({
-  //       sessionId: session.id,
-  //       action: ReviewHistoryAction.INITIAL_REVIEW,
-  //       summary: `Initial analysis of ${analysisResult.reviews.length} frames`,
-  //       changes: {
-  //         // Use standard HistoryChanges properties
-  //         brand_issues_count: analysisResult.reviews.reduce((sum: number, review: any) => sum + (review.brand_issues?.length || 0), 0),
-  //         general_issues_count: analysisResult.reviews.reduce((sum: number, review: any) => sum + (review.general_issues?.length || 0), 0),
-  //         total_issues_count: analysisResult.reviews.reduce((sum: number, review: any) => {
-  //           return sum +
-  //             (review.brand_issues?.length || 0) +
-  //             (review.general_issues?.length || 0);
-  //         }, 0),
-  //         design_score: analysisResult.reviews.reduce((sum: number, review: any) => sum + review.design_score.total, 0) / analysisResult.reviews.length,
-  //         fixed_count: 0,
-  //         partially_fixed_count: 0,
-  //         not_fixed_count: 0
-  //       }
-  //     });
-
-  //     // Update session status
-  //     await updateSessionStatus(session.id, ReviewStatus.COMPLETED);
-
-  //     // Add the session ID and main review ID to the result
-  //     // We use the first review ID as the main ID for backward compatibility
-  //     if (reviewIdArray.length > 0) {
-  //       const mainReviewId = reviewIdArray[0];
-  //       console.log('Setting main reviewId to:', mainReviewId);
-  //       console.log('Setting sessionId to:', session.id);
-
-  //       // Set the reviewId property to the main review ID
-  //       // This is what the client will use for navigation
-  //       analysisResult.reviewId = mainReviewId;
-  //       analysisResult.sessionId = session.id; // Add session ID
-  //       analysisResult.brandId = brandId;
-  //       analysisResult.figmaUrl = figmaUrl;
-  //       analysisResult.fileName = metadata.fileName;
-  //     } else {
-  //       console.warn('No review IDs returned from saveAnalysisResults');
-  //     }
-
-  //     return analysisResult;
-  //   } catch (error) {
-  //     console.error('Error analyzing design:', error);
-  //     throw error;
-  //   }
-  // }
+      return analysisResult;
+    } catch (error) {
+      console.error('Error analyzing design:', error);
+      throw error;
+    }
+  }
 
   /**
    * Recheck a design against previous comments
@@ -194,7 +162,7 @@ export class DesignReviewService {
       }
 
       // Extract designs from Figma
-      let extractionResult = await this.coreService.extractDesignsFromFigma(figmaUrl);
+      let extractionResult = await this.figmaService.extractDesignsFromFigma(figmaUrl);
       let imageUrls = extractionResult.imageUrls;
       let metadata = extractionResult.metadata;
 
@@ -235,7 +203,7 @@ export class DesignReviewService {
 
           // If the URLs are different, we need to re-extract designs from Figma
           if (originalUrl !== figmaUrl) {
-            extractionResult = await this.coreService.extractDesignsFromFigma(originalUrl);
+            extractionResult = await this.figmaService.extractDesignsFromFigma(originalUrl);
             imageUrls = extractionResult.imageUrls;
             metadata = extractionResult.metadata;
           }
@@ -245,14 +213,14 @@ export class DesignReviewService {
       }
 
       // Process images for AI
-      const imageParts = await this.coreService.processImagesForAI(imageUrls);
+      const imageParts = await Promise.all(imageUrls.map(url => this.figmaService.urlToInlineData(url)));
 
       // Initialize AI service
-      const aiService = await this.coreService.initAIService();
+      const aiService = await this.initAIService();
 
       // Create comment maps and prepare data for AI
       const { commentIdToIssue } = this.recheckService.createCommentMaps(frames);
-      const commentsByFrame = await this.recheckService.prepareCommentsByFrameFromMap(commentIdToIssue);
+      const commentsByFrame = await this.recheckService.prepareCommentsByFrame(metadata.fileKey, commentIdToIssue);
 
       // Recheck designs
       const recheckResult = await aiService.recheckDesign({
@@ -269,21 +237,15 @@ export class DesignReviewService {
         frames
       );
 
-      // Add the main updated review to the result
+      // Add the updated review to the result
       if (updatedReviews.size > 0) {
-        // Get the first review ID as the main ID
-        const mainReviewId = Array.from(updatedReviews.keys())[0];
-        console.log('Setting main recheck reviewId to:', mainReviewId);
-
-        // Set the reviewId property to the main review ID
-        // This is what the client will use for navigation
-        recheckResult.updatedReview = updatedReviews.get(mainReviewId);
-        recheckResult.reviewId = mainReviewId;
+        // Just use the first updated review for now (we can enhance this later)
+        const firstReviewId = Array.from(updatedReviews.keys())[0];
+        recheckResult.updatedReview = updatedReviews.get(firstReviewId);
+        recheckResult.reviewId = firstReviewId;
         recheckResult.brandId = brandId;
         recheckResult.figmaUrl = figmaUrlToUse;
         recheckResult.fileName = metadata.fileName;
-      } else {
-        console.warn('No updated reviews returned from processRecheckResult');
       }
 
       return recheckResult;
@@ -300,21 +262,43 @@ export class DesignReviewService {
    * @param metadata Figma metadata
    * @param analysisResult Analysis result
    */
-  // Removed createInitialReviewChanges as we now use the session-utils
+  /**
+   * Create history changes for initial review
+   * @param brandIssues Array of brand issues
+   * @param generalIssues Array of general issues
+   * @param designScore Design score
+   * @returns History changes object
+   */
+  private createInitialReviewChanges(
+    brandIssues: BrandIssue[],
+    generalIssues: GeneralIssue[],
+    designScore: number
+  ): HistoryChanges {
+    return {
+      brand_issues_count: brandIssues.length,
+      general_issues_count: generalIssues.length,
+      total_issues_count: brandIssues.length + generalIssues.length,
+      design_score: designScore,
+      // Initialize other fields with default values
+      fixed_count: 0,
+      partially_fixed_count: 0,
+      not_fixed_count: 0
+    };
+  }
 
   private async saveAnalysisResults(
-    sessionId: string,
     brandGuidelineId: string,
-    _userId: string, // Prefix with underscore to indicate it's not used
+    userId: string,
     metadata: FigmaMetadata,
-    analysisResult: DesignAnalysisResult
+    analysisResult: DesignAnalysisResult,
+    originalFigmaUrl?: string
   ): Promise<string[]> {
-    // Initialize array to store review IDs
+    // Array to store created review IDs
     const reviewIds: string[] = [];
     try {
       // Import utility functions
       const { formatBrandIssueComment, formatGeneralIssueComment } = await import('../utils');
-      // We now use session-level history entries
+      const { generateInitialReviewSummary } = await import('../utils/history-formatters');
       const { validateDesignReviewResult } = await import('../utils/validation');
 
       // Create URL to frame data mapping
@@ -386,7 +370,7 @@ export class DesignReviewService {
         if (frameData && review.brand_issues) {
           for (const issue of review.brand_issues) {
             const commentText = formatBrandIssueComment(issue);
-            const commentId = await this.coreService.getFigmaService().addFigmaComment(
+            const commentId = await this.figmaService.addFigmaComment(
               metadata.fileKey,
               frameData.id,
               commentText,
@@ -403,7 +387,7 @@ export class DesignReviewService {
         if (frameData && review.general_issues) {
           for (const issue of review.general_issues) {
             const commentText = formatGeneralIssueComment(issue);
-            const commentId = await this.coreService.getFigmaService().addFigmaComment(
+            const commentId = await this.figmaService.addFigmaComment(
               metadata.fileKey,
               frameData.id,
               commentText,
@@ -416,10 +400,11 @@ export class DesignReviewService {
           }
         }
 
-        // Save design review with session ID
+        // Save design review
         const designReview = await prisma.designReview.create({
           data: {
-            sessionId, // Link to the session
+            userId: userId,
+            brandGuidelineId: brandGuidelineId,
             frameId: frame.id,
             reviewJson: reviewWithTimestamp as any,
             designScore: review.design_score.total,
@@ -428,18 +413,32 @@ export class DesignReviewService {
             visualHarmonyScore: review.design_score.breakdown.visual_harmony,
             usabilityScore: review.design_score.breakdown.usability,
             accessibilityScore: review.design_score.breakdown.accessibility,
-            status: ReviewStatus.COMPLETED
+            status: ReviewStatus.COMPLETED,
+            originalFigmaUrl: originalFigmaUrl, // Save the original Figma URL
           },
         });
 
-        // We now create history entries at the session level, not for individual reviews
+        // Create history entry for initial review
+        const summary = generateInitialReviewSummary(review.brand_issues, review.general_issues);
+
+        await prisma.reviewHistory.create({
+          data: {
+            designReviewId: designReview.id,
+            action: ReviewHistoryAction.INITIAL_REVIEW,
+            summary,
+            changes: this.createInitialReviewChanges(
+              review.brand_issues,
+              review.general_issues,
+              review.design_score.total
+            ) as any, // Cast to any for Prisma JSON field compatibility
+            timestamp: new Date()
+          }
+        });
 
         // Add the review ID to the array
-        console.log('Created design review with ID:', designReview.id);
         reviewIds.push(designReview.id);
       }
 
-      console.log('Returning review IDs:', reviewIds);
       return reviewIds;
     } catch (error) {
       console.error('Error saving analysis results:', error);

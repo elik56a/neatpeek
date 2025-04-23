@@ -72,53 +72,6 @@ export async function getProjectsByBrandId(brandId: string) {
   });
 }
 
-export async function getProjectById(id: string) {
-  return prisma.project.findUnique({
-    where: { id },
-    include: {
-      figmaFiles: true,
-    },
-  });
-}
-
-// Figma file operations
-export async function getFigmaFilesByProjectId(projectId: string) {
-  return prisma.figmaFile.findMany({
-    where: { projectId },
-    include: {
-      frames: {
-        orderBy: { name: 'asc' },
-      },
-    },
-  });
-}
-
-// Design review operations
-export async function getDesignReviewsByFrameId(frameId: string) {
-  return prisma.designReview.findMany({
-    where: { frameId },
-    orderBy: { createdAt: 'desc' },
-    include: {
-      comments: true,
-    },
-  });
-}
-
-export async function createDesignReview(data: {
-  frameId: string;
-  reviewJson: any;
-  designScore: number;
-  designScoreMax?: number;
-  brandComplianceScore?: number;
-  visualHarmonyScore?: number;
-  usabilityScore?: number;
-  accessibilityScore?: number;
-  status?: 'PENDING' | 'COMPLETED' | 'FAILED' | 'IN_PROGRESS';
-}) {
-  return prisma.designReview.create({
-    data,
-  });
-}
 
 // Team operations
 export async function getUserTeams(userId: string) {

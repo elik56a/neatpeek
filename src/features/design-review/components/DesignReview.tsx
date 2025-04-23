@@ -109,8 +109,9 @@ export function DesignReview({ brandId: initialBrandId, allGuidelines, onGuideli
 
     const result = await reviewDesign(input);
     if (result && result.reviewId) {
-      // Update the URL to include the review ID and navigate to the new page
-      router.push(`/design-review/${result.reviewId}`);
+      // Update the URL to include the review ID
+      router.replace(`/design-review/${result.reviewId}`);
+      setStep("results");
     }
   };
 
@@ -129,8 +130,9 @@ export function DesignReview({ brandId: initialBrandId, allGuidelines, onGuideli
 
     const result = await recheckDesign(input);
     if (result && result.reviewId) {
-      // Update the URL to include the review ID and navigate to the new page
-      router.push(`/design-review/${result.reviewId}`);
+      // Update the URL to include the review ID
+      router.replace(`/design-review/${result.reviewId}`);
+      setStep("recheck");
     }
   };
 
