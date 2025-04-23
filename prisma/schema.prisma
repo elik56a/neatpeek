@@ -1,12 +1,11 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
 }
 
 model Account {
@@ -83,6 +82,8 @@ model User {
   accounts             Account[]
   brands               Brand[]
   brandGuidelines      BrandGuideline[]
+  designReviews        DesignReview[] // Legacy relation
+  reviewSessions       DesignReviewSession[] // Added relation to DesignReviewSession
   notificationSettings NotificationSettings?
   sessions             Session[]
   subscriptions        Subscription[]
@@ -282,98 +283,83 @@ model DesignExample {
 }
 
 model Project {
-  id          String      @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
   description String?
   brandId     String
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  figmaFiles  FigmaFile[]
-  brand       Brand       @relation(fields: [brandId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  brand       Brand    @relation(fields: [brandId], references: [id])
 
   @@index([brandId])
 }
 
-model FigmaFile {
-  id            String       @id @default(cuid())
-  projectId     String
-  figmaFileKey  String
-  figmaFileName String
-  lastSynced    DateTime?
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  project       Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  frames        FigmaFrame[]
-
-  @@index([projectId])
-  @@index([figmaFileKey])
-}
-
 model FigmaFrame {
-  id            String         @id @default(cuid())
-  figmaFileId   String
-  frameId       String
-  name          String
-  imageUrl      String
-  screenType    String?
-  platform      String?
-  positionX     Float?
-  positionY     Float?
-  width         Float?
-  height        Float?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  designReviews DesignReview[]
-  figmaComments FigmaComment[]
-  figmaFile     FigmaFile      @relation(fields: [figmaFileId], references: [id], onDelete: Cascade)
+  id               String         @id @default(cuid())
+  brandGuidelineId String // Added direct link to brand guideline
+  figmaFileKey     String // Added from FigmaFile
+  figmaFileName    String // Added from FigmaFile
+  frameId          String
+  name             String
+  imageUrl         String
+  screenType       String?
+  platform         String?
+  positionX        Float?
+  positionY        Float?
+  width            Float?
+  height           Float?
+  lastSynced       DateTime? // Added from FigmaFile
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  designReviews    DesignReview[]
+  brandGuideline   BrandGuideline @relation(fields: [brandGuidelineId], references: [id])
 
-  @@index([figmaFileId])
+  @@unique([figmaFileKey, frameId]) // Added unique constraint
+  @@index([brandGuidelineId])
+  @@index([figmaFileKey])
   @@index([frameId])
 }
 
+model DesignReviewSession {
+  id               String          @id @default(cuid())
+  userId           String // User who created the session
+  brandGuidelineId String // Brand guideline used for the review
+  figmaUrl         String // Original Figma URL provided by the user
+  figmaFileKey     String // Figma file identifier
+  figmaFileName    String // Name of the Figma file
+  status           ReviewStatus    @default(PENDING)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  user             User            @relation(fields: [userId], references: [id])
+  brandGuideline   BrandGuideline  @relation(fields: [brandGuidelineId], references: [id])
+  frameReviews     DesignReview[] // Link to individual frame reviews
+  history          ReviewHistory[] // History entries for the session
+
+  @@index([userId])
+  @@index([brandGuidelineId])
+}
+
 model DesignReview {
-  id                   String         @id @default(cuid())
-  frameId              String
-  reviewJson           Json
+  id                   String              @id @default(cuid())
+  sessionId            String // Link to parent session
+  frameId              String // Link to the frame
+  reviewJson           Json // The complete review for this frame
   designScore          Int
-  designScoreMax       Int            @default(100)
+  designScoreMax       Int                 @default(100)
   brandComplianceScore Int?
   visualHarmonyScore   Int?
   usabilityScore       Int?
   accessibilityScore   Int?
-  status               ReviewStatus   @default(PENDING)
-  createdAt            DateTime       @default(now())
-  updatedAt            DateTime       @updatedAt
-  frame                FigmaFrame     @relation(fields: [frameId], references: [id], onDelete: Cascade)
-  comments             FigmaComment[]
+  status               ReviewStatus        @default(PENDING)
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
+  session              DesignReviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  frame                FigmaFrame          @relation(fields: [frameId], references: [id], onDelete: Cascade)
+  User                 User?               @relation(fields: [userId], references: [id])
+  userId               String?
 
+  @@index([sessionId])
   @@index([frameId])
-}
-
-model FigmaComment {
-  id                String         @id @default(cuid())
-  reviewId          String
-  frameId           String
-  commentId         String?
-  messageType       CommentType
-  message           String
-  elementType       String?
-  severity          IssueSeverity?
-  positionX         Float
-  positionY         Float
-  isFlagged         Boolean        @default(false)
-  isResolved        Boolean        @default(false)
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
-  originalCommentId String?
-  recheckStatus     RecheckStatus?
-  recheckDetails    String?
-  frame             FigmaFrame     @relation(fields: [frameId], references: [id], onDelete: Cascade)
-  review            DesignReview   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
-
-  @@index([reviewId])
-  @@index([frameId])
-  @@index([commentId])
 }
 
 model FeatureFlag {
@@ -438,25 +424,28 @@ model NotificationSettings {
 }
 
 model BrandGuideline {
-  id                String        @id @default(cuid())
+  id                String                @id @default(cuid())
   userId            String
   name              String
   description       String?
-  status            String        @default("DRAFT")
+  status            String                @default("DRAFT")
   pdfUrl            String?
   pdfPath           String?
-  processingStatus  String        @default("PENDING")
+  processingStatus  String                @default("PENDING")
   processingMessage String?
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
   companyId         String?
   teamId            String?
-  company           Company?      @relation(fields: [companyId], references: [id])
-  team              Team?         @relation(fields: [teamId], references: [id])
-  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company           Company?              @relation(fields: [companyId], references: [id])
+  team              Team?                 @relation(fields: [teamId], references: [id])
+  user              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
   brandRules        BrandRule[]
   customRules       CustomRule[]
   designImages      DesignImage[]
+  figmaFrames       FigmaFrame[] // Added relation to FigmaFrame
+  // Removed legacy relation to DesignReview
+  reviewSessions    DesignReviewSession[] // Added relation to DesignReviewSession
 
   @@index([userId])
   @@index([companyId])
@@ -588,4 +577,27 @@ enum RecheckStatus {
   FIXED
   NOT_FIXED
   PARTIALLY_FIXED
+}
+
+enum ReviewHistoryAction {
+  INITIAL_REVIEW
+  RECHECK
+  NEW_ISSUES_FOUND
+  ISSUES_FIXED
+  ISSUES_PARTIALLY_FIXED
+}
+
+model ReviewHistory {
+  id        String              @id @default(cuid())
+  sessionId String // Link to the session
+  frameId   String? // Optional link to specific frame
+  action    ReviewHistoryAction
+  summary   String
+  changes   Json?
+  timestamp DateTime            @default(now())
+  session   DesignReviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([frameId])
+  @@index([timestamp])
 }

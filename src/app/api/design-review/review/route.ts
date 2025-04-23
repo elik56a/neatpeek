@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
 
     // Use user's Figma token if available, otherwise try to use the fallback token from env
     const figmaToken = user.figmaAccessToken || process.env.FIGMA_PERSONAL_ACCESS_TOKEN;
-    
+
     if (!figmaToken) {
       return NextResponse.json(
         { error: "Figma access token not found. Please connect your Figma account or set FIGMA_PERSONAL_ACCESS_TOKEN in environment variables." },
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
 
     // Get request body
     const body = await req.json();
-    const { figmaUrl, brandId, designType, selectedFrameIds } = body;
+    const { figmaUrl, brandId, selectedFrameIds } = body;
 
     if (!figmaUrl) {
       return NextResponse.json(
@@ -63,17 +63,17 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Dynamically import the DesignReviewService
-    const { DesignReviewService } = await import('@/features/design-review/services/design-review-service');
+    // Dynamically import the DesignReviewSessionService
+    const { DesignReviewSessionService } = await import('@/features/design-review/services/design-review-session-service');
 
-    // Create design review service
-    const designReviewService = new DesignReviewService(figmaToken);
+    // Create design review session service
+    const sessionService = new DesignReviewSessionService(figmaToken);
 
-    // Review design with selected frames
-    const reviewResult = await designReviewService.analyzeDesign({
+    // Analyze designs
+    const reviewResult = await sessionService.analyzeDesigns({
       figmaUrl,
       brandId,
-      designType,
+      userId: user.id,
       selectedFrameIds // Pass the selected frame IDs to the service
     });
 

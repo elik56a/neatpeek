@@ -2,7 +2,60 @@
  * Types for the Design Review feature
  */
 
-import { FigmaFile, FigmaFrame, DesignReview as CoreDesignReview, FigmaComment } from "@/types";
+// Core types are imported in specific files where needed
+import { ExportFileType } from './file-type';
+import { HistoryChanges, IssueSummary } from './review-history';
+import {
+  BaseIssue,
+  BrandIssue,
+  DesignScore,
+  FrameImage,
+  GeneralIssue,
+  IssueCoordinates,
+  IssueSeverity,
+  IssueStatus,
+  IssueType,
+  RecheckReviewJson,
+  ReviewJson,
+  ScoreBreakdown
+} from './review-json';
+import { ReviewStatus } from './review-status';
+import { ScoreCategory } from './score-category';
+import {
+  CreateSessionInput,
+  DesignReviewSession,
+  DesignReviewSessionWithRelations,
+  DesignReviewWithFrame,
+  SessionAnalysisInput,
+  SessionAnalysisResult,
+  DesignReview as SessionDesignReview,
+  SessionHistoryEntry,
+  SessionRecheckInput,
+  SessionRecheckResult
+} from './session';
+
+// Re-export the review-json types
+export type {
+  BaseIssue,
+  BrandIssue, DesignScore, FrameImage, GeneralIssue, IssueCoordinates,
+  RecheckReviewJson, ReviewJson, ScoreBreakdown
+};
+
+// Re-export the review-history types
+    export type {
+    HistoryChanges,
+    IssueSummary
+  };
+
+// Re-export the session types
+    export type {
+    CreateSessionInput, DesignReviewSession,
+    DesignReviewSessionWithRelations, DesignReviewWithFrame, SessionAnalysisInput, SessionAnalysisResult, SessionDesignReview, SessionHistoryEntry, SessionRecheckInput, SessionRecheckResult
+  };
+
+// Re-export enums (these don't need 'export type' since they're values, not just types)
+    export { ExportFileType, IssueSeverity, IssueStatus, IssueType, ReviewStatus, ScoreCategory };
+    export { ReviewHistoryAction } from '@prisma/client';
 
 /**
  * Frame position in a Figma file
@@ -44,63 +97,14 @@ export interface CommentPlacement {
   frame: FramePosition;
 }
 
-/**
- * Design issue with coordinates
- */
-export interface DesignIssue {
-  element_type: string;
-  description: string;
-  brand_rule_violation?: string;
-  issue?: string;
-  fix_suggestion: string;
-  severity: 'low' | 'medium' | 'high';
-  coordinates: {
-    x: number;
-    y: number;
-  };
-}
-
-/**
- * Positive aspect of a design
- */
-export interface PositiveAspect {
-  element_type: string;
-  description: string;
-  strength: string;
-  impact: string;
-  brand_alignment: string;
-}
-
-/**
- * Design score breakdown
- */
-export interface DesignScoreBreakdown {
-  total: number;
-  max_score: number;
-  breakdown: {
-    brand_compliance: number;
-    visual_harmony: number;
-    usability: number;
-    accessibility: number;
-  };
-}
-
-/**
- * Score category type
- */
-export type ScoreCategory = 'brand_compliance' | 'visual_harmony' | 'usability' | 'accessibility';
-
-/**
- * Severity level for design issues
- */
-export type SeverityLevel = 'low' | 'medium' | 'high';
+// ScoreCategory is now an enum imported from './score-category'
 
 /**
  * Export options for design review
  */
 export interface DesignReviewExportOptions {
   fileName: string;
-  fileType: 'csv' | 'xlsx';
+  fileType: ExportFileType;
   includeTimestamp?: boolean;
   includeFigmaFileName?: boolean;
 }
@@ -121,19 +125,11 @@ export interface DesignReviewExportRow {
  * Review for a single image/frame
  */
 export interface DesignReviewResult {
-  image: {
-    url: string;
-    name: string;
-    description: string;
-    screen_type: string;
-    platform: string;
-    frame_id: string;
-    position: FramePosition;
-  };
-  brand_issues: DesignIssue[];
-  general_issues: DesignIssue[];
-  positive_aspects: PositiveAspect[];
-  design_score: DesignScoreBreakdown;
+  image: FrameImage;
+  brand_issues: BrandIssue[];
+  general_issues: GeneralIssue[];
+  positive_aspects?: string[];
+  design_score: DesignScore;
 }
 
 /**
@@ -141,6 +137,10 @@ export interface DesignReviewResult {
  */
 export interface DesignAnalysisResult {
   reviews: DesignReviewResult[];
+  sessionId: string;
+  brandId: string;
+  figmaUrl: string;
+  fileName?: string;
 }
 
 /**
@@ -148,13 +148,14 @@ export interface DesignAnalysisResult {
  */
 export interface CommentCheckResult {
   comment_id: string;
-  original_message: string;
+  original_message?: string;
   is_fixed: boolean;
   check_result: {
-    status: 'fixed' | 'not_fixed' | 'partially_fixed';
+    status: IssueStatus;
     details: string;
-    remaining_issues: string;
   };
+  original_issue?: BaseIssue;
+  issue_type?: IssueType;
 }
 
 /**
@@ -164,7 +165,7 @@ export interface FrameRecheckResult {
   frame_id: string;
   frame_url: string;
   comment_checks: CommentCheckResult[];
-  new_issues: DesignIssue[];
+  new_issues: (BrandIssue | GeneralIssue)[];
 }
 
 /**
@@ -172,6 +173,11 @@ export interface FrameRecheckResult {
  */
 export interface DesignRecheckResult {
   recheck_results: FrameRecheckResult[];
+  updatedReview?: ReviewJson;
+  reviewId?: string;
+  brandId?: string;
+  figmaUrl?: string;
+  fileName?: string;
 }
 
 /**
@@ -190,6 +196,9 @@ export interface DesignAnalysisInput {
 export interface DesignRecheckInput {
   figmaUrl: string;
   brandId: string;
+  userId: string;
+  frameId?: string;
+  frameIds?: string[];
 }
 
 /**
@@ -200,4 +209,22 @@ export interface FrameSelectionState {
   name: string;
   imageUrl: string;
   selected: boolean;
+}
+
+/**
+ * Information extracted from a Figma URL
+ */
+export interface FigmaInfo {
+  fileKey: string | null;
+  nodeId: string | null;
+}
+
+/**
+ * Information about a Figma frame
+ */
+export interface FrameInfo {
+  id: string;
+  name: string;
+  type: string;
+  absoluteBoundingBox: FramePosition;
 }

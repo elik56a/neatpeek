@@ -67,18 +67,24 @@ export default function CreateCompanyPage() {
         description: `${result.company.name} has been created successfully.`,
       });
 
+      // Show success message first
+      toast({
+        title: "Success",
+        description: "Company created successfully. Redirecting to brand setup...",
+        duration: 3000,
+      });
+
       // Update the session with the new company data
       await updateSession({
         companyId: result.user.companyId,
         companyRole: result.user.companyRole
       });
 
-      // Show success message
-      toast({
-        title: "Success",
-        description: "Refreshing session with your new company data...",
-        duration: 3000,
-      });
+      // Add a small delay before navigation to ensure toast is visible and session update propagates
+      setTimeout(() => {
+        // Navigate to brand setup page after session update is complete
+        router.push('/brand-setup/new');
+      }, 1000);
 
     } catch (error) {
       console.error("Error creating company:", error);

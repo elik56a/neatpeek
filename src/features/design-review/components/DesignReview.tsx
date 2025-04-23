@@ -10,8 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAppDataContext } from "@/providers";
 import { AlertCircle, ArrowLeft, Image as ImageIcon, Link2 } from "lucide-react";
 import { GuidelineSelector } from "./GuidelineSelector";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDesignReview } from "../hooks";
+import { useRouter } from "next/navigation";
 import { AnalysisResults } from "./AnalysisResults";
 import { FigmaConnectPrompt } from "./FigmaConnectPrompt";
 import { FrameSelector } from "./FrameSelector";
@@ -30,6 +31,7 @@ interface DesignReviewProps {
  */
 export function DesignReview({ brandId: initialBrandId, allGuidelines, onGuidelineChange }: DesignReviewProps) {
   const { company, user, brands } = useAppDataContext();
+  const router = useRouter();
   const [brandId, setBrandId] = useState(initialBrandId);
   const [inputMode, setInputMode] = useState<"figma" | "image">("figma");
   // Use either provided guidelines or brands from context
@@ -106,21 +108,29 @@ export function DesignReview({ brandId: initialBrandId, allGuidelines, onGuideli
     };
 
     const result = await reviewDesign(input);
-    if (result) {
-      setStep("results");
+    if (result && result.reviewId) {
+      // Update the URL to include the review ID and navigate to the new page
+      router.push(`/design-review/${result.reviewId}`);
     }
   };
 
   // Handle recheck
   const handleRecheck = async () => {
+    if (!user?.id) {
+      console.error("User ID is required for recheck");
+      return;
+    }
+
     const input = {
       figmaUrl,
-      brandId // Use the current selected brandId
+      brandId, // Use the current selected brandId
+      userId: user.id // Add the user ID
     };
 
     const result = await recheckDesign(input);
-    if (result) {
-      setStep("recheck");
+    if (result && result.reviewId) {
+      // Update the URL to include the review ID and navigate to the new page
+      router.push(`/design-review/${result.reviewId}`);
     }
   };
 

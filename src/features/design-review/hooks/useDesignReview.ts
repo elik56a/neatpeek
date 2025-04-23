@@ -135,7 +135,11 @@ export function useDesignReview() {
         description: 'Design review has been completed successfully.',
       });
 
-      return data;
+      // Add reviewId to the data for redirection
+      return {
+        ...data,
+        reviewId: data.sessionId
+      };
     } catch (error: any) {
       setError(error);
       toast({
@@ -180,7 +184,11 @@ export function useDesignReview() {
         description: 'Design recheck has been completed successfully.',
       });
 
-      return data;
+      // Add reviewId to the data for redirection
+      return {
+        ...data,
+        reviewId: data.sessionId
+      };
     } catch (error: any) {
       setError(error);
       toast({

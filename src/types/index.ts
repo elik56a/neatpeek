@@ -1,167 +1,15 @@
 /**
- * Core application types
- *
- * This file contains the core entity types used throughout the application.
- * All components should import these types instead of defining their own.
+ * Global type definitions
  */
-
-// Define CompanyRole enum to avoid importing from Prisma on the client side
-export enum CompanyRole {
-  OWNER = "OWNER",
-  ADMIN = "ADMIN",
-  MEMBER = "MEMBER"
-}
-
-// User roles
-export enum UserRole {
-  USER = "USER",
-  ADMIN = "ADMIN"
-}
-
-/**
- * User entity
- */
-export interface User {
-  id: string;
-  name?: string;
-  email?: string;
-  image?: string | null;
-  role?: UserRole | string | null;
-  companyId?: string | null;
-  companyName?: string | null;
-  companyRole?: CompanyRole | null;
-  company?: Company | null;
-  figmaUserId?: string | null;
-  figmaAccessToken?: string | null;
-  figmaRefreshToken?: string | null;
-  figmaTokenExpiry?: Date | null;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
-/**
- * Company entity
- */
-export interface Company {
-  id: string;
-  name: string;
-  domain?: string | null;
-  logo?: string | null;
-  settings?: Record<string, any> | null;
-  createdAt?: Date;
-  updatedAt?: Date;
-  isActive?: boolean;
-}
-
-/**
- * Team entity
- */
-export interface Team {
-  id: string;
-  name: string;
-  description?: string | null;
-  companyId: string;
-  company?: Company;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
-/**
- * Brand Guideline entity
- */
-export interface BrandGuideline {
-  id: string;
-  name: string;
-  description?: string | null;
-  companyId: string;
-  company?: Company;
-  status: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-  rules?: BrandRule[];
-  files?: BrandFile[];
-}
-
-/**
- * Brand Rule entity
- */
-export interface BrandRule {
-  id: string;
-  name: string;
-  value: string;
-  description?: string | null;
-  category: string;
-  brandGuidelineId: string;
-  brandGuideline?: BrandGuideline;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
-/**
- * Brand File entity
- */
-export interface BrandFile {
-  id: string;
-  name: string;
-  url: string;
-  type: string;
-  size?: number;
-  brandGuidelineId: string;
-  brandGuideline?: BrandGuideline;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
-/**
- * API Response type
- */
-export interface ApiResponse<T> {
-  data?: T;
-  error?: string;
-  message?: string;
-  status: number;
-}
-
-/**
- * Pagination metadata
- */
-export interface PaginationMeta {
-  page: number;
-  pageSize: number;
-  totalItems: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
-}
-
-/**
- * Paginated response
- */
-export interface PaginatedResponse<T> extends ApiResponse<T[]> {
-  meta?: PaginationMeta;
-}
-
-/**
- * Figma File entity
- */
-export interface FigmaFile {
-  id: string;
-  projectId: string;
-  figmaFileKey: string;
-  figmaFileName: string;
-  lastSynced: Date;
-  createdAt?: Date;
-  updatedAt?: Date;
-  frames?: FigmaFrame[];
-}
 
 /**
  * Figma Frame entity
  */
 export interface FigmaFrame {
   id: string;
-  figmaFileId: string;
-  figmaFile?: FigmaFile;
+  brandGuidelineId: string;
+  figmaFileKey: string;
+  figmaFileName: string;
   frameId: string;
   name: string;
   imageUrl: string;
@@ -171,9 +19,11 @@ export interface FigmaFrame {
   positionY: number;
   width: number;
   height: number;
+  lastSynced?: Date;
   createdAt?: Date;
   updatedAt?: Date;
   designReviews?: DesignReview[];
+  brandGuideline?: BrandGuideline;
 }
 
 /**
@@ -181,40 +31,206 @@ export interface FigmaFrame {
  */
 export interface DesignReview {
   id: string;
+  userId: string;
+  brandGuidelineId: string;
   frameId: string;
   frame?: FigmaFrame;
-  reviewJson: any;
+  reviewJson: any; // This will be typed properly in the feature-specific code
   designScore: number;
   designScoreMax: number;
-  brandComplianceScore: number;
-  visualHarmonyScore: number;
-  usabilityScore: number;
-  accessibilityScore: number;
+  brandComplianceScore?: number;
+  visualHarmonyScore?: number;
+  usabilityScore?: number;
+  accessibilityScore?: number;
   status: string;
   createdAt?: Date;
   updatedAt?: Date;
-  comments?: FigmaComment[];
+  user?: User;
+  brandGuideline?: BrandGuideline;
+  history?: ReviewHistory[];
 }
 
 /**
- * Figma Comment entity
+ * Review History entity
  */
-export interface FigmaComment {
+export interface ReviewHistory {
   id: string;
-  reviewId: string;
-  review?: DesignReview;
-  frameId: string;
-  frame?: FigmaFrame;
-  commentId?: string;
-  messageType: string;
-  message: string;
-  elementType?: string;
-  severity: string;
-  positionX: number;
-  positionY: number;
-  isResolved: boolean;
-  recheckStatus?: string;
-  recheckDetails?: string;
+  designReviewId: string;
+  action: string;
+  summary: string;
+  changes?: any;
+  timestamp: Date;
+  designReview?: DesignReview;
+}
+
+/**
+ * User entity
+ */
+export interface User {
+  id: string;
+  email: string;
+  name?: string;
+  image?: string;
+  emailVerified?: Date;
   createdAt?: Date;
   updatedAt?: Date;
+  isActive?: boolean;
+  lastLogin?: Date;
+  role?: string;
+  companyId?: string;
+  companyRole?: CompanyRole;
+  figmaUserId?: string;
+  figmaAccessToken?: string;
+  figmaRefreshToken?: string;
+  figmaTokenExpiry?: Date;
+  company?: Company;
+  brands?: Brand[];
+  brandGuidelines?: BrandGuideline[];
+  designReviews?: DesignReview[];
+}
+
+/**
+ * Company entity
+ */
+export interface Company {
+  id: string;
+  name: string;
+  domain?: string;
+  logo?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  isActive?: boolean;
+  settings?: any;
+  users?: User[];
+  brands?: Brand[];
+  brandGuidelines?: BrandGuideline[];
+}
+
+/**
+ * Brand entity
+ */
+export interface Brand {
+  id: string;
+  name: string;
+  description?: string;
+  userId: string;
+  teamId?: string;
+  companyId?: string;
+  brandRules: any;
+  createdAt?: Date;
+  updatedAt?: Date;
+  user?: User;
+  team?: Team;
+  company?: Company;
+}
+
+/**
+ * Team entity
+ */
+export interface Team {
+  id: string;
+  name: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  ownerId: string;
+  companyId?: string;
+  description?: string;
+  owner?: User;
+  company?: Company;
+  members?: TeamMember[];
+}
+
+/**
+ * Team Member entity
+ */
+export interface TeamMember {
+  id: string;
+  teamId: string;
+  userId: string;
+  role: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  team?: Team;
+  user?: User;
+}
+
+/**
+ * Brand Guideline entity
+ */
+export interface BrandGuideline {
+  id: string;
+  userId: string;
+  name: string;
+  description?: string;
+  status: string;
+  pdfUrl?: string;
+  pdfPath?: string;
+  processingStatus: string;
+  processingMessage?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  companyId?: string;
+  teamId?: string;
+  user?: User;
+  company?: Company;
+  team?: Team;
+  brandRules?: BrandRule[];
+  customRules?: CustomRule[];
+  designImages?: DesignImage[];
+  figmaFrames?: FigmaFrame[];
+  designReviews?: DesignReview[];
+}
+
+/**
+ * Brand Rule entity
+ */
+export interface BrandRule {
+  id: string;
+  brandGuidelineId: string;
+  category: string;
+  name: string;
+  description: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  confidence?: number;
+  source?: string;
+  value?: string;
+  brandGuideline?: BrandGuideline;
+}
+
+/**
+ * Custom Rule entity
+ */
+export interface CustomRule {
+  id: string;
+  brandGuidelineId: string;
+  category: string;
+  name: string;
+  description: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  brandGuideline?: BrandGuideline;
+}
+
+/**
+ * Design Image entity
+ */
+export interface DesignImage {
+  id: string;
+  brandGuidelineId: string;
+  url: string;
+  path: string;
+  name?: string;
+  description?: string;
+  createdAt?: Date;
+  brandGuideline?: BrandGuideline;
+}
+
+/**
+ * Company Role enum
+ */
+export enum CompanyRole {
+  OWNER = 'OWNER',
+  ADMIN = 'ADMIN',
+  MEMBER = 'MEMBER'
 }

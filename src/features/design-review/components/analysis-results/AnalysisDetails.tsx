@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -16,22 +16,26 @@ interface AnalysisDetailsProps {
   result: DesignAnalysisResult;
   className?: string;
   figmaFileName?: string;
+  activeFrameId?: string | null;
 }
 
 /**
  * Component for displaying detailed analysis results
  */
-export function AnalysisDetails({ result, className, figmaFileName }: AnalysisDetailsProps) {
-  // State for active frame
-  const [activeReview, setActiveReview] = useState<string | null>(
+export function AnalysisDetails({ result, className, activeFrameId }: AnalysisDetailsProps) {
+  // State for active frame, use the prop if provided, otherwise use internal state
+  const [internalActiveReview, setInternalActiveReview] = useState<string | null>(
     result.reviews.length > 0 ? result.reviews[0].image.frame_id : null
   );
-  
+
+  // Use the prop if provided, otherwise use internal state
+  const activeReview = activeFrameId || internalActiveReview;
+
   // Get the active review
   const currentReview = result.reviews.find(
     (review) => review.image.frame_id === activeReview
   );
-  
+
   // Render score card with animation
   const renderScoreCard = (score: number, label: string) => (
     <Card className="hover:shadow-md transition-all duration-300 overflow-hidden group">
@@ -71,25 +75,12 @@ export function AnalysisDetails({ result, className, figmaFileName }: AnalysisDe
 
   return (
     <div className={className}>
-      {/* Frame selector tabs */}
+      {/* We're now using FrameRecheckSelector for navigation, so we hide the tabs */}
       <Tabs
         value={activeReview || ""}
-        onValueChange={setActiveReview}
+        onValueChange={activeFrameId ? undefined : setInternalActiveReview}
         className="w-full"
       >
-        <TabsList className="mb-4 flex flex-nowrap overflow-x-auto pb-1 scrollbar-thin">
-          {result.reviews.map((review) => (
-            <TabsTrigger
-              key={review.image.frame_id}
-              value={review.image.frame_id}
-              className="relative z-10 overflow-hidden group"
-            >
-              <span className="relative z-10 flex items-center">
-                {review.image.name}
-              </span>
-            </TabsTrigger>
-          ))}
-        </TabsList>
 
         {result.reviews.map((review) => (
           <TabsContent key={review.image.frame_id} value={review.image.frame_id} className="space-y-6">
@@ -98,7 +89,7 @@ export function AnalysisDetails({ result, className, figmaFileName }: AnalysisDe
               <Card className="overflow-hidden">
                 <div className="aspect-video bg-muted">
                   <img
-                    src={review.image.url}
+                    src={`${review.image.url}?t=${Date.now()}`} /* Add cache-busting parameter */
                     alt={review.image.name}
                     className="w-full h-full object-cover"
                   />
@@ -106,7 +97,7 @@ export function AnalysisDetails({ result, className, figmaFileName }: AnalysisDe
                 <CardHeader className="pb-2">
                   <CardTitle>{review.image.name}</CardTitle>
                   <CardDescription>
-                    {review.image.description || "Frame from Figma design"}
+                    Frame from Figma design
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -125,7 +116,7 @@ export function AnalysisDetails({ result, className, figmaFileName }: AnalysisDe
                 <CardFooter>
                   <Button variant="outline" className="w-full" asChild>
                     <a
-                      href={`https://www.figma.com/file/${review.image.frame_id}`}
+                      href={result.figmaUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -168,21 +159,44 @@ export function AnalysisDetails({ result, className, figmaFileName }: AnalysisDe
                       const severity = issue.severity.toUpperCase();
 
                       return (
-                        <AccordionItem key={index} value={`brand-issue-${index}`}>
+                        <AccordionItem
+                          key={index}
+                          value={`brand-issue-${index}`}
+                          className={`${issue.status === 'fixed' ? 'bg-green-50' : issue.status === 'partially_fixed' ? 'bg-amber-50' : ''} transition-colors duration-500`}
+                        >
                           <AccordionTrigger className="hover:no-underline">
                             <div className="flex items-center justify-between w-full pr-4">
                               <div className="flex items-center">
-                                <Badge
-                                  variant={
-                                    issue.severity === "high" ? "destructive" :
-                                    issue.severity === "medium" ? "default" :
-                                    "outline"
-                                  }
-                                  className="mr-2"
-                                >
-                                  {severity}
-                                </Badge>
-                                <span className="font-medium truncate">{issue.element_type}</span>
+                                <div className="flex items-center gap-1">
+                                  <Badge
+                                    variant={
+                                      issue.severity === "high" ? "destructive" :
+                                      issue.severity === "medium" ? "default" :
+                                      "outline"
+                                    }
+                                    className="mr-2"
+                                  >
+                                    {severity}
+                                  </Badge>
+                                  {issue.status === 'fixed' && (
+                                    <Badge variant="outline" className="bg-green-100 text-green-800 animate-pulse">
+                                      Fixed
+                                    </Badge>
+                                  )}
+                                  {issue.status === 'partially_fixed' && (
+                                    <Badge variant="outline" className="bg-amber-100 text-amber-800 animate-pulse">
+                                      Partially Fixed
+                                    </Badge>
+                                  )}
+                                  {/* New issue badge - uncomment when is_new property is added to the type
+                                  {issue.is_new && (
+                                    <Badge variant="outline" className="bg-blue-100 text-blue-800 animate-pulse">
+                                      New
+                                    </Badge>
+                                  )}
+                                  */}
+                                </div>
+                                <span className="font-medium truncate">{'Brand Issue'}</span>
                               </div>
                             </div>
                           </AccordionTrigger>
@@ -234,21 +248,44 @@ export function AnalysisDetails({ result, className, figmaFileName }: AnalysisDe
                       .map((issue, index) => {
                       const severity = issue.severity.toUpperCase();
                       return (
-                        <AccordionItem key={index} value={`general-issue-${index}`}>
+                        <AccordionItem
+                          key={index}
+                          value={`general-issue-${index}`}
+                          className={`${issue.status === 'fixed' ? 'bg-green-50' : issue.status === 'partially_fixed' ? 'bg-amber-50' : ''} transition-colors duration-500`}
+                        >
                           <AccordionTrigger className="hover:no-underline">
                             <div className="flex items-center justify-between w-full pr-4">
                               <div className="flex items-center">
-                                <Badge
-                                  variant={
-                                    issue.severity === "high" ? "destructive" :
-                                    issue.severity === "medium" ? "default" :
-                                    "outline"
-                                  }
-                                  className="mr-2"
-                                >
-                                  {severity}
-                                </Badge>
-                                <span className="font-medium truncate">{issue.element_type}</span>
+                                <div className="flex items-center gap-1">
+                                  <Badge
+                                    variant={
+                                      issue.severity === "high" ? "destructive" :
+                                      issue.severity === "medium" ? "default" :
+                                      "outline"
+                                    }
+                                    className="mr-2"
+                                  >
+                                    {severity}
+                                  </Badge>
+                                  {issue.status === 'fixed' && (
+                                    <Badge variant="outline" className="bg-green-100 text-green-800 animate-pulse">
+                                      Fixed
+                                    </Badge>
+                                  )}
+                                  {issue.status === 'partially_fixed' && (
+                                    <Badge variant="outline" className="bg-amber-100 text-amber-800 animate-pulse">
+                                      Partially Fixed
+                                    </Badge>
+                                  )}
+                                  {/* New issue badge - uncomment when is_new property is added to the type
+                                  {issue.is_new && (
+                                    <Badge variant="outline" className="bg-blue-100 text-blue-800 animate-pulse">
+                                      New
+                                    </Badge>
+                                  )}
+                                  */}
+                                </div>
+                                <span className="font-medium truncate">{'General Issue'}</span>
                               </div>
                             </div>
                           </AccordionTrigger>
@@ -256,7 +293,7 @@ export function AnalysisDetails({ result, className, figmaFileName }: AnalysisDe
                             <p className="font-medium">{issue.description}</p>
                             <p className="text-sm text-muted-foreground">
                               <span className="font-medium">Issue: </span>
-                              {issue.issue}
+                              {issue.description}
                             </p>
                             <p className="text-sm">
                               <span className="font-medium">Fix: </span>
@@ -289,20 +326,12 @@ export function AnalysisDetails({ result, className, figmaFileName }: AnalysisDe
                             <Badge variant="outline" className="bg-green-50 text-green-700 mr-2">
                               Positive
                             </Badge>
-                            <span className="font-medium truncate">{aspect.element_type}</span>
+                            <span className="font-medium truncate">Positive Aspect</span>
                           </div>
                         </div>
                       </AccordionTrigger>
                       <AccordionContent className="space-y-2 px-2">
-                        <p className="font-medium">{aspect.description}</p>
-                        <p className="text-sm text-muted-foreground">
-                          <span className="font-medium">Strength: </span>
-                          {aspect.strength}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          <span className="font-medium">Brand Alignment: </span>
-                          {aspect.brand_alignment}
-                        </p>
+                        <p className="font-medium">{aspect}</p>
                       </AccordionContent>
                     </AccordionItem>
                   ))}

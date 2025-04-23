@@ -13,9 +13,9 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(req: NextRequest) {
   try {
     // Get the current user session
-    const session = await getServerSession();
+    const authSession = await getServerSession();
 
-    if (!session?.user?.email) {
+    if (!authSession?.user?.email) {
       return NextResponse.json(
         { error: "You must be logged in to analyze designs" },
         { status: 401 }
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 
     // Get the user
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { email: authSession.user.email },
       select: { id: true, figmaAccessToken: true },
     });
 
@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
 
     // Get request body
     const body = await req.json();
-    const { figmaUrl, brandId, designType } = body;
+    const { figmaUrl, brandId, selectedFrameIds } = body;
 
     if (!figmaUrl) {
       return NextResponse.json(
@@ -60,17 +60,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Dynamically import the DesignReviewService
-    const { DesignReviewService } = await import('@/features/design-review/services/design-review-service');
+    // Dynamically import the DesignReviewSessionService
+    const { DesignReviewSessionService } = await import('@/features/design-review/services/design-review-session-service');
 
-    // Create design review service
-    const designReviewService = new DesignReviewService(user.figmaAccessToken);
+    // Create design review session service
+    const sessionService = new DesignReviewSessionService(user.figmaAccessToken);
 
-    // Analyze design
-    const analysisResult = await designReviewService.analyzeDesign({
+    // Analyze designs
+    const analysisResult = await sessionService.analyzeDesigns({
       figmaUrl,
       brandId,
-      designType
+      userId: user.id,
+      selectedFrameIds
     });
 
     return NextResponse.json(analysisResult);
