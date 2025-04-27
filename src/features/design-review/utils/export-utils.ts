@@ -1,4 +1,4 @@
-import { DesignAnalysisResult, DesignReviewExportRow, DesignReviewExportOptions } from "../types";
+import { DesignAnalysisResult, DesignReviewExportRow, DesignReviewExportOptions, IssueSeverity } from "../types";
 
 /**
  * Prepare design review data for export
@@ -102,17 +102,25 @@ export function generateExportFilename(options: DesignReviewExportOptions, figma
 /**
  * Sort design issues by severity
  * @param issues Array of design issues
- * @returns Sorted array with high severity first
+ * @returns Sorted array with high severity first, optional last
  */
 export function sortIssuesBySeverity<T extends { severity: string }>(issues: T[]): T[] {
-  const severityOrder = { high: 0, medium: 1, low: 2 };
+  const severityOrder = {
+    [IssueSeverity.HIGH]: 0,
+    [IssueSeverity.MEDIUM]: 1,
+    [IssueSeverity.LOW]: 2,
+    [IssueSeverity.OPTIONAL]: 3
+  };
 
   return [...issues].sort((a, b) => {
-    const aSeverity = (a.severity || 'low').toLowerCase();
-    const bSeverity = (b.severity || 'low').toLowerCase();
+    const aSeverity = (a.severity || IssueSeverity.LOW).toLowerCase();
+    const bSeverity = (b.severity || IssueSeverity.LOW).toLowerCase();
 
-    return severityOrder[aSeverity as keyof typeof severityOrder] -
-           severityOrder[bSeverity as keyof typeof severityOrder];
+    // Default to lowest priority (OPTIONAL) if severity is not in the order map
+    const aOrder = severityOrder[aSeverity as keyof typeof severityOrder] ?? severityOrder[IssueSeverity.OPTIONAL];
+    const bOrder = severityOrder[bSeverity as keyof typeof severityOrder] ?? severityOrder[IssueSeverity.OPTIONAL];
+
+    return aOrder - bOrder;
   });
 }
 

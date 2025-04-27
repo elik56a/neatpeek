@@ -243,7 +243,7 @@ export class VertexAIProvider implements AIService {
 
       MAIN OBJECTIVE: Your primary task is to identify any deviations from or violations of the brand guidelines. This includes but is not limited to:
       - Correct usage of brand colors
-      - Typography compliance, including font, size, and weight!! very important!!  
+      - Typography compliance, including exact font, size, and weight!! very important!!
       - Logo usage and placement
       - Brand voice and messaging
       - Visual style consistency
@@ -251,9 +251,9 @@ export class VertexAIProvider implements AIService {
       - Target audience alignment
       - Brand values representation
       - Brand benefits communication
-      - Social media guidelines 
+      - Social media guidelines
       - Brand tone and voice consistency
-   
+
 
       Secondary objective: Identify general UI/UX and accessibility issues that might affect user experience.
 
@@ -290,8 +290,16 @@ export class VertexAIProvider implements AIService {
       Here are the brand rules:
       ${JSON.stringify(params.brandRules, null, 2)}
 
-      IMPORTTANT:
-      THE SEVERITY OF THE ISSUES SHOULD BE BASED ON THE BRAND RULES AND GUIDELINES. IF THE ISSUE IS A VIOLATION OF A BRAND RULE, THE SEVERITY SHOULD BE HIGH. IF THE ISSUE IS A VIOLATION OF A GENERAL RULE, THE SEVERITY SHOULD BE MEDIUM. IF THE ISSUE IS A VIOLATION OF A GENERAL RULE BUT THE BRAND RULES ARE NOT VIOLATED, THE SEVERITY SHOULD BE LOW.
+      IMPORTANT:
+      THE SEVERITY OF THE ISSUES SHOULD BE BASED ON THE BRAND RULES AND GUIDELINES.
+      IF THE ISSUE IS A VIOLATION OF A BRAND RULE, THE SEVERITY SHOULD BE HIGH, UNLESS THE ISSUE IS A TYPOGRAPHY ISSUE, THEN THE SEVERITY SHOULD BE MEDIUM.
+      IF THE ISSUE IS A VIOLATION OF A GENERAL RULE, THE SEVERITY SHOULD BE MEDIUM.
+      IF THE ISSUE IS A VIOLATION OF A GENERAL RULE BUT THE BRAND RULES ARE NOT VIOLATED, THE SEVERITY SHOULD BE LOW.
+      IF U DONT SURE IF THE ISSUE IS A VIOLATION OF A BRAND RULE, THE SEVERITY SHOULD BE OPTIONAL.
+
+      IF U CREATED A BRAND ISSUE , AND U SEE ALSO SAME ISSUE IN THE GENERAL ISSUES, THEN U SHOULD REMOVE THE GENERAL ISSUE, WE DONT WANT DUPLICATE ISSUES.
+
+      CRITICAL: NEVER INCLUDE ANY INTERNAL IDs, DATABASE IDs, OR CRYPTIC IDENTIFIERS (like "cm9tzx3ya002h11pmofy7amjo") in your responses. For brand rule violations, use only the rule name/title (e.g., "Logo Usage on Backgrounds" or "Typography Guidelines"). If you don't know the exact rule name, create a descriptive name based on the rule's content.
 
       IMPORTANT: Return the following JSON schema with frame_id included for each image. DO NOT wrap the JSON in code blocks or markdown formatting. DO NOT use backticks around your response. Return ONLY the raw JSON:
       {
@@ -315,8 +323,8 @@ export class VertexAIProvider implements AIService {
               {
                 "element_type": "string",
                 "description": "string",
-                "brand_rule_violation": "string",
-                "fix_suggestion": "string",
+                "brand_rule_violation": "string", // IMPORTANT: Use only the rule name/title, NOT the rule ID or any internal identifiers
+                "fix_suggestion": "string", // IMPORTANT: Must be a specific, actionable suggestion, dont make this empty never
                 "severity": "low" | "medium" | "high",
                 "coordinates": {
                   "x": number,  // MUST be between 0-1
@@ -330,7 +338,7 @@ export class VertexAIProvider implements AIService {
                 "description": "string",
                 "issue": "string",
                 "fix_suggestion": "string",
-                "severity": "low" | "medium" | "high",
+                "severity": "low" | "medium" | "high" | "optional",
                 "coordinates": {
                   "x": number,  // MUST be between 0-1
                   "y": number   // MUST be between 0-1
@@ -405,7 +413,7 @@ export class VertexAIProvider implements AIService {
 
       // Construct the recheck prompt
       const recheckPrompt = `You are a brand compliance and design reviewer performing a follow-up review.
-      Your task is to verify if previously identified issues have been properly addressed.
+      Your task is to verify if previously identified issues have been properly addressed and recalculate design scores.
 
       For each frame, I'll provide:
       1. The current design
@@ -415,6 +423,13 @@ export class VertexAIProvider implements AIService {
       1. If the issue has been fixed (true/false)
       2. If not fixed, what specifically remains to be addressed
       3. If partially fixed, what improvements have been made and what still needs work
+
+      IMPORTANT: You must also recalculate the design scores based on the current state of the design:
+      1. Overall score
+      2. Brand compliance score
+      3. Visual harmony score
+      4. Usability score
+      5. Accessibility score
 
       COORDINATE SYSTEM:
       When specifying coordinates for new issues, use relative coordinates within the frame (0 to 1).
@@ -447,8 +462,10 @@ export class VertexAIProvider implements AIService {
 
       IMPORTANT: Only analyze and respond about the frames provided above. Do not comment on any other frames in the file.
 
-      VERY IMPORTENT!!!
-      BEFORE SET THE ISSURE TO FIXED, MAKE SURE VERY CAREFULLY CHECK THE DESIGN AND MAKE SURE THE ISSUE IS FIXED. SAME FOR NEW ISSUES.
+      VERY IMPORTANT!!!
+      BEFORE SET THE ISSUE TO FIXED, MAKE SURE VERY CAREFULLY CHECK THE DESIGN AND MAKE SURE THE ISSUE IS FIXED. SAME FOR NEW ISSUES.
+
+      CRITICAL: NEVER INCLUDE ANY INTERNAL IDs, DATABASE IDs, OR CRYPTIC IDENTIFIERS (like "cm9tzx3ya002h11pmofy7amjo") in your responses. For brand rule violations, use only the rule name/title (e.g., "Logo Usage on Backgrounds" or "Typography Guidelines"). If you don't know the exact rule name, create a descriptive name based on the rule's content.
 
       IMPORTANT: Return the following JSON schema. DO NOT wrap the JSON in code blocks or markdown formatting. DO NOT use backticks around your response. Return ONLY the raw JSON:
       {
@@ -472,13 +489,23 @@ export class VertexAIProvider implements AIService {
               {
                 "element_type": "string",
                 "description": "string",
-                "severity": "low" | "medium" | "high",
+                "severity": "low" | "medium" | "high" | "optional",
                 "coordinates": {
                   "x": number,  // MUST be between 0-1
                   "y": number   // MUST be between 0-1
                 }
               }
-            ]
+            ],
+            "updated_scores": {
+              "total": number,
+              "max_score": 100,
+              "breakdown": {
+                "brand_compliance": number,
+                "visual_harmony": number,
+                "usability": number,
+                "accessibility": number
+              }
+            }
           }
         ]
       }`;
@@ -509,7 +536,7 @@ export class VertexAIProvider implements AIService {
         console.error('First 100 chars of response:', cleanedResponse.substring(0, 100));
 
         // Return a default empty response instead of throwing
-        return { results: [] };
+        return { recheck_results: [] };
       }
     } catch (error) {
       console.error('Error rechecking design:', error);

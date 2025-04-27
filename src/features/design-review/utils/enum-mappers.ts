@@ -2,15 +2,15 @@
  * Utility functions for mapping enums to human-readable labels and UI properties
  */
 
-import { IssueStatus, ReviewHistoryAction } from "../types";
-import { 
-  AlertCircle, 
-  CheckCircle2, 
-  Clock, 
-  FileSearch, 
+import { IssueStatus, IssueSeverity, ReviewHistoryAction } from "../types";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  FileSearch,
   MinusCircle,
-  PlusCircle, 
-  RefreshCw, 
+  PlusCircle,
+  RefreshCw,
   ThumbsUp,
   LucideIcon
 } from "lucide-react";
@@ -180,5 +180,59 @@ export function getStatusColor(status: IssueStatus): string {
       return "text-primary";
     default:
       return "text-muted-foreground";
+  }
+}
+
+/**
+ * Maps an IssueSeverity to a human-readable label
+ * @param severity The severity to map
+ * @returns A human-readable label
+ */
+export function getSeverityLabel(severity: IssueSeverity): string {
+  switch (severity) {
+    case IssueSeverity.HIGH:
+      return "HIGH";
+    case IssueSeverity.MEDIUM:
+      return "MEDIUM";
+    case IssueSeverity.LOW:
+      return "LOW";
+    case IssueSeverity.OPTIONAL:
+      return "OPTIONAL";
+    default:
+      return severity;
+  }
+}
+
+/**
+ * Maps an IssueSeverity to a badge variant
+ * @param severity The severity to map
+ * @returns A badge variant
+ */
+export function getSeverityBadgeVariant(severity: IssueSeverity): string {
+  switch (severity) {
+    case IssueSeverity.HIGH:
+      return "destructive";
+    case IssueSeverity.MEDIUM:
+      return "default";
+    case IssueSeverity.LOW:
+      return "outline";
+    case IssueSeverity.OPTIONAL:
+      return "secondary";
+    default:
+      return "outline";
+  }
+}
+
+/**
+ * Gets the CSS classes for a severity badge
+ * @param severity The severity to get classes for
+ * @returns CSS class string
+ */
+export function getSeverityBadgeClasses(severity: IssueSeverity): string {
+  switch (severity) {
+    case IssueSeverity.OPTIONAL:
+      return "bg-purple-100 text-purple-800 hover:bg-purple-100";
+    default:
+      return "";
   }
 }

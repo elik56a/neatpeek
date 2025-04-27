@@ -258,6 +258,19 @@ export class DesignRecheckService {
     // Add updated_at timestamp
     reviewJson.updated_at = new Date().toISOString();
 
+    // Update the image URL with the latest one from metadata
+    const frameMetadata = metadata.frames.find(frame => frame.id === frameId);
+    if (frameMetadata && frameMetadata.url && reviewJson.image) {
+      console.log(`Updating image URL for frame ${frameId} from ${reviewJson.image.url} to ${frameMetadata.url}`);
+      reviewJson.image.url = frameMetadata.url;
+    }
+
+    // Update design scores if provided by AI
+    if (frameResult.updated_scores) {
+      console.log(`Updating design scores for frame ${frameId}`);
+      reviewJson.design_score = frameResult.updated_scores;
+    }
+
     // Update existing issues with recheck results
     await this.updateExistingIssues(frameResult.comment_checks, commentIdToIssue, reviewJson, metadata.fileKey);
 
@@ -327,7 +340,7 @@ export class DesignRecheckService {
       issueArray[issueIndex].recheck_details = check.check_result.details;
 
       // Add thread comment to Figma
-      const commentText = formatRecheckComment(check.check_result.status, check.check_result.details);
+      const commentText = formatRecheckComment(check.check_result.status as IssueStatus, check.check_result.details);
       try {
         await this.figmaService.addThreadComment(
           fileKey,
@@ -401,7 +414,16 @@ export class DesignRecheckService {
       // Update the review in the database
       await prisma.designReview.update({
         where: { id: reviewId },
-        data: { reviewJson: updatedReviewJson as any }
+        data: {
+          reviewJson: updatedReviewJson as any,
+          // Also update the design scores in the database
+          designScore: updatedReviewJson.design_score.total,
+          designScoreMax: updatedReviewJson.design_score.max_score,
+          brandComplianceScore: updatedReviewJson.design_score.breakdown.brand_compliance,
+          visualHarmonyScore: updatedReviewJson.design_score.breakdown.visual_harmony,
+          usabilityScore: updatedReviewJson.design_score.breakdown.usability,
+          accessibilityScore: updatedReviewJson.design_score.breakdown.accessibility
+        }
       });
 
       // Create history entry

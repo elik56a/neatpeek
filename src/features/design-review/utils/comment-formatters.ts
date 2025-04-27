@@ -3,19 +3,21 @@
  * These functions ensure consistent formatting of comments across the application
  */
 
-import { BrandIssue, GeneralIssue, IssueSeverity } from '../types';
+import { BrandIssue, GeneralIssue, IssueSeverity, IssueStatus } from '../types';
 
 /**
  * Get emoji for severity level
  */
 export function getSeverityEmoji(severity: IssueSeverity): string {
   switch (severity) {
-    case 'high':
+    case IssueSeverity.HIGH:
       return '🚨'; // Red alert for high severity
-    case 'medium':
+    case IssueSeverity.MEDIUM:
       return '⚠️'; // Warning for medium severity
-    case 'low':
+    case IssueSeverity.LOW:
       return 'ℹ️'; // Info for low severity
+    case IssueSeverity.OPTIONAL:
+      return '💭'; // Thought bubble for optional/suggestion
     default:
       return '⚠️'; // Default to warning
   }
@@ -23,7 +25,7 @@ export function getSeverityEmoji(severity: IssueSeverity): string {
 
 /**
  * Format a brand issue as a Figma comment
- * 
+ *
  * Example output:
  * 🚨 HIGH Brand Issue: Poor contrast between text and background
  * 📋 Rule: Brand colors must maintain proper contrast
@@ -32,13 +34,16 @@ export function getSeverityEmoji(severity: IssueSeverity): string {
 export function formatBrandIssueComment(issue: BrandIssue): string {
   const severityEmoji = getSeverityEmoji(issue.severity);
   const severityText = issue.severity.toUpperCase();
-  
-  return `${severityEmoji} ${severityText} Brand Issue: ${issue.description}\n📋 Rule: ${issue.brand_rule_violation}\n💡 Fix: ${issue.fix_suggestion}`;
+
+  // Only include the fix suggestion if it exists
+  const fixPart = issue.fix_suggestion ? `\n💡 Fix: ${issue.fix_suggestion}` : '';
+
+  return `${severityEmoji} ${severityText} Brand Issue: ${issue.description}\n📋 Rule: ${issue.brand_rule_violation}${fixPart}`;
 }
 
 /**
  * Format a general issue as a Figma comment
- * 
+ *
  * Example output:
  * ⚠️ MEDIUM UX Issue: Button too small for touch targets
  * 💡 Fix: Increase button size to at least 44px
@@ -47,22 +52,25 @@ export function formatGeneralIssueComment(issue: GeneralIssue): string {
   const severityEmoji = getSeverityEmoji(issue.severity);
   const severityText = issue.severity.toUpperCase();
   const issueType = issue.issue_type || 'UX';
-  
-  return `${severityEmoji} ${severityText} ${issueType} Issue: ${issue.description}\n💡 Fix: ${issue.fix_suggestion}`;
+
+  // Only include the fix suggestion if it exists
+  const fixPart = issue.fix_suggestion ? `\n💡 Fix: ${issue.fix_suggestion}` : '';
+
+  return `${severityEmoji} ${severityText} ${issueType} Issue: ${issue.description}${fixPart}`;
 }
 
 /**
  * Format a recheck result as a Figma thread comment
  */
-export function formatRecheckComment(status: string, details?: string): string {
+export function formatRecheckComment(status: IssueStatus, details?: string): string {
   switch (status) {
-    case 'fixed':
-      return `✅ Fixed! The issue has been resolved.${details ? `\n${details}` : ''}`;
-    case 'partially_fixed':
+    case IssueStatus.FIXED:
+      return `✅ Fixed. Great job!`;
+    case IssueStatus.PARTIALLY_FIXED:
       return `🔸 Partially fixed.${details ? `\n${details}` : ''}`;
-    case 'not_fixed':
-      return `👀 Issue still exists. Please address this issue.${details ? `\n${details}` : ''}`;
-    case 'new':
+    case IssueStatus.NOT_FIXED:
+      return `👀 Issue still exists.`;
+    case IssueStatus.NEW:
       return `🆕 New issue found during recheck.${details ? `\n${details}` : ''}`;
     default:
       return `⚠️ Status unknown.${details ? `\n${details}` : ''}`;
@@ -75,11 +83,13 @@ export function formatRecheckComment(status: string, details?: string): string {
 export function formatNewIssueComment(issue: BrandIssue | GeneralIssue): string {
   // Determine if it's a brand issue or general issue
   const isBrandIssue = 'brand_rule_violation' in issue;
-  
-  // Format the comment with a 🆕 prefix
+
+  // Format the comment with a 🆕 NEW prefix on its own line
   if (isBrandIssue) {
-    return `🆕 NEW ${formatBrandIssueComment(issue as BrandIssue)}`;
+    const brandComment = formatBrandIssueComment(issue as BrandIssue);
+    return `🆕 NEW\n${brandComment}`;
   } else {
-    return `🆕 NEW ${formatGeneralIssueComment(issue as GeneralIssue)}`;
+    const generalComment = formatGeneralIssueComment(issue as GeneralIssue);
+    return `🆕 NEW\n${generalComment}`;
   }
 }

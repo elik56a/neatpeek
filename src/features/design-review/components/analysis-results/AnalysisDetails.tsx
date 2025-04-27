@@ -5,11 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { DesignAnalysisResult } from "../../types";
+import { DesignAnalysisResult, IssueSeverity } from "../../types";
 import { AlertCircle, ExternalLink, ThumbsUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { extractHexColors, sortIssuesBySeverity } from "../../utils/export-utils";
-import { getStatusIcon, getStatusLabel } from "../../utils/enum-mappers";
+import { getStatusIcon, getStatusLabel, getSeverityBadgeVariant, getSeverityBadgeClasses } from "../../utils/enum-mappers";
 
 interface AnalysisDetailsProps {
   result: DesignAnalysisResult;
@@ -29,31 +29,29 @@ export function AnalysisDetails({ result, className, figmaFileName, activeFrameI
 
   // Render score card with animation
   const renderScoreCard = (score: number, label: string) => (
-    <Card className="hover:shadow-md transition-all duration-300 overflow-hidden group">
-      <CardContent className="p-4 flex items-center justify-between">
-        <div>
-          <CardTitle className="text-sm font-medium mb-1">{label}</CardTitle>
-          <div className="h-1.5 w-24 bg-muted rounded-full overflow-hidden">
-            <div
-              className="h-full transition-all duration-1000 ease-out"
-              style={{
-                width: `${score}%`,
-                backgroundColor: score > 70 ? "#22c55e" : score > 40 ? "#eab308" : "#ef4444"
-              }}
-            />
-          </div>
+    <div className="flex items-center justify-between p-2 hover:bg-muted/50 rounded-md transition-all duration-300">
+      <div className="flex-grow">
+        <p className="text-sm font-medium">{label}</p>
+        <div className="h-1.5 w-full mt-1 bg-muted rounded-full overflow-hidden">
+          <div
+            className="h-full transition-all duration-1000 ease-out"
+            style={{
+              width: `${score}%`,
+              backgroundColor: score > 70 ? "#22c55e" : score > 40 ? "#eab308" : "#ef4444"
+            }}
+          />
         </div>
-        <div
-          className={`text-xl font-bold px-3 py-1 rounded-full transform transition-transform duration-300 group-hover:scale-110 ${
-            score > 70 ? "bg-green-100 text-green-700" :
-            score > 40 ? "bg-yellow-100 text-yellow-700" :
-            "bg-red-100 text-red-700"
-          }`}
-        >
-          {score}
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+      <div
+        className={`ml-3 text-lg font-bold px-2.5 py-0.5 rounded-full transform transition-transform duration-300 hover:scale-110 ${
+          score > 70 ? "bg-green-100 text-green-700" :
+          score > 40 ? "bg-yellow-100 text-yellow-700" :
+          "bg-red-100 text-red-700"
+        }`}
+      >
+        {score}
+      </div>
+    </div>
   );
 
   if (!currentReview) {
@@ -69,9 +67,9 @@ export function AnalysisDetails({ result, className, figmaFileName, activeFrameI
       {/* Display only the current review */}
       {currentReview && (
         <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Frame preview */}
-              <Card className="overflow-hidden">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Frame preview - takes up 2/3 of the space */}
+              <Card className="overflow-hidden md:col-span-2">
                 <div className="aspect-video bg-muted">
                   <img
                     src={`${currentReview.image.url}?t=${Date.now()}`} /* Add cache-busting parameter */
@@ -101,7 +99,7 @@ export function AnalysisDetails({ result, className, figmaFileName, activeFrameI
                 <CardFooter>
                   <Button variant="outline" className="w-full" asChild>
                     <a
-                      href={`https://www.figma.com/file/${currentReview.image.frame_id}`}
+                      href={result.figmaUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -112,15 +110,19 @@ export function AnalysisDetails({ result, className, figmaFileName, activeFrameI
                 </CardFooter>
               </Card>
 
-              {/* Scores */}
+              {/* Scores - takes up 1/3 of the space with vertical layout */}
               <div className="space-y-4">
                 <h3 className="text-xl font-bold mb-4">Design Scores</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in-50 duration-500">
-                  {renderScoreCard(currentReview.design_score?.total || 0, "Overall Score")}
-                  {renderScoreCard(currentReview.design_score?.breakdown?.brand_compliance || 0, "Brand Compliance")}
-                  {renderScoreCard(currentReview.design_score?.breakdown?.visual_harmony || 0, "Visual Harmony")}
-                  {renderScoreCard(currentReview.design_score?.breakdown?.usability || 0, "Usability")}
-                </div>
+                <Card className="p-3">
+                  <div className="space-y-2 animate-in fade-in-50 duration-500">
+                    {renderScoreCard(currentReview.design_score?.total || 0, "Overall Score")}
+                    <Separator className="my-1" />
+                    {renderScoreCard(currentReview.design_score?.breakdown?.brand_compliance || 0, "Brand Compliance")}
+                    {renderScoreCard(currentReview.design_score?.breakdown?.visual_harmony || 0, "Visual Harmony")}
+                    {renderScoreCard(currentReview.design_score?.breakdown?.usability || 0, "Usability")}
+                    {renderScoreCard(currentReview.design_score?.breakdown?.accessibility || 0, "Accessibility")}
+                  </div>
+                </Card>
               </div>
             </div>
 
@@ -149,12 +151,8 @@ export function AnalysisDetails({ result, className, figmaFileName, activeFrameI
                             <div className="flex items-center justify-between w-full pr-4">
                               <div className="flex items-center">
                                 <Badge
-                                  variant={
-                                    issue.severity === "high" ? "destructive" :
-                                    issue.severity === "medium" ? "default" :
-                                    "outline"
-                                  }
-                                  className="mr-2"
+                                  variant={getSeverityBadgeVariant(issue.severity as IssueSeverity) as any}
+                                  className={`mr-2 ${getSeverityBadgeClasses(issue.severity as IssueSeverity)}`}
                                 >
                                   {severity}
                                 </Badge>
@@ -227,12 +225,8 @@ export function AnalysisDetails({ result, className, figmaFileName, activeFrameI
                             <div className="flex items-center justify-between w-full pr-4">
                               <div className="flex items-center">
                                 <Badge
-                                  variant={
-                                    issue.severity === "high" ? "destructive" :
-                                    issue.severity === "medium" ? "default" :
-                                    "outline"
-                                  }
-                                  className="mr-2"
+                                  variant={getSeverityBadgeVariant(issue.severity as IssueSeverity) as any}
+                                  className={`mr-2 ${getSeverityBadgeClasses(issue.severity as IssueSeverity)}`}
                                 >
                                   {severity}
                                 </Badge>

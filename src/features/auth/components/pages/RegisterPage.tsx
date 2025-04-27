@@ -37,10 +37,6 @@ const RegisterPage = () => {
 
     try {
       await register(name, email, password);
-      toast({
-        title: "Account created successfully",
-        description: `Welcome to ${appConfig.name}!`,
-      });
     } catch (error) {
       console.error("Registration failed:", error);
       toast({

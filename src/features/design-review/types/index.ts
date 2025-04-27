@@ -151,6 +151,7 @@ export interface FrameRecheckResult {
   frame_url: string;
   comment_checks: CommentCheckResult[];
   new_issues: (BrandIssue | GeneralIssue)[];
+  updated_scores?: DesignScore;
 }
 
 /**
