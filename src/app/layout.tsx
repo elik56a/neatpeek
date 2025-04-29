@@ -24,7 +24,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head />
       <body className={inter.className}>
         <SessionProvider>
           <ThemeProvider defaultTheme="light" storageKey={appConfig.storage.theme}>
