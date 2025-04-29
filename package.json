@@ -8,7 +8,7 @@
     "prisma:setup:dev": "yarn build:scripts && node dist-scripts/setup-prisma.js development",
     "prisma:setup:prod": "yarn build:scripts && node dist-scripts/setup-prisma.js production",
     "dev:local": "yarn build:scripts && cross-env NODE_ENV=development node dist-scripts/start-app.js local",
-    "dev": "yarn build:scripts && cross-env NODE_ENV=development node dist-scripts/start-app.js development",
+    "dev": "yarn build && yarn build:scripts && cross-env NODE_ENV=development node dist-scripts/start-app.js development",
     "start": "yarn build && yarn build:scripts && cross-env NODE_ENV=production node dist-scripts/start-app.js production",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
