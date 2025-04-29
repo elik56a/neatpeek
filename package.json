@@ -5,10 +5,9 @@
   "scripts": {
     "build": "next build",
     "build:scripts": "tsc --project tsconfig.scripts.json",
-    "start": "yarn build:scripts && cross-env NODE_ENV=production node dist-scripts/start-app.js production",
-    "dev": "yarn build:scripts && cross-env NODE_ENV=development node dist-scripts/start-app.js local",
-    "start:production": "yarn start",
-    "dev:local": "yarn dev",
+    "dev": "yarn build && yarn build:scripts && cross-env NODE_ENV=development node dist-scripts/start-app.js development",
+    "start": "yarn build && yarn build:scripts && cross-env NODE_ENV=production node dist-scripts/start-app.js production",
+    "dev:local": "yarn build:scripts && cross-env NODE_ENV=development node dist-scripts/start-app.js local",
     "postinstall": "prisma generate",
     "type-check": "tsc --noEmit",
     "lint": "next lint",
