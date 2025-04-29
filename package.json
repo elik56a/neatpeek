@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "scripts": {
     "build": "next build",
+    "test-start": "next start -p 4455",
     "build:scripts": "tsc --project tsconfig.scripts.json",
     "dev:local": "yarn build:scripts && cross-env NODE_ENV=development node dist-scripts/start-app.js local",
     "dev": "yarn build:scripts && cross-env NODE_ENV=development node dist-scripts/start-app.js development",
