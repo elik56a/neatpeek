@@ -55,7 +55,7 @@ async function startApp() {
   const isProduction = mode === "production";
   const cmd = isProduction
     ? `npx next start -p ${PORT}`
-    : `npx next dev -p ${PORT}`;
+    : `npx next start -p ${PORT}`;
 
   console.log(`🚀 Starting Next.js app with command: ${cmd}`);
   
