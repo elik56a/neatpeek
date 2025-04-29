@@ -35,7 +35,7 @@ async function ensureDatabaseConnection() {
 async function startNextApp() {
   const command = mode === "production"
     ? `npx next start -p ${PORT}`
-    : `npx next dev -p ${PORT}`;
+    : `npx next start -p ${PORT}`;
 
   console.log(`🚀 Starting Next.js with: ${command}`);
 
