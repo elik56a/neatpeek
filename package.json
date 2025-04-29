@@ -8,12 +8,18 @@
     "dev:local": "yarn build:scripts && cross-env NODE_ENV=development node dist-scripts/start-app.js local",
     "dev": "yarn build:scripts && cross-env NODE_ENV=development node dist-scripts/start-app.js development",
     "start": "yarn build && yarn build:scripts && cross-env NODE_ENV=production node dist-scripts/start-app.js production",
+    "db:migrate": "prisma migrate dev",
+    "db:deploy": "prisma migrate deploy",
+    "db:seed": "prisma db seed",
+    "db:reset": "prisma migrate reset --force",
     "postinstall": "prisma generate",
     "type-check": "tsc --noEmit",
     "lint": "next lint",
     "format": "prettier --write .",
-    "clean": "rm -rf .next",
-    "test": "jest"
+    "clean": "rm -rf .next dist-scripts",
+    "test": "jest",
+    "railway:dev": "yarn build && yarn build:scripts && cross-env NODE_ENV=development node dist-scripts/start-app.js development",
+    "railway:prod": "yarn build && yarn build:scripts && cross-env NODE_ENV=production node dist-scripts/start-app.js production"
   },
   "prisma": {
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
