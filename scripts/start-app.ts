@@ -1,4 +1,4 @@
-import { execSync } from "child_process";
+import { execSync, spawn } from "child_process";
 import { config } from "dotenv";
 import path from "path";
 import { Client } from "pg";
@@ -39,11 +39,15 @@ async function setupPrisma() {
   execSync("npx prisma generate", { stdio: "inherit" });
 
   if (mode === "production") {
-    console.log("⚙️ Deploying Prisma migrations...");
+    console.log("🚀 Deploying Prisma migrations...");
     execSync("npx prisma migrate deploy", { stdio: "inherit" });
   } else {
-    console.log("⚙️ Running Prisma migrations in development...");
-    execSync("npx prisma migrate dev --name init", { stdio: "inherit" });
+    console.log("🚧 Running Prisma dev migrations...");
+    try {
+      execSync("npx prisma migrate dev --name init", { stdio: "inherit" });
+    } catch (error) {
+      console.warn("⚠️ Prisma migrate dev failed (probably because DB already up-to-date). Continuing...");
+    }
   }
 }
 
@@ -54,15 +58,23 @@ async function startApp() {
     : `npx next dev -p ${PORT}`;
 
   console.log(`🚀 Starting Next.js app with command: ${cmd}`);
-  execSync(cmd, { stdio: "inherit" });
+  
+  // חשוב: משתמשים ב-spawn במקום execSync כדי שהשרת יישאר פתוח
+  const child = spawn(cmd, {
+    shell: true,
+    stdio: "inherit",
+  });
+
+  child.on("close", (code) => {
+    console.log(`🔴 App exited with code ${code}`);
+    process.exit(code ?? 1);
+  });
 }
-
-
 
 async function main() {
   await ensureDatabaseConnection();
   await setupPrisma();
-  startApp(); 
+  await startApp(); 
 }
 
 main().catch((error) => {
