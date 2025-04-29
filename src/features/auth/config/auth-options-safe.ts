@@ -9,8 +9,8 @@ import GoogleProvider from "next-auth/providers/google";
 export const authOptionsSafe: Partial<NextAuthOptions> = {
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID || "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      clientId: process.env.GOOGLE_OAUTH_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET || "",
     }),
     FigmaProvider({
       clientId: process.env.FIGMA_CLIENT_ID || "",

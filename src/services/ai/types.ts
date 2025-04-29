@@ -2,7 +2,7 @@
  * Types for the AI service
  */
 
-import { AIAnalysisResult } from "@/features/brand-setup/types";
+import { AIAnalysisResult, BrandRule } from "@/features/brand-setup/types";
 import { DesignAnalysisResult, DesignRecheckResult, FigmaMetadata } from "@/features/design-review/types";
 
 /**
@@ -55,7 +55,7 @@ export interface AnalyzeDesignParams {
   /**
    * Brand rules
    */
-  brandRules: any;
+  brandRules: Partial<BrandRule>[];
 }
 
 /**

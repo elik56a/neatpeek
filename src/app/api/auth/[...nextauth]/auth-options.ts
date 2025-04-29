@@ -1,11 +1,11 @@
 // This file contains the server-side auth options for API routes
+import FigmaProvider from "@/features/auth/providers/figma-provider";
 import { comparePasswords } from "@/features/auth/server/auth-utils";
 import { prisma } from "@/services/db/prisma";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
-import FigmaProvider from "@/features/auth/providers/figma-provider";
 
 // Disable console logs to prevent infinite loop
 const originalConsoleLog = console.log;
@@ -29,8 +29,8 @@ export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.GOOGLE_OAUTH_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET!,
       authorization: {
         params: {
           prompt: "select_account"
