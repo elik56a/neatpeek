@@ -265,24 +265,24 @@ async function main() {
 
 
   // Create a few feature flags
-  await prisma.featureFlag.createMany({
-    data: [
-      {
-        key: 'advanced_analytics',
-        name: 'Advanced Analytics',
-        description: 'Enable advanced analytics features',
-        isEnabled: false,
-        enabledForTiers: [PlanTier.BUSINESS],
-      },
-      {
-        key: 'ai_suggestions_v2',
-        name: 'AI Suggestions V2',
-        description: 'New version of AI suggestions with improved accuracy',
-        isEnabled: true,
-        enabledForTiers: [PlanTier.PRO, PlanTier.BUSINESS],
-      },
-    ],
-  });
+  // await prisma.featureFlag.createMany({
+  //   data: [
+  //     {
+  //       key: 'advanced_analytics',
+  //       name: 'Advanced Analytics',
+  //       description: 'Enable advanced analytics features',
+  //       isEnabled: false,
+  //       enabledForTiers: [PlanTier.BUSINESS],
+  //     },
+  //     {
+  //       key: 'ai_suggestions_v2',
+  //       name: 'AI Suggestions V2',
+  //       description: 'New version of AI suggestions with improved accuracy',
+  //       isEnabled: true,
+  //       enabledForTiers: [PlanTier.PRO, PlanTier.BUSINESS],
+  //     },
+  //   ],
+  // });
   
   console.log('Seeding completed successfully!');
 }
