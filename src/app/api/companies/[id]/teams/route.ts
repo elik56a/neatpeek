@@ -1,15 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { prisma } from '@/services/db/prisma';
-import { CompanyRole } from '@prisma/client';
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { prisma } from "@/services/db/prisma";
+import { CompanyRole } from "@prisma/client";
 
 /**
  * Get all teams for a company
  */
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Extract the ID from params
     const { id } = await Promise.resolve(params);
@@ -19,7 +16,7 @@ export async function GET(
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'You must be logged in to view company teams' },
+        { error: "You must be logged in to view company teams" },
         { status: 401 }
       );
     }
@@ -27,20 +24,17 @@ export async function GET(
     // Get the user
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true, companyId: true},
+      select: { id: true, companyId: true },
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Check if the user belongs to this company
     if (user.companyId !== id) {
       return NextResponse.json(
-        { error: 'You do not have permission to view teams of this company' },
+        { error: "You do not have permission to view teams of this company" },
         { status: 403 }
       );
     }
@@ -61,27 +55,21 @@ export async function GET(
         },
       },
       orderBy: {
-        name: 'asc',
+        name: "asc",
       },
     });
 
     return NextResponse.json(teams);
   } catch (error) {
-    console.error('Error getting company teams:', error);
-    return NextResponse.json(
-      { error: 'Failed to get company teams' },
-      { status: 500 }
-    );
+    console.error("Error getting company teams:", error);
+    return NextResponse.json({ error: "Failed to get company teams" }, { status: 500 });
   }
 }
 
 /**
  * Create a new team for a company
  */
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Extract the ID from params
     const { id } = await Promise.resolve(params);
@@ -91,7 +79,7 @@ export async function POST(
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'You must be logged in to create a team' },
+        { error: "You must be logged in to create a team" },
         { status: 401 }
       );
     }
@@ -103,10 +91,7 @@ export async function POST(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Check if the user is an admin or owner of this company
@@ -115,7 +100,7 @@ export async function POST(
       (user.companyRole !== CompanyRole.ADMIN && user.companyRole !== CompanyRole.OWNER)
     ) {
       return NextResponse.json(
-        { error: 'You do not have permission to create teams for this company' },
+        { error: "You do not have permission to create teams for this company" },
         { status: 403 }
       );
     }
@@ -125,10 +110,7 @@ export async function POST(
 
     // Validate the request body
     if (!body.name) {
-      return NextResponse.json(
-        { error: 'Team name is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Team name is required" }, { status: 400 });
     }
 
     // Create the team
@@ -141,7 +123,7 @@ export async function POST(
         members: {
           create: {
             userId: user.id,
-            role: 'OWNER',
+            role: "OWNER",
           },
         },
       },
@@ -149,10 +131,7 @@ export async function POST(
 
     return NextResponse.json(team);
   } catch (error) {
-    console.error('Error creating team:', error);
-    return NextResponse.json(
-      { error: 'Failed to create team' },
-      { status: 500 }
-    );
+    console.error("Error creating team:", error);
+    return NextResponse.json({ error: "Failed to create team" }, { status: 500 });
   }
 }

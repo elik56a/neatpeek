@@ -9,11 +9,11 @@ import CredentialsProvider from "next-auth/providers/credentials";
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
-    ...Object.values(PROVIDERS).map(({ provider, clientId, clientSecret, config }) => 
+    ...Object.values(PROVIDERS).map(({ provider, clientId, clientSecret, config }) =>
       provider({
         clientId,
         clientSecret,
-        ...config
+        ...config,
       })
     ),
     CredentialsProvider({
@@ -36,7 +36,8 @@ export const authOptions: NextAuthOptions = {
         if (attempts && attempts.count >= 5) {
           const lastAttempt = attempts.updatedAt;
           const timeDiff = Date.now() - lastAttempt.getTime();
-          if (timeDiff < 15 * 60 * 1000) { // 15 minutes
+          if (timeDiff < 15 * 60 * 1000) {
+            // 15 minutes
             throw new Error("Too many login attempts. Please try again later.");
           }
           // Reset attempts if time has passed
@@ -127,7 +128,7 @@ export const authOptions: NextAuthOptions = {
           await prisma.user.create({
             data: {
               email: user.email!,
-              name: user.name || user.email!.split('@')[0],
+              name: user.name || user.email!.split("@")[0],
               image: user.image,
               // For Figma, store additional data
               ...(providerId === "figma" && {
@@ -153,7 +154,7 @@ export const authOptions: NextAuthOptions = {
         } else {
           // Check if user already has an account with this provider
           const existingAccount = existingUser.accounts.find(
-            (acc) => acc.provider === account.provider
+            acc => acc.provider === account.provider
           );
 
           if (!existingAccount) {

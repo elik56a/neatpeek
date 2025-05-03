@@ -2,11 +2,40 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
 import { useAppDataContext } from "@/providers";
 import { User, CompanyRole } from "@/types";
@@ -17,7 +46,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-type CompanyMember = Pick<User, 'id' | 'name' | 'email' | 'image'> & {
+type CompanyMember = Pick<User, "id" | "name" | "email" | "image"> & {
   companyRole: CompanyRole;
 };
 
@@ -154,9 +183,7 @@ export default function CompanyMembersPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Invite a New Member</DialogTitle>
-              <DialogDescription>
-                Send an invitation to join your company.
-              </DialogDescription>
+              <DialogDescription>Send an invitation to join your company.</DialogDescription>
             </DialogHeader>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onInviteUser)} className="space-y-6">
@@ -183,10 +210,7 @@ export default function CompanyMembersPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Role</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select a role" />
@@ -223,9 +247,7 @@ export default function CompanyMembersPage() {
             <Building className="h-5 w-5" />
             <CardTitle>{company?.name || "Company"} Members</CardTitle>
           </div>
-          <CardDescription>
-            Manage the members of your company and their roles.
-          </CardDescription>
+          <CardDescription>Manage the members of your company and their roles.</CardDescription>
         </CardHeader>
         <CardContent>
           {members.length === 0 ? (
@@ -251,7 +273,7 @@ export default function CompanyMembersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {members.map((member) => (
+                {members.map(member => (
                   <TableRow key={member.id}>
                     <TableCell className="font-medium">{member.name}</TableCell>
                     <TableCell>{member.email}</TableCell>

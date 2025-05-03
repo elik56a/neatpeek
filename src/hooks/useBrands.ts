@@ -26,30 +26,30 @@ export function useBrands() {
    * Fetch all brands the user has access to
    */
   const fetchBrands = useCallback(async () => {
-    console.log('Fetching brands...');
+    console.log("Fetching brands...");
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await fetch('/api/brands', {
+      const response = await fetch("/api/brands", {
         headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        }
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch brands');
+        throw new Error("Failed to fetch brands");
       }
 
       const data = await response.json();
-      console.log('Brands fetched:', data.length);
+      console.log("Brands fetched:", data.length);
       setBrands(data);
     } catch (error) {
-      console.error('Error fetching brands:', error);
-      setError(error instanceof Error ? error : new Error('Failed to fetch brands'));
-      
+      console.error("Error fetching brands:", error);
+      setError(error instanceof Error ? error : new Error("Failed to fetch brands"));
+
       toast({
         title: "Error",
         description: "Failed to load brands. Please try again.",
@@ -69,6 +69,6 @@ export function useBrands() {
     brands,
     isLoading,
     error,
-    refreshBrands: fetchBrands
+    refreshBrands: fetchBrands,
   };
 }

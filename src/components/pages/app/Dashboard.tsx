@@ -11,18 +11,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import {
-  AreaChart,
-  BarChart,
-  LineChart,
-  PieChart,
-} from '@/components/ui/chart';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AreaChart, BarChart, LineChart, PieChart } from "@/components/ui/chart";
 import { format, subDays } from "date-fns";
 import {
   ArrowRight,
@@ -98,7 +88,7 @@ const historyData: AreaData[] = generateDates(30).map((date, i) => ({
 }));
 
 const Dashboard = () => {
-  const [chartType, setChartType] = useState<'line' | 'area' | 'bar' | 'pie'>('line');
+  const [chartType, setChartType] = useState<"line" | "area" | "bar" | "pie">("line");
 
   const recentActivity = [
     {
@@ -136,9 +126,7 @@ const Dashboard = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome back to your brand consistency dashboard
-          </p>
+          <p className="text-muted-foreground">Welcome back to your brand consistency dashboard</p>
         </div>
         <div className="flex items-center gap-2">
           <Button asChild className="hover-scale">
@@ -201,21 +189,29 @@ const Dashboard = () => {
           <CardContent className="pl-2">
             <Tabs
               value={chartType}
-              onValueChange={(v) => setChartType(v as 'line' | 'area' | 'bar' | 'pie')}
+              onValueChange={v => setChartType(v as "line" | "area" | "bar" | "pie")}
               className="w-full"
             >
               <TabsList className="grid grid-cols-4 w-fit h-8 mb-4">
-                <TabsTrigger value="line"><LineChartIcon className="h-4 w-4" /></TabsTrigger>
-                <TabsTrigger value="area"><LayoutDashboard className="h-4 w-4" /></TabsTrigger>
-                <TabsTrigger value="bar"><BarChart3 className="h-4 w-4" /></TabsTrigger>
-                <TabsTrigger value="pie"><PieChartIcon className="h-4 w-4" /></TabsTrigger>
+                <TabsTrigger value="line">
+                  <LineChartIcon className="h-4 w-4" />
+                </TabsTrigger>
+                <TabsTrigger value="area">
+                  <LayoutDashboard className="h-4 w-4" />
+                </TabsTrigger>
+                <TabsTrigger value="bar">
+                  <BarChart3 className="h-4 w-4" />
+                </TabsTrigger>
+                <TabsTrigger value="pie">
+                  <PieChartIcon className="h-4 w-4" />
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="line">
                 <LineChart
                   data={activityData}
-                  categories={['value']}
-                  colors={['#8344FF']}
+                  categories={["value"]}
+                  colors={["#8344FF"]}
                   yAxisWidth={30}
                   showLegend={false}
                   showGridLines={false}
@@ -226,8 +222,8 @@ const Dashboard = () => {
               <TabsContent value="area">
                 <AreaChart
                   data={historyData}
-                  categories={['desktop', 'mobile', 'tablet']}
-                  colors={['#8344FF', '#4BCAFF', '#F97316']}
+                  categories={["desktop", "mobile", "tablet"]}
+                  colors={["#8344FF", "#4BCAFF", "#F97316"]}
                   yAxisWidth={30}
                   showLegend={true}
                   showGridLines={false}
@@ -238,8 +234,8 @@ const Dashboard = () => {
               <TabsContent value="bar">
                 <BarChart
                   data={designTypeData}
-                  categories={['value']}
-                  colors={['#8344FF']}
+                  categories={["value"]}
+                  colors={["#8344FF"]}
                   yAxisWidth={30}
                   showLegend={false}
                   showGridLines={false}
@@ -252,7 +248,7 @@ const Dashboard = () => {
                   data={deviceBreakdownData}
                   category="value"
                   index="name"
-                  colors={['#8344FF', '#4BCAFF', '#F97316']}
+                  colors={["#8344FF", "#4BCAFF", "#F97316"]}
                   showAnimation={true}
                   className="aspect-[4/2]"
                 />
@@ -268,7 +264,7 @@ const Dashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivity.map((activity) => (
+              {recentActivity.map(activity => (
                 <div key={activity.id} className="flex items-start gap-3 hover-scale">
                   <div className="rounded-full p-1.5 mt-0.5">
                     {activity.type === "Design Check" ? (
@@ -284,7 +280,9 @@ const Dashboard = () => {
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center justify-between">
                       <div className="font-semibold">{activity.name}</div>
-                      <div className="text-sm text-muted-foreground">{format(activity.date, "MMM d")}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {format(activity.date, "MMM d")}
+                      </div>
                     </div>
                     <div className="flex items-center text-sm">
                       <div className="text-muted-foreground">{activity.type}</div>
@@ -294,8 +292,8 @@ const Dashboard = () => {
                             activity.status === "Passed"
                               ? "default"
                               : activity.status === "Failed"
-                              ? "destructive"
-                              : "outline"
+                                ? "destructive"
+                                : "outline"
                           }
                         >
                           {activity.status}
@@ -320,16 +318,14 @@ const Dashboard = () => {
         <Card className="md:col-span-3">
           <CardHeader>
             <CardTitle>Design Checks by Type</CardTitle>
-            <CardDescription>
-              Distribution of design checks by type
-            </CardDescription>
+            <CardDescription>Distribution of design checks by type</CardDescription>
           </CardHeader>
           <CardContent>
-            <BarChart 
+            <BarChart
               data={designTypeData}
               index="name"
-              categories={['value']}
-              colors={['#8344FF']}
+              categories={["value"]}
+              colors={["#8344FF"]}
               layout="vertical"
               showLegend={false}
               showGridLines={false}
@@ -338,28 +334,26 @@ const Dashboard = () => {
             />
           </CardContent>
         </Card>
-        
+
         <Card className="md:col-span-3">
           <CardHeader>
             <CardTitle>Device Breakdown</CardTitle>
-            <CardDescription>
-              Designs checked by device type
-            </CardDescription>
+            <CardDescription>Designs checked by device type</CardDescription>
           </CardHeader>
           <CardContent>
-            <PieChart 
+            <PieChart
               data={deviceBreakdownData}
               category="value"
               index="name"
-              colors={['#8344FF', '#4BCAFF', '#F97316']}
-              valueFormatter={(number) => `${number}%`}
+              colors={["#8344FF", "#4BCAFF", "#F97316"]}
+              valueFormatter={number => `${number}%`}
               showAnimation={true}
               className="aspect-[4/3]"
             />
           </CardContent>
         </Card>
       </div>
-      
+
       <div className="flex flex-col md:flex-row gap-4">
         <Card className="md:w-2/3">
           <CardHeader>
@@ -377,24 +371,26 @@ const Dashboard = () => {
                 <div key={index} className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="font-medium">{project.name}</div>
-                    <Badge variant={
-                      project.progress === 100 
-                        ? "default" 
-                        : project.progress > 70 
-                        ? "outline" 
-                        : "secondary"
-                    }>
+                    <Badge
+                      variant={
+                        project.progress === 100
+                          ? "default"
+                          : project.progress > 70
+                            ? "outline"
+                            : "secondary"
+                      }
+                    >
                       {project.status}
                     </Badge>
                   </div>
                   <div className="w-full bg-muted rounded-full h-2.5">
-                    <div 
+                    <div
                       className={`h-2.5 rounded-full ${
-                        project.progress === 100 
-                          ? "bg-green-500" 
-                          : project.progress > 70 
-                          ? "bg-blue-500" 
-                          : "bg-amber-500"
+                        project.progress === 100
+                          ? "bg-green-500"
+                          : project.progress > 70
+                            ? "bg-blue-500"
+                            : "bg-amber-500"
                       }`}
                       style={{ width: `${project.progress}%` }}
                     ></div>
@@ -404,7 +400,7 @@ const Dashboard = () => {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="md:w-1/3">
           <CardHeader>
             <CardTitle>Top Issues</CardTitle>
@@ -419,10 +415,7 @@ const Dashboard = () => {
                 { issue: "Spacing", count: 12 },
                 { issue: "Element Alignment", count: 8 },
               ].map((item, index) => (
-                <div 
-                  key={index} 
-                  className="flex items-center justify-between hover-scale py-1"
-                >
+                <div key={index} className="flex items-center justify-between hover-scale py-1">
                   <div className="flex items-center">
                     <span className="w-5 text-muted-foreground">{index + 1}.</span>
                     <span>{item.issue}</span>

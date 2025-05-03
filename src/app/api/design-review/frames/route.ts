@@ -4,9 +4,9 @@
  * This is a server-side only route that handles fetching frames from Figma.
  */
 
-import { prisma } from '@/services/db/prisma';
-import { getServerSession } from 'next-auth';
-import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from "@/services/db/prisma";
+import { getServerSession } from "next-auth";
+import { NextRequest, NextResponse } from "next/server";
 
 // We'll import the service dynamically to avoid client-side issues
 
@@ -16,10 +16,7 @@ export async function POST(req: NextRequest) {
     const session = await getServerSession();
 
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: "You must be logged in to get frames" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "You must be logged in to get frames" }, { status: 401 });
     }
 
     // Get the user
@@ -29,17 +26,17 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const figmaToken = user.figmaAccessToken 
-    
+    const figmaToken = user.figmaAccessToken;
+
     if (!figmaToken) {
       return NextResponse.json(
-        { error: "Figma access token not found. Please connect your Figma account or set FIGMA_PERSONAL_ACCESS_TOKEN in environment variables." },
+        {
+          error:
+            "Figma access token not found. Please connect your Figma account or set FIGMA_PERSONAL_ACCESS_TOKEN in environment variables.",
+        },
         { status: 400 }
       );
     }
@@ -49,14 +46,11 @@ export async function POST(req: NextRequest) {
     const { figmaUrl } = body;
 
     if (!figmaUrl) {
-      return NextResponse.json(
-        { error: "Figma URL is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Figma URL is required" }, { status: 400 });
     }
 
     // Dynamically import the FigmaService
-    const { FigmaService } = await import('@/features/design-review/services/figma-service');
+    const { FigmaService } = await import("@/features/design-review/services/figma-service");
 
     // Create Figma service with the token
     const figmaService = new FigmaService(figmaToken);
@@ -73,14 +67,11 @@ export async function POST(req: NextRequest) {
         name: frame.name,
         imageUrl: frame.url,
         width: frame.position.width,
-        height: frame.position.height
-      }))
+        height: frame.position.height,
+      })),
     });
   } catch (error: any) {
     console.error("Error getting frames:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to get frames" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message || "Failed to get frames" }, { status: 500 });
   }
 }

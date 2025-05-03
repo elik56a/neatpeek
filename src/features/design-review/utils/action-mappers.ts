@@ -11,7 +11,7 @@ import {
   PlusCircle,
   RefreshCw,
   ThumbsUp,
-  LucideIcon
+  LucideIcon,
 } from "lucide-react";
 
 /**

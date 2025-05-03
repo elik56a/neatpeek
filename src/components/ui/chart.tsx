@@ -1,4 +1,3 @@
-
 "use client";
 
 import { AreaChart as Area } from "@tremor/react";

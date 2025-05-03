@@ -29,7 +29,11 @@ interface DesignReviewProps {
 /**
  * Main component for the Design Review feature
  */
-export function DesignReview({ brandId: initialBrandId, allGuidelines, onGuidelineChange }: DesignReviewProps) {
+export function DesignReview({
+  brandId: initialBrandId,
+  allGuidelines,
+  onGuidelineChange,
+}: DesignReviewProps) {
   const { company, user, brands } = useAppDataContext();
   const router = useRouter();
   const [brandId, setBrandId] = useState(initialBrandId);
@@ -55,7 +59,7 @@ export function DesignReview({ brandId: initialBrandId, allGuidelines, onGuideli
     deselectAllFrames,
     reviewDesign,
     recheckDesign,
-    reset
+    reset,
   } = useDesignReview();
 
   // Handle Figma URL submission
@@ -84,7 +88,7 @@ export function DesignReview({ brandId: initialBrandId, allGuidelines, onGuideli
 
     const input = {
       images: uploadedImages,
-      brandId // Use the current selected brandId
+      brandId, // Use the current selected brandId
     };
 
     const result = await reviewDesign(input);
@@ -104,7 +108,7 @@ export function DesignReview({ brandId: initialBrandId, allGuidelines, onGuideli
     const input = {
       figmaUrl,
       brandId, // Use the current selected brandId
-      selectedFrameIds // Pass the selected frame IDs to the API
+      selectedFrameIds, // Pass the selected frame IDs to the API
     };
 
     const result = await reviewDesign(input);
@@ -125,7 +129,7 @@ export function DesignReview({ brandId: initialBrandId, allGuidelines, onGuideli
     const input = {
       figmaUrl,
       brandId, // Use the current selected brandId
-      userId: user.id // Add the user ID
+      userId: user.id, // Add the user ID
     };
 
     const result = await recheckDesign(input);
@@ -156,12 +160,8 @@ export function DesignReview({ brandId: initialBrandId, allGuidelines, onGuideli
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <CustomLoader size="lg" />
-        <p className="mt-4 text-lg font-medium">
-          Loading Figma frames...
-        </p>
-        <p className="text-sm text-muted-foreground mt-2">
-          This may take a moment...
-        </p>
+        <p className="mt-4 text-lg font-medium">Loading Figma frames...</p>
+        <p className="text-sm text-muted-foreground mt-2">This may take a moment...</p>
       </div>
     );
   }
@@ -181,7 +181,7 @@ export function DesignReview({ brandId: initialBrandId, allGuidelines, onGuideli
             <GuidelineSelector
               guidelines={guidelines}
               selectedId={brandId}
-              onSelect={(id) => {
+              onSelect={id => {
                 setBrandId(id);
                 if (onGuidelineChange) {
                   onGuidelineChange(id);
@@ -197,17 +197,23 @@ export function DesignReview({ brandId: initialBrandId, allGuidelines, onGuideli
             <Tabs
               defaultValue="figma"
               value={inputMode}
-              onValueChange={(value) => setInputMode(value as "figma" | "image")}
+              onValueChange={value => setInputMode(value as "figma" | "image")}
               className="w-full"
             >
               <TabsList className="relative w-full mb-6 grid grid-cols-2">
-                <TabsTrigger value="figma" className="relative z-10 overflow-hidden group data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
+                <TabsTrigger
+                  value="figma"
+                  className="relative z-10 overflow-hidden group data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                >
                   <span className="relative z-10 flex items-center">
                     <Link2 className="w-4 h-4 mr-2" />
                     Review Figma Design
                   </span>
                 </TabsTrigger>
-                <TabsTrigger value="image" className="relative z-10 overflow-hidden group data-[state=active]:bg-primary/10 data-[state=active]:text-primary">
+                <TabsTrigger
+                  value="image"
+                  className="relative z-10 overflow-hidden group data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
+                >
                   <span className="relative z-10 flex items-center">
                     <ImageIcon className="w-4 h-4 mr-2" />
                     Review Design Images
@@ -224,7 +230,7 @@ export function DesignReview({ brandId: initialBrandId, allGuidelines, onGuideli
                       placeholder="https://www.figma.com/file/..."
                       type="url"
                       value={figmaUrl}
-                      onChange={(e) => setFigmaUrl(e.target.value)}
+                      onChange={e => setFigmaUrl(e.target.value)}
                       className="pl-10 hover:border-primary/50 transition-colors duration-200 focus-visible:ring-primary/20"
                     />
                     <Link2 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -296,7 +302,10 @@ export function DesignReview({ brandId: initialBrandId, allGuidelines, onGuideli
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {imagePreviewUrls.map((url, index) => (
-                          <div key={index} className="border rounded-md overflow-hidden hover:shadow-md transition-all duration-200 group relative bg-background">
+                          <div
+                            key={index}
+                            className="border rounded-md overflow-hidden hover:shadow-md transition-all duration-200 group relative bg-background"
+                          >
                             <div className="relative aspect-video">
                               <img
                                 src={url}
@@ -305,7 +314,7 @@ export function DesignReview({ brandId: initialBrandId, allGuidelines, onGuideli
                               />
                               <button
                                 className="absolute top-2 right-2 h-8 w-8 rounded-full bg-background/80 flex items-center justify-center border text-destructive hover:bg-destructive hover:text-white hover:border-destructive transform hover:scale-110 transition-all duration-200"
-                                onClick={(e) => {
+                                onClick={e => {
                                   e.stopPropagation();
                                   // Remove image
                                   URL.revokeObjectURL(url);
@@ -313,7 +322,17 @@ export function DesignReview({ brandId: initialBrandId, allGuidelines, onGuideli
                                   setImagePreviewUrls(prev => prev.filter((_, i) => i !== index));
                                 }}
                               >
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="16"
+                                  height="16"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
                                   <line x1="18" y1="6" x2="6" y2="18"></line>
                                   <line x1="6" y1="6" x2="18" y2="18"></line>
                                 </svg>
@@ -373,19 +392,12 @@ export function DesignReview({ brandId: initialBrandId, allGuidelines, onGuideli
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleReset}
-              className="mr-2"
-            >
+            <Button variant="ghost" size="icon" onClick={handleReset} className="mr-2">
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <h1 className="text-3xl font-bold">Select Frames</h1>
           </div>
-          <p className="text-muted-foreground">
-            {fileName || "Figma Design"}
-          </p>
+          <p className="text-muted-foreground">{fileName || "Figma Design"}</p>
         </div>
 
         <FrameSelector
@@ -420,19 +432,12 @@ export function DesignReview({ brandId: initialBrandId, allGuidelines, onGuideli
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleReset}
-              className="mr-2"
-            >
+            <Button variant="ghost" size="icon" onClick={handleReset} className="mr-2">
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <h1 className="text-3xl font-bold">Review Results</h1>
           </div>
-          <p className="text-muted-foreground">
-            {fileName || "Design Review"}
-          </p>
+          <p className="text-muted-foreground">{fileName || "Design Review"}</p>
         </div>
 
         <Separator />
@@ -469,10 +474,7 @@ export function DesignReview({ brandId: initialBrandId, allGuidelines, onGuideli
             </div>
           </div>
         ) : analysisResult ? (
-          <AnalysisResults
-            result={analysisResult}
-            onRecheck={handleRecheck}
-          />
+          <AnalysisResults result={analysisResult} onRecheck={handleRecheck} />
         ) : (
           <div className="text-center p-8 border border-dashed rounded-lg">
             <p className="text-muted-foreground">No analysis results available.</p>
@@ -502,29 +504,17 @@ export function DesignReview({ brandId: initialBrandId, allGuidelines, onGuideli
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleReset}
-              className="mr-2"
-            >
+            <Button variant="ghost" size="icon" onClick={handleReset} className="mr-2">
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <h1 className="text-3xl font-bold">Recheck Results</h1>
           </div>
-          <p className="text-muted-foreground">
-            {fileName || "Design Recheck"}
-          </p>
+          <p className="text-muted-foreground">{fileName || "Design Recheck"}</p>
         </div>
 
         <Separator />
 
-        {recheckResult && (
-          <RecheckResults
-            result={recheckResult}
-            onRecheck={handleReset}
-          />
-        )}
+        {recheckResult && <RecheckResults result={recheckResult} onRecheck={handleReset} />}
 
         {error && (
           <Card className="border-destructive">

@@ -13,10 +13,7 @@ interface RecheckButtonProps {
  */
 export function RecheckButton({ onRecheck, className }: RecheckButtonProps) {
   return (
-    <Button 
-      onClick={onRecheck}
-      className={className}
-    >
+    <Button onClick={onRecheck} className={className}>
       <FileText className="mr-2 h-4 w-4" />
       Recheck Design
     </Button>

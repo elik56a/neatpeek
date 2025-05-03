@@ -1,6 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-import { SaveFileParams, SaveFileResult, StorageProvider } from './types';
+import fs from "fs";
+import path from "path";
+import { SaveFileParams, SaveFileResult, StorageProvider } from "./types";
 
 /**
  * Implementation of StorageProvider using Railway volume storage
@@ -39,7 +39,7 @@ export class RailwayStorageProvider implements StorageProvider {
 
     // Generate the URL and path
     const relativePath = path.join(params.folder, uniqueFilename);
-    const url = `${this.baseUrl}/${relativePath.replace(/\\/g, '/')}`;
+    const url = `${this.baseUrl}/${relativePath.replace(/\\/g, "/")}`;
 
     return {
       url,
@@ -51,7 +51,7 @@ export class RailwayStorageProvider implements StorageProvider {
    * Get a file URL from Railway volume storage
    */
   getFileUrl(path: string): string {
-    return `${this.baseUrl}/${path.replace(/\\/g, '/')}`;
+    return `${this.baseUrl}/${path.replace(/\\/g, "/")}`;
   }
 
   /**

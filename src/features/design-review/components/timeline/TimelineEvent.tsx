@@ -4,7 +4,12 @@ import { Badge } from "@/components/ui/badge";
 import { ReviewHistoryEntry } from "../../types";
 import { formatDistanceToNow } from "date-fns";
 import { AlertCircle, CheckCircle2, FileSearch, PlusCircle, ThumbsUp } from "lucide-react";
-import { getActionBadgeVariant, getActionColor, getActionIcon, getActionLabel } from "../../utils/enum-mappers";
+import {
+  getActionBadgeVariant,
+  getActionColor,
+  getActionIcon,
+  getActionLabel,
+} from "../../utils/enum-mappers";
 
 interface TimelineEventProps {
   event: ReviewHistoryEntry;
@@ -39,7 +44,11 @@ export function TimelineEvent({ event, isFirst }: TimelineEventProps) {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-1">
           <div className="flex items-center gap-2 mb-1 sm:mb-0">
             <Badge variant={badgeVariant as any}>{actionText}</Badge>
-            {isFirst && <Badge variant="outline" className="bg-primary/10">Latest</Badge>}
+            {isFirst && (
+              <Badge variant="outline" className="bg-primary/10">
+                Latest
+              </Badge>
+            )}
           </div>
           <span className="text-xs text-muted-foreground">{formattedTime}</span>
         </div>

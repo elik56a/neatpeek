@@ -2,15 +2,15 @@
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,20 +20,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ColorValueDisplay } from "@/components/ui/color-value-display";
 import { cn } from "@/utils/cn";
 import {
-    AlertCircle,
-    ArrowLeft,
-    BookOpen,
-    Brain,
-    Brush,
-    Edit,
-    FileText,
-    Image,
-    Loader2,
-    Palette,
-    Play,
-    Sparkles,
-    Trash2,
-    Type
+  AlertCircle,
+  ArrowLeft,
+  BookOpen,
+  Brain,
+  Brush,
+  Edit,
+  FileText,
+  Image,
+  Loader2,
+  Palette,
+  Play,
+  Sparkles,
+  Trash2,
+  Type,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -48,7 +48,8 @@ interface EnhancedBrandGuidelineDetailsProps {
 }
 
 export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDetailsProps) {
-  const { brandGuideline, isLoading, error, startAnalysis, deleteBrandGuideline } = useBrandGuideline(id);
+  const { brandGuideline, isLoading, error, startAnalysis, deleteBrandGuideline } =
+    useBrandGuideline(id);
   const {
     activeTab,
     setActiveTab,
@@ -56,7 +57,7 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
     getCategoryColor,
     getCategoryBadgeColor,
     getStatusBadge,
-    groupRulesByCategory
+    groupRulesByCategory,
   } = useBrandGuidelineUI();
   const [isStartingAnalysis, setIsStartingAnalysis] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -77,15 +78,13 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
     setIsDeleting(true);
     try {
       await deleteBrandGuideline();
-      router.push('/brand-setup');
+      router.push("/brand-setup");
     } catch (error) {
-      console.error('Error deleting brand guideline:', error);
+      console.error("Error deleting brand guideline:", error);
     } finally {
       setIsDeleting(false);
     }
   };
-
-
 
   if (isLoading) {
     return (
@@ -178,8 +177,8 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete the brand guideline
-                  and all associated data.
+                  This action cannot be undone. This will permanently delete the brand guideline and
+                  all associated data.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -191,7 +190,7 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
                       Deleting...
                     </>
                   ) : (
-                    'Delete'
+                    "Delete"
                   )}
                 </AlertDialogAction>
               </AlertDialogFooter>
@@ -221,26 +220,34 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
         </div>
       </div>
 
-      {brandGuideline.processingMessage && brandGuideline.processingStatus !== BrandGuidelineStatus.COMPLETED && (
-        <Alert
-          variant={brandGuideline.processingStatus === BrandGuidelineStatus.FAILED ? "destructive" : "default"}
-          className={cn(
-            "animate-in fade-in duration-500",
-            brandGuideline.processingStatus === BrandGuidelineStatus.PROCESSING ? "bg-amber-50 border-amber-200" :
-            brandGuideline.processingStatus === BrandGuidelineStatus.FAILED ? "bg-red-50 border-red-200" : ""
-          )}
-        >
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>
-            {brandGuideline.processingStatus === BrandGuidelineStatus.PROCESSING
-              ? "Processing"
-              : brandGuideline.processingStatus === BrandGuidelineStatus.FAILED
-              ? "Failed"
-              : "Status"}
-          </AlertTitle>
-          <AlertDescription>{brandGuideline.processingMessage}</AlertDescription>
-        </Alert>
-      )}
+      {brandGuideline.processingMessage &&
+        brandGuideline.processingStatus !== BrandGuidelineStatus.COMPLETED && (
+          <Alert
+            variant={
+              brandGuideline.processingStatus === BrandGuidelineStatus.FAILED
+                ? "destructive"
+                : "default"
+            }
+            className={cn(
+              "animate-in fade-in duration-500",
+              brandGuideline.processingStatus === BrandGuidelineStatus.PROCESSING
+                ? "bg-amber-50 border-amber-200"
+                : brandGuideline.processingStatus === BrandGuidelineStatus.FAILED
+                  ? "bg-red-50 border-red-200"
+                  : ""
+            )}
+          >
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>
+              {brandGuideline.processingStatus === BrandGuidelineStatus.PROCESSING
+                ? "Processing"
+                : brandGuideline.processingStatus === BrandGuidelineStatus.FAILED
+                  ? "Failed"
+                  : "Status"}
+            </AlertTitle>
+            <AlertDescription>{brandGuideline.processingMessage}</AlertDescription>
+          </Alert>
+        )}
 
       {/* Brand details card */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -264,7 +271,10 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
                 <h3 className="text-sm font-medium text-gray-700">Resources</h3>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {brandGuideline.pdfPath && (
-                    <Badge variant="outline" className="flex items-center bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors">
+                    <Badge
+                      variant="outline"
+                      className="flex items-center bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
+                    >
                       <FileText className="mr-1 h-3 w-3" />
                       <a
                         href={brandGuideline.pdfUrl}
@@ -278,14 +288,20 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
                   )}
 
                   {brandGuideline.designImages && brandGuideline.designImages.length > 0 && (
-                    <Badge variant="outline" className="flex items-center bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors">
+                    <Badge
+                      variant="outline"
+                      className="flex items-center bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors"
+                    >
                       <Image className="mr-1 h-3 w-3" />
                       {brandGuideline.designImages.length} Design Images
                     </Badge>
                   )}
 
                   {brandGuideline.customRules && brandGuideline.customRules.length > 0 && (
-                    <Badge variant="outline" className="flex items-center bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors">
+                    <Badge
+                      variant="outline"
+                      className="flex items-center bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors"
+                    >
                       <BookOpen className="mr-1 h-3 w-3" />
                       {brandGuideline.customRules.length} Custom Rules
                     </Badge>
@@ -297,71 +313,80 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
         </Card>
 
         {/* AI-generated brand rules */}
-        {brandGuideline.status === BrandGuidelineStatus.COMPLETED && brandGuideline.brandRules && brandGuideline.brandRules.length > 0 && (
-          <Card className="md:col-span-2 animate-in fade-in duration-500 slide-in-from-right-5">
-            <CardHeader className="bg-gradient-to-r from-indigo-50 to-blue-50 border-b">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center">
-                  <Brain className="mr-2 h-5 w-5 text-indigo-600" />
-                  <span className="flex items-center">
-                    AI-Generated Brand Rules
-                    <Badge className="ml-2 bg-indigo-100 text-indigo-800 hover:bg-indigo-100">
-                      <Sparkles className="mr-1 h-3 w-3" />
-                      AI Generated
-                    </Badge>
-                  </span>
-                </CardTitle>
-              </div>
-              <CardDescription>
-                These rules were automatically generated based on your brand guidelines.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <Tabs defaultValue={activeTab || Object.keys(rulesByCategory)[0]} className="space-y-6">
-                <TabsList className="flex flex-wrap bg-slate-50 p-1">
-                  {Object.keys(rulesByCategory).map((category) => (
-                    <TabsTrigger
-                      key={category}
-                      value={category}
-                      className={cn(
-                        "flex items-center data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-200",
-                        "data-[state=active]:text-indigo-700"
-                      )}
-                      onClick={() => setActiveTab(category)}
-                    >
-                      {getCategoryIcon(category as RuleCategory)}
-                      <span className="ml-1.5">{category.charAt(0) + category.slice(1).toLowerCase()}</span>
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
+        {brandGuideline.status === BrandGuidelineStatus.COMPLETED &&
+          brandGuideline.brandRules &&
+          brandGuideline.brandRules.length > 0 && (
+            <Card className="md:col-span-2 animate-in fade-in duration-500 slide-in-from-right-5">
+              <CardHeader className="bg-gradient-to-r from-indigo-50 to-blue-50 border-b">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center">
+                    <Brain className="mr-2 h-5 w-5 text-indigo-600" />
+                    <span className="flex items-center">
+                      AI-Generated Brand Rules
+                      <Badge className="ml-2 bg-indigo-100 text-indigo-800 hover:bg-indigo-100">
+                        <Sparkles className="mr-1 h-3 w-3" />
+                        AI Generated
+                      </Badge>
+                    </span>
+                  </CardTitle>
+                </div>
+                <CardDescription>
+                  These rules were automatically generated based on your brand guidelines.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <Tabs
+                  defaultValue={activeTab || Object.keys(rulesByCategory)[0]}
+                  className="space-y-6"
+                >
+                  <TabsList className="flex flex-wrap bg-slate-50 p-1">
+                    {Object.keys(rulesByCategory).map(category => (
+                      <TabsTrigger
+                        key={category}
+                        value={category}
+                        className={cn(
+                          "flex items-center data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-200",
+                          "data-[state=active]:text-indigo-700"
+                        )}
+                        onClick={() => setActiveTab(category)}
+                      >
+                        {getCategoryIcon(category as RuleCategory)}
+                        <span className="ml-1.5">
+                          {category.charAt(0) + category.slice(1).toLowerCase()}
+                        </span>
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
 
-                {Object.entries(rulesByCategory).map(([category, rules] : [RuleCategory, BrandRule[]]) => (
-                  <TabsContent key={category} value={category} className="space-y-4 pt-2">
-                    <div
-                      className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-2 duration-500"
-                      style={{
-                        animationFillMode: 'both',
-                        animationDelay: '150ms'
-                      }}
-                    >
-                      {rules.map((rule) => (
-                        <EditableBrandRule
-                          key={rule.id}
-                          rule={rule}
-                          category={category as RuleCategory}
-                          getCategoryBadgeColor={getCategoryBadgeColor}
-                          getCategoryIcon={getCategoryIcon}
-                          getCategoryColor={getCategoryColor}
-                          brandGuidelineId={id}
-                        />
-                      ))}
-                    </div>
-                  </TabsContent>
-                ))}
-              </Tabs>
-            </CardContent>
-          </Card>
-        )}
+                  {Object.entries(rulesByCategory).map(
+                    ([category, rules]: [RuleCategory, BrandRule[]]) => (
+                      <TabsContent key={category} value={category} className="space-y-4 pt-2">
+                        <div
+                          className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-2 duration-500"
+                          style={{
+                            animationFillMode: "both",
+                            animationDelay: "150ms",
+                          }}
+                        >
+                          {rules.map(rule => (
+                            <EditableBrandRule
+                              key={rule.id}
+                              rule={rule}
+                              category={category as RuleCategory}
+                              getCategoryBadgeColor={getCategoryBadgeColor}
+                              getCategoryIcon={getCategoryIcon}
+                              getCategoryColor={getCategoryColor}
+                              brandGuidelineId={id}
+                            />
+                          ))}
+                        </div>
+                      </TabsContent>
+                    )
+                  )}
+                </Tabs>
+              </CardContent>
+            </Card>
+          )}
       </div>
 
       {/* Custom rules card */}
@@ -372,17 +397,21 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
               <BookOpen className="mr-2 h-5 w-5 text-amber-600" />
               Custom Rules
             </CardTitle>
-            <CardDescription>
-              Custom rules you provided for your brand.
-            </CardDescription>
+            <CardDescription>Custom rules you provided for your brand.</CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {brandGuideline.customRules.map((rule) => (
-                <div key={rule.id} className="border rounded-lg p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200 shadow-sm hover:shadow-md transition-all duration-300">
+              {brandGuideline.customRules.map(rule => (
+                <div
+                  key={rule.id}
+                  className="border rounded-lg p-4 bg-gradient-to-r from-amber-50 to-yellow-50 border-amber-200 shadow-sm hover:shadow-md transition-all duration-300"
+                >
                   <div className="flex justify-between items-start">
                     <h3 className="font-medium text-gray-900">{rule.name}</h3>
-                    <Badge variant="outline" className="bg-amber-100 text-amber-800 hover:bg-amber-100">
+                    <Badge
+                      variant="outline"
+                      className="bg-amber-100 text-amber-800 hover:bg-amber-100"
+                    >
                       {rule.category}
                     </Badge>
                   </div>
@@ -404,13 +433,11 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
               <Image className="mr-2 h-5 w-5 text-purple-600" />
               Design Examples
             </CardTitle>
-            <CardDescription>
-              Design examples you provided for your brand.
-            </CardDescription>
+            <CardDescription>Design examples you provided for your brand.</CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {brandGuideline.designImages.map((image) => (
+              {brandGuideline.designImages.map(image => (
                 <div
                   key={image.id}
                   className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 group"
@@ -438,9 +465,7 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
                     <div className="p-3 bg-white">
                       <h3 className="font-medium text-sm text-gray-900">{image.name}</h3>
                       {image.description && (
-                        <p className="text-xs text-gray-600 mt-1">
-                          {image.description}
-                        </p>
+                        <p className="text-xs text-gray-600 mt-1">{image.description}</p>
                       )}
                     </div>
                   )}

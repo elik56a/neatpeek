@@ -24,11 +24,13 @@ NeatPeek is a SaaS platform that analyzes design frames against brand guidelines
 1. Install PostgreSQL on your machine or use a cloud service (like Railway, Supabase, etc.)
 
 2. Create a database named `neatpeekdb`:
+
    ```
    CREATE DATABASE neatpeekdb;
    ```
 
 3. Create a user and grant privileges (adjust as needed for your setup):
+
    ```
    CREATE USER neatpeekuser WITH PASSWORD 'your_secure_password';
    GRANT ALL PRIVILEGES ON DATABASE neatpeekdb TO neatpeekuser;
@@ -42,32 +44,38 @@ NeatPeek is a SaaS platform that analyzes design frames against brand guidelines
 ### Installation
 
 1. Clone the repository
+
    ```
    git clone <repository-url>
    cd neatpeek
    ```
 
 2. Install dependencies
+
    ```
    npm install
    ```
 
 3. Generate Prisma client
+
    ```
    npm run prisma:generate
    ```
 
 4. Run database migrations
+
    ```
    npm run prisma:migrate:dev
    ```
 
 5. Seed the database with initial data
+
    ```
    npm run prisma:seed
    ```
 
 6. Start the development server
+
    ```
    npm run dev
    ```

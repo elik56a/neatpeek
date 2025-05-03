@@ -1,4 +1,4 @@
-import { prisma } from './prisma';
+import { prisma } from "./prisma";
 
 /**
  * Generic database operations that can be used across the application
@@ -17,11 +17,7 @@ export async function getUserByEmail(email: string) {
   });
 }
 
-export async function createUser(data: {
-  email: string;
-  name?: string;
-  password?: string;
-}) {
+export async function createUser(data: { email: string; name?: string; password?: string }) {
   return prisma.user.create({
     data,
   });
@@ -31,14 +27,14 @@ export async function createUser(data: {
 export async function getBrandsByUserId(userId: string) {
   return prisma.brand.findMany({
     where: { userId },
-    orderBy: { updatedAt: 'desc' },
+    orderBy: { updatedAt: "desc" },
   });
 }
 
 export async function getBrandsByTeamId(teamId: string) {
   return prisma.brand.findMany({
     where: { teamId },
-    orderBy: { updatedAt: 'desc' },
+    orderBy: { updatedAt: "desc" },
   });
 }
 
@@ -68,10 +64,9 @@ export async function createBrand(data: {
 export async function getProjectsByBrandId(brandId: string) {
   return prisma.project.findMany({
     where: { brandId },
-    orderBy: { updatedAt: 'desc' },
+    orderBy: { updatedAt: "desc" },
   });
 }
-
 
 // Team operations
 export async function getUserTeams(userId: string) {
@@ -109,7 +104,7 @@ export async function getUserSubscription(userId: string) {
     include: {
       plan: true,
     },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: "desc" },
   });
 }
 
@@ -130,24 +125,22 @@ export async function trackUsage(data: {
   count: number;
 }) {
   const { userId, teamId, featureKey, count } = data;
-  
+
   if (!userId && !teamId) {
-    throw new Error('Either userId or teamId must be provided');
+    throw new Error("Either userId or teamId must be provided");
   }
-  
+
   const now = new Date();
   const periodStart = new Date(now.getFullYear(), now.getMonth(), 1); // First day of current month
   const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0); // Last day of current month
-  
-  const where = userId
-    ? { userId, featureKey, periodStart }
-    : { teamId, featureKey, periodStart };
-  
+
+  const where = userId ? { userId, featureKey, periodStart } : { teamId, featureKey, periodStart };
+
   // Try to update existing record
   const existingCount = await prisma.usageCount.findFirst({
     where: where as any,
   });
-  
+
   if (existingCount) {
     return prisma.usageCount.update({
       where: { id: existingCount.id },
@@ -157,7 +150,7 @@ export async function trackUsage(data: {
       },
     });
   }
-  
+
   // Create new record if none exists
   return prisma.usageCount.create({
     data: {
@@ -179,14 +172,14 @@ export async function checkUsageLimit(data: {
   featureKey: string;
 }): Promise<{ hasLimit: boolean; limit: number; currentUsage: number; exceeded: boolean }> {
   const { userId, teamId, featureKey } = data;
-  
+
   if (!userId && !teamId) {
-    throw new Error('Either userId or teamId must be provided');
+    throw new Error("Either userId or teamId must be provided");
   }
-  
+
   // Get the plan for the user or team
   let planId;
-  
+
   if (userId) {
     const subscription = await getUserSubscription(userId);
     planId = subscription?.planId;
@@ -194,15 +187,15 @@ export async function checkUsageLimit(data: {
     const subscription = await getTeamSubscription(teamId);
     planId = subscription?.planId;
   }
-  
+
   if (!planId) {
     // Default to freemium plan limits if no subscription
     const freemiumPlan = await prisma.plan.findFirst({
-      where: { tier: 'FREEMIUM' },
+      where: { tier: "FREEMIUM" },
     });
     planId = freemiumPlan?.id;
   }
-  
+
   // Get the limit for this feature
   const limit = await prisma.usageLimit.findUnique({
     where: {
@@ -212,27 +205,25 @@ export async function checkUsageLimit(data: {
       },
     },
   });
-  
+
   if (!limit || limit.limit === -1) {
     // No limit or unlimited
     return { hasLimit: false, limit: -1, currentUsage: 0, exceeded: false };
   }
-  
+
   // Get current usage
   const now = new Date();
   const periodStart = new Date(now.getFullYear(), now.getMonth(), 1); // First day of current month
-  
-  const where = userId
-    ? { userId, featureKey, periodStart }
-    : { teamId, featureKey, periodStart };
-  
+
+  const where = userId ? { userId, featureKey, periodStart } : { teamId, featureKey, periodStart };
+
   const usage = await prisma.usageCount.findFirst({
     where: where as any,
   });
-  
+
   const currentUsage = usage?.count || 0;
   const exceeded = currentUsage >= limit.limit;
-  
+
   return {
     hasLimit: true,
     limit: limit.limit,

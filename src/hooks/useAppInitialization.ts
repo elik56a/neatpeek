@@ -28,26 +28,27 @@ export function useAppInitialization() {
 
       try {
         console.log("Initializing app data...");
-        
+
         // 1. Fetch user's company data
         await refetchCompany();
-        
+
         // 2. Add other initialization tasks here as needed
         // For example:
         // - Fetch user preferences
         // - Fetch notifications
         // - Fetch global app settings
         // - Initialize analytics
-        
+
         console.log("App initialization complete");
         setIsInitialized(true);
       } catch (error) {
         console.error("Error during app initialization:", error);
         setError(error instanceof Error ? error : new Error("Failed to initialize app"));
-        
+
         toast({
           title: "Initialization Error",
-          description: "There was a problem loading your data. Some features may not work correctly.",
+          description:
+            "There was a problem loading your data. Some features may not work correctly.",
           variant: "destructive",
         });
       } finally {
@@ -65,6 +66,6 @@ export function useAppInitialization() {
     // Add a manual refresh function
     refreshAppData: async () => {
       setIsInitialized(false); // This will trigger the useEffect to run again
-    }
+    },
   };
 }

@@ -30,7 +30,7 @@ export function EditableBrandRule({
   getCategoryIcon,
   getCategoryColor,
   brandGuidelineId,
-  onRuleUpdated
+  onRuleUpdated,
 }: EditableBrandRuleProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -105,7 +105,6 @@ export function EditableBrandRule({
     setIsEditing(false);
   };
 
-
   return (
     <div
       className={cn(
@@ -128,11 +127,14 @@ export function EditableBrandRule({
           <div className="flex justify-between items-start gap-3">
             <Input
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={e => setName(e.target.value)}
               placeholder="Rule name"
               className="font-medium"
             />
-            <Badge variant="secondary" className={cn("font-medium flex-shrink-0", getCategoryBadgeColor(category))}>
+            <Badge
+              variant="secondary"
+              className={cn("font-medium flex-shrink-0", getCategoryBadgeColor(category))}
+            >
               {getCategoryIcon(category)}
               <span className="ml-1">{category.charAt(0) + category.slice(1).toLowerCase()}</span>
             </Badge>
@@ -143,7 +145,7 @@ export function EditableBrandRule({
               <ColorValueDisplay value={value} showText={false} showIndividualColors={false} />
               <Input
                 value={value}
-                onChange={(e) => setValue(e.target.value)}
+                onChange={e => setValue(e.target.value)}
                 placeholder="Color value (e.g. #FF5733 or linear-gradient(#FF5733, #3366FF))"
                 className="text-sm font-medium"
               />
@@ -151,7 +153,7 @@ export function EditableBrandRule({
           ) : (
             <Input
               value={value}
-              onChange={(e) => setValue(e.target.value)}
+              onChange={e => setValue(e.target.value)}
               placeholder="Value"
               className="text-sm font-medium mt-2"
             />
@@ -159,32 +161,39 @@ export function EditableBrandRule({
 
           <Textarea
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={e => setDescription(e.target.value)}
             placeholder="Description"
             className="text-sm mt-2 mb-8"
             rows={3}
           />
 
           <div className="flex justify-end space-x-2 mt-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleCancel}
-              disabled={isSubmitting}
-            >
+            <Button variant="outline" size="sm" onClick={handleCancel} disabled={isSubmitting}>
               <X className="h-4 w-4 mr-1" />
               Cancel
             </Button>
-            <Button
-              size="sm"
-              onClick={handleSave}
-              disabled={isSubmitting}
-            >
+            <Button size="sm" onClick={handleSave} disabled={isSubmitting}>
               {isSubmitting ? (
                 <span className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
                   </svg>
                   Saving...
                 </span>
@@ -200,10 +209,11 @@ export function EditableBrandRule({
       ) : (
         <>
           <div className="flex justify-between items-start">
-            <h3 className="font-medium text-gray-900 flex items-center">
-              {rule.name}
-            </h3>
-            <Badge variant="secondary" className={cn("font-medium", getCategoryBadgeColor(category))}>
+            <h3 className="font-medium text-gray-900 flex items-center">{rule.name}</h3>
+            <Badge
+              variant="secondary"
+              className={cn("font-medium", getCategoryBadgeColor(category))}
+            >
               {getCategoryIcon(category)}
               <span className="ml-1">{category.charAt(0) + category.slice(1).toLowerCase()}</span>
             </Badge>

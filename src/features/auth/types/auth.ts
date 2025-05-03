@@ -23,4 +23,4 @@ export interface AuthResponse {
   success: boolean;
   error?: AuthError;
   data?: any;
-} 
+}

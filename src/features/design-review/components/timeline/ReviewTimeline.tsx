@@ -53,27 +53,27 @@ export function ReviewTimeline({ reviewId, isVisible }: ReviewTimelineProps) {
   return (
     <div className="relative">
       {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-8">
-            <CustomLoader size="sm" />
-            <p className="mt-2 text-sm text-muted-foreground">Loading timeline...</p>
-          </div>
-        ) : error ? (
-          <div className="flex flex-col items-center justify-center py-4">
-            <AlertCircle className="h-8 w-8 text-destructive mb-2" />
-            <p className="text-sm text-muted-foreground">{error.message}</p>
-          </div>
-        ) : history.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4">No history available.</p>
-        ) : (
-          <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
-            {history.map((event, index) => (
-              <div key={event.id}>
-                <TimelineEvent event={event} isFirst={index === 0} />
-                {index < history.length - 1 && <Separator className="my-4" />}
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="flex flex-col items-center justify-center py-8">
+          <CustomLoader size="sm" />
+          <p className="mt-2 text-sm text-muted-foreground">Loading timeline...</p>
+        </div>
+      ) : error ? (
+        <div className="flex flex-col items-center justify-center py-4">
+          <AlertCircle className="h-8 w-8 text-destructive mb-2" />
+          <p className="text-sm text-muted-foreground">{error.message}</p>
+        </div>
+      ) : history.length === 0 ? (
+        <p className="text-sm text-muted-foreground text-center py-4">No history available.</p>
+      ) : (
+        <div className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
+          {history.map((event, index) => (
+            <div key={event.id}>
+              <TimelineEvent event={event} isFirst={index === 0} />
+              {index < history.length - 1 && <Separator className="my-4" />}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

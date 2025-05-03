@@ -1,51 +1,51 @@
-import { PrismaClient } from '@prisma/client';
-import { hash } from 'bcrypt';
+import { PrismaClient } from "@prisma/client";
+import { hash } from "bcrypt";
 
 const prisma = new PrismaClient();
 
 // Using string literals for plan tiers as defined in the schema
-type PlanTier = 'FREEMIUM' | 'PRO' | 'BUSINESS';
+type PlanTier = "FREEMIUM" | "PRO" | "BUSINESS";
 const PlanTier = {
-  FREEMIUM: 'FREEMIUM' as PlanTier,
-  PRO: 'PRO' as PlanTier,
-  BUSINESS: 'BUSINESS' as PlanTier
+  FREEMIUM: "FREEMIUM" as PlanTier,
+  PRO: "PRO" as PlanTier,
+  BUSINESS: "BUSINESS" as PlanTier,
 };
 
 async function main() {
-  console.log('Start seeding...');
-  
+  console.log("Start seeding...");
+
   // Create subscription plans
   const freemiumPlan = await prisma.plan.upsert({
-    where: { id: 'plan_freemium' },
+    where: { id: "plan_freemium" },
     update: {},
     create: {
-      id: 'plan_freemium',
-      name: 'Freemium',
+      id: "plan_freemium",
+      name: "Freemium",
       tier: PlanTier.FREEMIUM,
       monthlyPrice: 0,
-      currency: 'usd',
+      currency: "usd",
       features: JSON.stringify({
         brandCount: 1,
         frameAnalysis: true,
         aiSuggestions: true,
-        historyRetention: '30 days',
+        historyRetention: "30 days",
       }),
       usageLimits: {
         create: [
           {
-            featureKey: 'brands_count',
+            featureKey: "brands_count",
             limit: 1,
-            resetPeriod: 'NEVER',
+            resetPeriod: "NEVER",
           },
           {
-            featureKey: 'frames_per_month',
+            featureKey: "frames_per_month",
             limit: 20,
-            resetPeriod: 'MONTHLY',
+            resetPeriod: "MONTHLY",
           },
           {
-            featureKey: 'projects_per_brand',
+            featureKey: "projects_per_brand",
             limit: 3,
-            resetPeriod: 'NEVER',
+            resetPeriod: "NEVER",
           },
         ],
       },
@@ -53,45 +53,45 @@ async function main() {
   });
 
   const proPlan = await prisma.plan.upsert({
-    where: { id: 'plan_pro' },
+    where: { id: "plan_pro" },
     update: {},
     create: {
-      id: 'plan_pro',
-      name: 'Pro',
+      id: "plan_pro",
+      name: "Pro",
       tier: PlanTier.PRO,
       monthlyPrice: 1999, // $19.99
       annualPrice: 19990, // $199.90 (2 months free)
-      stripePriceId: 'price_pro_monthly',
-      currency: 'usd',
+      stripePriceId: "price_pro_monthly",
+      currency: "usd",
       features: JSON.stringify({
         brandCount: 3,
         frameAnalysis: true,
         aiSuggestions: true,
         teamAccess: true,
         exportReports: true,
-        historyRetention: '90 days',
+        historyRetention: "90 days",
       }),
       usageLimits: {
         create: [
           {
-            featureKey: 'brands_count',
+            featureKey: "brands_count",
             limit: 3,
-            resetPeriod: 'NEVER',
+            resetPeriod: "NEVER",
           },
           {
-            featureKey: 'frames_per_month',
+            featureKey: "frames_per_month",
             limit: 100,
-            resetPeriod: 'MONTHLY',
+            resetPeriod: "MONTHLY",
           },
           {
-            featureKey: 'projects_per_brand',
+            featureKey: "projects_per_brand",
             limit: 10,
-            resetPeriod: 'NEVER',
+            resetPeriod: "NEVER",
           },
           {
-            featureKey: 'team_members',
+            featureKey: "team_members",
             limit: 5,
-            resetPeriod: 'NEVER',
+            resetPeriod: "NEVER",
           },
         ],
       },
@@ -99,16 +99,16 @@ async function main() {
   });
 
   const businessPlan = await prisma.plan.upsert({
-    where: { id: 'plan_business' },
+    where: { id: "plan_business" },
     update: {},
     create: {
-      id: 'plan_business',
-      name: 'Business',
+      id: "plan_business",
+      name: "Business",
       tier: PlanTier.BUSINESS,
       monthlyPrice: 4999, // $49.99
       annualPrice: 49990, // $499.90 (2 months free)
-      stripePriceId: 'price_business_monthly',
-      currency: 'usd',
+      stripePriceId: "price_business_monthly",
+      currency: "usd",
       features: JSON.stringify({
         brandCount: -1, // Unlimited
         frameAnalysis: true,
@@ -118,29 +118,29 @@ async function main() {
         customBranding: true,
         apiAccess: true,
         prioritySupport: true,
-        historyRetention: '365 days',
+        historyRetention: "365 days",
       }),
       usageLimits: {
         create: [
           {
-            featureKey: 'brands_count',
+            featureKey: "brands_count",
             limit: -1, // Unlimited
-            resetPeriod: 'NEVER',
+            resetPeriod: "NEVER",
           },
           {
-            featureKey: 'frames_per_month',
+            featureKey: "frames_per_month",
             limit: 500,
-            resetPeriod: 'MONTHLY',
+            resetPeriod: "MONTHLY",
           },
           {
-            featureKey: 'projects_per_brand',
+            featureKey: "projects_per_brand",
             limit: -1, // Unlimited
-            resetPeriod: 'NEVER',
+            resetPeriod: "NEVER",
           },
           {
-            featureKey: 'team_members',
+            featureKey: "team_members",
             limit: 20,
-            resetPeriod: 'NEVER',
+            resetPeriod: "NEVER",
           },
         ],
       },
@@ -148,19 +148,19 @@ async function main() {
   });
 
   // Create test users
-  const hashedPassword = await hash('password123', 10);
-  
+  const hashedPassword = await hash("password123", 10);
+
   const user1 = await prisma.user.upsert({
-    where: { email: 'test@example.com' },
+    where: { email: "test@example.com" },
     update: {},
     create: {
-      email: 'test@example.com',
-      name: 'Test User',
+      email: "test@example.com",
+      name: "Test User",
       password: hashedPassword,
       subscriptions: {
         create: {
           planId: freemiumPlan.id,
-          status: 'ACTIVE',
+          status: "ACTIVE",
           currentPeriodStart: new Date(),
           currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
         },
@@ -169,16 +169,16 @@ async function main() {
   });
 
   const user2 = await prisma.user.upsert({
-    where: { email: 'pro@example.com' },
+    where: { email: "pro@example.com" },
     update: {},
     create: {
-      email: 'pro@example.com',
-      name: 'Pro User',
+      email: "pro@example.com",
+      name: "Pro User",
       password: hashedPassword,
       subscriptions: {
         create: {
           planId: proPlan.id,
-          status: 'ACTIVE',
+          status: "ACTIVE",
           currentPeriodStart: new Date(),
           currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
         },
@@ -188,17 +188,17 @@ async function main() {
 
   // Create team
   const team = await prisma.team.upsert({
-    where: { id: 'team_business' },
+    where: { id: "team_business" },
     update: {},
     create: {
-      id: 'team_business',
-      name: 'Acme Design Team',
+      id: "team_business",
+      name: "Acme Design Team",
       ownerId: user2.id,
       subscription: {
         create: {
           userId: user2.id,
           planId: businessPlan.id,
-          status: 'ACTIVE',
+          status: "ACTIVE",
           currentPeriodStart: new Date(),
           currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
         },
@@ -206,7 +206,7 @@ async function main() {
       members: {
         create: {
           userId: user2.id,
-          role: 'OWNER',
+          role: "OWNER",
         },
       },
     },
@@ -215,19 +215,19 @@ async function main() {
   // Create brand for freemium user
   const brandFreemium = await prisma.brand.create({
     data: {
-      name: 'Personal Brand',
-      description: 'My personal design system',
+      name: "Personal Brand",
+      description: "My personal design system",
       userId: user1.id,
       brandRules: JSON.stringify({
         colors: {
-          primary: '#3498db',
-          secondary: '#2ecc71',
-          text: '#2c3e50',
-          background: '#f9f9f9',
+          primary: "#3498db",
+          secondary: "#2ecc71",
+          text: "#2c3e50",
+          background: "#f9f9f9",
         },
         typography: {
-          headingFont: 'Montserrat',
-          bodyFont: 'Open Sans',
+          headingFont: "Montserrat",
+          bodyFont: "Open Sans",
           baseFontSize: 16,
         },
         spacing: {
@@ -236,17 +236,17 @@ async function main() {
       }),
       brandFiles: {
         create: {
-          fileName: 'Logo.png',
-          fileType: 'LOGO',
-          fileUrl: 'https://example.com/brand/logo.png',
+          fileName: "Logo.png",
+          fileType: "LOGO",
+          fileUrl: "https://example.com/brand/logo.png",
           fileSize: 25600,
         },
       },
       designExamples: {
         create: {
-          name: 'Home Screen',
-          imageUrl: 'https://example.com/brand/example1.png',
-          tags: ['homepage', 'landing'],
+          name: "Home Screen",
+          imageUrl: "https://example.com/brand/example1.png",
+          tags: ["homepage", "landing"],
         },
       },
     },
@@ -255,14 +255,11 @@ async function main() {
   // Create project and design reviews
   const project = await prisma.project.create({
     data: {
-      name: 'Website Redesign',
-      description: 'Redesigning the company website',
+      name: "Website Redesign",
+      description: "Redesigning the company website",
       brandId: brandFreemium.id,
-    }
+    },
   });
-
-  
-
 
   // Create a few feature flags
   // await prisma.featureFlag.createMany({
@@ -283,15 +280,15 @@ async function main() {
   //     },
   //   ],
   // });
-  
-  console.log('Seeding completed successfully!');
+
+  console.log("Seeding completed successfully!");
 }
 
 main()
-  .catch((e) => {
+  .catch(e => {
     console.error(e);
     process.exit(1);
   })
   .finally(async () => {
     await prisma.$disconnect();
-  }); 
+  });

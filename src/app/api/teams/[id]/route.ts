@@ -1,15 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { prisma } from '@/services/db/prisma';
-import { CompanyRole } from '@prisma/client';
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { prisma } from "@/services/db/prisma";
+import { CompanyRole } from "@prisma/client";
 
 /**
  * Get a team by ID
  */
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Extract the ID from params
     const { id } = await Promise.resolve(params);
@@ -19,7 +16,7 @@ export async function GET(
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'You must be logged in to view team details' },
+        { error: "You must be logged in to view team details" },
         { status: 401 }
       );
     }
@@ -31,10 +28,7 @@ export async function GET(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Get the team
@@ -63,37 +57,28 @@ export async function GET(
     });
 
     if (!team) {
-      return NextResponse.json(
-        { error: 'Team not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Team not found" }, { status: 404 });
     }
 
     // Check if the user belongs to the same company as the team
     if (user.companyId !== team.companyId) {
       return NextResponse.json(
-        { error: 'You do not have permission to view this team' },
+        { error: "You do not have permission to view this team" },
         { status: 403 }
       );
     }
 
     return NextResponse.json(team);
   } catch (error) {
-    console.error('Error getting team:', error);
-    return NextResponse.json(
-      { error: 'Failed to get team' },
-      { status: 500 }
-    );
+    console.error("Error getting team:", error);
+    return NextResponse.json({ error: "Failed to get team" }, { status: 500 });
   }
 }
 
 /**
  * Update a team
  */
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Extract the ID from params
     const { id } = await Promise.resolve(params);
@@ -103,7 +88,7 @@ export async function PUT(
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'You must be logged in to update a team' },
+        { error: "You must be logged in to update a team" },
         { status: 401 }
       );
     }
@@ -115,10 +100,7 @@ export async function PUT(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Get the team
@@ -128,27 +110,25 @@ export async function PUT(
     });
 
     if (!team) {
-      return NextResponse.json(
-        { error: 'Team not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Team not found" }, { status: 404 });
     }
 
     // Check if the user belongs to the same company as the team
     if (user.companyId !== team.companyId) {
       return NextResponse.json(
-        { error: 'You do not have permission to update this team' },
+        { error: "You do not have permission to update this team" },
         { status: 403 }
       );
     }
 
     // Check if the user is a company admin or the team owner
     const isTeamOwner = team.ownerId === user.id;
-    const isCompanyAdmin = user.companyRole === CompanyRole.ADMIN || user.companyRole === CompanyRole.OWNER;
+    const isCompanyAdmin =
+      user.companyRole === CompanyRole.ADMIN || user.companyRole === CompanyRole.OWNER;
 
     if (!isTeamOwner && !isCompanyAdmin) {
       return NextResponse.json(
-        { error: 'You do not have permission to update this team' },
+        { error: "You do not have permission to update this team" },
         { status: 403 }
       );
     }
@@ -158,10 +138,7 @@ export async function PUT(
 
     // Validate the request body
     if (!body.name) {
-      return NextResponse.json(
-        { error: 'Team name is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Team name is required" }, { status: 400 });
     }
 
     // Update the team
@@ -175,21 +152,15 @@ export async function PUT(
 
     return NextResponse.json(updatedTeam);
   } catch (error) {
-    console.error('Error updating team:', error);
-    return NextResponse.json(
-      { error: 'Failed to update team' },
-      { status: 500 }
-    );
+    console.error("Error updating team:", error);
+    return NextResponse.json({ error: "Failed to update team" }, { status: 500 });
   }
 }
 
 /**
  * Delete a team
  */
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Extract the ID from params
     const { id } = await Promise.resolve(params);
@@ -199,7 +170,7 @@ export async function DELETE(
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'You must be logged in to delete a team' },
+        { error: "You must be logged in to delete a team" },
         { status: 401 }
       );
     }
@@ -211,10 +182,7 @@ export async function DELETE(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Get the team
@@ -224,27 +192,25 @@ export async function DELETE(
     });
 
     if (!team) {
-      return NextResponse.json(
-        { error: 'Team not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Team not found" }, { status: 404 });
     }
 
     // Check if the user belongs to the same company as the team
     if (user.companyId !== team.companyId) {
       return NextResponse.json(
-        { error: 'You do not have permission to delete this team' },
+        { error: "You do not have permission to delete this team" },
         { status: 403 }
       );
     }
 
     // Check if the user is a company admin or the team owner
     const isTeamOwner = team.ownerId === user.id;
-    const isCompanyAdmin = user.companyRole === CompanyRole.ADMIN || user.companyRole === CompanyRole.OWNER;
+    const isCompanyAdmin =
+      user.companyRole === CompanyRole.ADMIN || user.companyRole === CompanyRole.OWNER;
 
     if (!isTeamOwner && !isCompanyAdmin) {
       return NextResponse.json(
-        { error: 'You do not have permission to delete this team' },
+        { error: "You do not have permission to delete this team" },
         { status: 403 }
       );
     }
@@ -256,10 +222,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting team:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete team' },
-      { status: 500 }
-    );
+    console.error("Error deleting team:", error);
+    return NextResponse.json({ error: "Failed to delete team" }, { status: 500 });
   }
 }

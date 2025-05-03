@@ -1,19 +1,18 @@
-
 "use client";
 
 import { cn } from "@/utils/cn";
 
 interface CustomLoaderProps {
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: "sm" | "md" | "lg" | "xl";
   className?: string;
 }
 
-export function CustomLoader({ size = 'md', className }: CustomLoaderProps) {
+export function CustomLoader({ size = "md", className }: CustomLoaderProps) {
   const sizeClasses = {
     sm: "w-6 h-6",
     md: "w-10 h-10",
     lg: "w-16 h-16",
-    xl: "w-24 h-24"
+    xl: "w-24 h-24",
   };
 
   return (
@@ -22,10 +21,12 @@ export function CustomLoader({ size = 'md', className }: CustomLoaderProps) {
         <div className="absolute w-full h-full border-4 border-muted rounded-full"></div>
         <div className="absolute w-full h-full border-4 border-t-primary rounded-full animate-spin"></div>
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className={cn(
-            "rounded-full bg-background",
-            size === 'sm' ? "w-2 h-2" : size === 'md' ? "w-3 h-3" : "w-4 h-4"
-          )}></div>
+          <div
+            className={cn(
+              "rounded-full bg-background",
+              size === "sm" ? "w-2 h-2" : size === "md" ? "w-3 h-3" : "w-4 h-4"
+            )}
+          ></div>
         </div>
       </div>
     </div>

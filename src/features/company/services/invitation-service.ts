@@ -1,7 +1,7 @@
-import { prisma } from '@/services/db/prisma';
-import { CompanyRole, Invitation, InvitationStatus } from '@prisma/client';
-import { addDays } from 'date-fns';
-import { v4 as uuidv4 } from 'uuid';
+import { prisma } from "@/services/db/prisma";
+import { CompanyRole, Invitation, InvitationStatus } from "@prisma/client";
+import { addDays } from "date-fns";
+import { v4 as uuidv4 } from "uuid";
 
 /**
  * Service for managing company invitations
@@ -17,13 +17,7 @@ export class InvitationService {
     createdById?: string;
     expiresInDays?: number;
   }): Promise<Invitation> {
-    const {
-      email,
-      companyId,
-      role = CompanyRole.MEMBER,
-      createdById,
-      expiresInDays = 7,
-    } = params;
+    const { email, companyId, role = CompanyRole.MEMBER, createdById, expiresInDays = 7 } = params;
 
     // Generate a unique token
     const token = uuidv4();
@@ -66,7 +60,7 @@ export class InvitationService {
         status: InvitationStatus.PENDING,
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
   }
@@ -74,21 +68,18 @@ export class InvitationService {
   /**
    * Accept an invitation
    */
-  async acceptInvitation(params: {
-    token: string;
-    userId: string;
-  }): Promise<Invitation> {
+  async acceptInvitation(params: { token: string; userId: string }): Promise<Invitation> {
     const { token, userId } = params;
 
     // Get the invitation
     const invitation = await this.getInvitationByToken(token);
 
     if (!invitation) {
-      throw new Error('Invitation not found');
+      throw new Error("Invitation not found");
     }
 
     if (invitation.status !== InvitationStatus.PENDING) {
-      throw new Error('Invitation is no longer valid');
+      throw new Error("Invitation is no longer valid");
     }
 
     if (invitation.expires < new Date()) {
@@ -97,7 +88,7 @@ export class InvitationService {
         where: { id: invitation.id },
         data: { status: InvitationStatus.EXPIRED },
       });
-      throw new Error('Invitation has expired');
+      throw new Error("Invitation has expired");
     }
 
     // Update the user to join the company

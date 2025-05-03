@@ -32,33 +32,33 @@ const Sidebar = () => {
     {
       name: "Dashboard",
       href: "/dashboard",
-      icon: LayoutDashboard
+      icon: LayoutDashboard,
     },
-      {
+    {
       name: "Design Review",
       href: "/design-review",
-      icon: FileCheck
+      icon: FileCheck,
     },
     {
       name: "Brand Setup",
       href: "/brand-setup",
-      icon: PaintBucket
+      icon: PaintBucket,
     },
     {
       name: "Teams",
       href: "/teams",
-      icon: Users
+      icon: Users,
     },
 
     {
       name: "Design History",
       href: "/design-history",
-      icon: History
+      icon: History,
     },
     {
       name: "Settings",
       href: "/settings",
-      icon: Settings
+      icon: Settings,
     },
   ];
 
@@ -102,7 +102,7 @@ const Sidebar = () => {
           </div>
         )}
         <nav className="px-2 space-y-1">
-          {sidebarLinks.map((link) => {
+          {sidebarLinks.map(link => {
             const isActive = pathname === link.href || pathname.startsWith(link.href + "/");
 
             if (collapsed) {
@@ -116,18 +116,24 @@ const Sidebar = () => {
                         className={cn(
                           "flex h-10 w-10 mx-auto items-center justify-center rounded-md",
                           "transition-all duration-200 ease-in-out hover:bg-sidebar-accent",
-                          isActive ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm" : ""
+                          isActive
+                            ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
+                            : ""
                         )}
                       >
-                        <link.icon size={20} className={cn("transition-transform duration-200", isActive && "scale-110")} />
+                        <link.icon
+                          size={20}
+                          className={cn(
+                            "transition-transform duration-200",
+                            isActive && "scale-110"
+                          )}
+                        />
                         {isActive && (
                           <div className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-primary-foreground animate-pulse"></div>
                         )}
                       </Link>
                     </TooltipTrigger>
-                    <TooltipContent side="right">
-                      {link.name}
-                    </TooltipContent>
+                    <TooltipContent side="right">{link.name}</TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               );
@@ -144,8 +150,13 @@ const Sidebar = () => {
                   isActive ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm" : ""
                 )}
               >
-                <link.icon size={20} className={cn("transition-transform duration-200", isActive && "scale-110")} />
-                <span className={cn("transition-all duration-200", isActive && "font-medium")}>{link.name}</span>
+                <link.icon
+                  size={20}
+                  className={cn("transition-transform duration-200", isActive && "scale-110")}
+                />
+                <span className={cn("transition-all duration-200", isActive && "font-medium")}>
+                  {link.name}
+                </span>
                 {isActive && (
                   <div className="ml-auto h-1.5 w-1.5 rounded-full bg-primary-foreground animate-pulse"></div>
                 )}
@@ -162,32 +173,29 @@ const Sidebar = () => {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Avatar className="h-9 w-9 cursor-pointer border-2 border-transparent hover:border-primary transition-all duration-200">
-                    <AvatarImage src={user?.image} alt={user?.name || ''} />
+                    <AvatarImage src={user?.image} alt={user?.name || ""} />
                     <AvatarFallback className="bg-primary text-primary-foreground font-medium">
-                      {user?.name ? user.name.split(' ').map(n => n[0]?.toUpperCase()).join('').substring(0, 2) : ''}
+                      {user?.name
+                        ? user.name
+                            .split(" ")
+                            .map(n => n[0]?.toUpperCase())
+                            .join("")
+                            .substring(0, 2)
+                        : ""}
                     </AvatarFallback>
                   </Avatar>
                 </TooltipTrigger>
-                <TooltipContent side="right">
-                  {user?.name || user?.email}
-                </TooltipContent>
+                <TooltipContent side="right">{user?.name || user?.email}</TooltipContent>
               </Tooltip>
             </TooltipProvider>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="mx-auto"
-                    onClick={logout}
-                  >
+                  <Button variant="ghost" size="icon" className="mx-auto" onClick={logout}>
                     <LogOut size={20} className="text-muted-foreground" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent side="right">
-                  Logout
-                </TooltipContent>
+                <TooltipContent side="right">Logout</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
@@ -195,18 +203,20 @@ const Sidebar = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Avatar className="h-9 w-9">
-                <AvatarImage src={user?.image} alt={user?.name || ''} />
+                <AvatarImage src={user?.image} alt={user?.name || ""} />
                 <AvatarFallback className="bg-primary text-primary-foreground font-medium">
-                  {user?.name ? user.name.split(' ').map(n => n[0]?.toUpperCase()).join('').substring(0, 2) : ''}
+                  {user?.name
+                    ? user.name
+                        .split(" ")
+                        .map(n => n[0]?.toUpperCase())
+                        .join("")
+                        .substring(0, 2)
+                    : ""}
                 </AvatarFallback>
               </Avatar>
               <div className="space-y-0.5 overflow-hidden">
-                <p className="text-sm font-medium leading-none truncate">
-                  {user?.name}
-                </p>
-                <p className="text-xs text-muted-foreground truncate">
-                  {user?.email}
-                </p>
+                <p className="text-sm font-medium leading-none truncate">{user?.name}</p>
+                <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
               </div>
             </div>
             <Button variant="ghost" size="icon" onClick={logout}>

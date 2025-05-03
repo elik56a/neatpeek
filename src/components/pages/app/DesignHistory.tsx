@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -29,7 +28,18 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { ArrowDown, ArrowUp, ChevronDown, Eye, Filter,X, Grid, List, MoreHorizontal, Search } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowUp,
+  ChevronDown,
+  Eye,
+  Filter,
+  X,
+  Grid,
+  List,
+  MoreHorizontal,
+  Search,
+} from "lucide-react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { cn } from "@/utils/cn";
@@ -128,7 +138,7 @@ const DesignHistory = () => {
   // Filter and sort designs
   const filteredDesigns = designChecks
     .filter(
-      (design) =>
+      design =>
         design.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         design.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
         design.id.toLowerCase().includes(searchQuery.toLowerCase())
@@ -139,9 +149,7 @@ const DesignHistory = () => {
           ? a.date.getTime() - b.date.getTime()
           : b.date.getTime() - a.date.getTime();
       } else {
-        return sortDirection === "asc"
-          ? a.score - b.score
-          : b.score - a.score;
+        return sortDirection === "asc" ? a.score - b.score : b.score - a.score;
       }
     });
 
@@ -160,8 +168,8 @@ const DesignHistory = () => {
   };
 
   // Get the selected design details
-  const selectedDesignDetails = selectedDesign 
-    ? designChecks.find(design => design.id === selectedDesign) 
+  const selectedDesignDetails = selectedDesign
+    ? designChecks.find(design => design.id === selectedDesign)
     : null;
 
   return (
@@ -169,9 +177,7 @@ const DesignHistory = () => {
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Design History</h1>
-          <p className="text-muted-foreground">
-            View and analyze your past design checks
-          </p>
+          <p className="text-muted-foreground">View and analyze your past design checks</p>
         </div>
         <div className="flex w-full md:w-auto flex-col sm:flex-row gap-2">
           <div className="relative w-full sm:w-[280px]">
@@ -181,7 +187,7 @@ const DesignHistory = () => {
               placeholder="Search designs..."
               className="pl-8 w-full"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={e => setSearchQuery(e.target.value)}
             />
           </div>
           <DropdownMenu>
@@ -193,9 +199,7 @@ const DesignHistory = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setSearchQuery("Web")}>
-                Web Design
-              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSearchQuery("Web")}>Web Design</DropdownMenuItem>
               <DropdownMenuItem onClick={() => setSearchQuery("Mobile")}>
                 Mobile Design
               </DropdownMenuItem>
@@ -208,9 +212,7 @@ const DesignHistory = () => {
               <DropdownMenuItem onClick={() => setSearchQuery("Brand")}>
                 Brand Design
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setSearchQuery("")}>
-                Clear Filters
-              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setSearchQuery("")}>Clear Filters</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <div className="flex items-center border rounded-md overflow-hidden">
@@ -285,9 +287,9 @@ const DesignHistory = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredDesigns.map((design) => (
-                  <TableRow 
-                    key={design.id} 
+                {filteredDesigns.map(design => (
+                  <TableRow
+                    key={design.id}
                     className={cn(
                       "transition-colors duration-200 cursor-pointer",
                       selectedDesign === design.id ? "bg-muted" : "hover:bg-muted/50"
@@ -300,9 +302,7 @@ const DesignHistory = () => {
                     <TableCell>{format(design.date, "MMM d, yyyy")}</TableCell>
                     <TableCell>{design.score}%</TableCell>
                     <TableCell>
-                      <Badge
-                        variant={design.status === "Passed" ? "default" : "destructive"}
-                      >
+                      <Badge variant={design.status === "Passed" ? "default" : "destructive"}>
                         {design.status}
                       </Badge>
                     </TableCell>
@@ -321,19 +321,17 @@ const DesignHistory = () => {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredDesigns.map((design) => (
-            <motion.div 
+          {filteredDesigns.map(design => (
+            <motion.div
               key={design.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <Card 
+              <Card
                 className={cn(
                   "overflow-hidden transition-all duration-200",
-                  selectedDesign === design.id 
-                    ? "ring-2 ring-primary" 
-                    : "hover:shadow-md"
+                  selectedDesign === design.id ? "ring-2 ring-primary" : "hover:shadow-md"
                 )}
                 onClick={() => handleDesignClick(design.id)}
               >
@@ -382,7 +380,9 @@ const DesignHistory = () => {
                 </CardContent>
                 <CardFooter className="p-4 pt-0">
                   <Button variant="outline" size="sm" className="w-full group">
-                    <span className="relative z-10 transition-transform duration-300 group-hover:translate-x-1">View Analysis</span>
+                    <span className="relative z-10 transition-transform duration-300 group-hover:translate-x-1">
+                      View Analysis
+                    </span>
                   </Button>
                 </CardFooter>
               </Card>
@@ -401,16 +401,14 @@ const DesignHistory = () => {
             <CardHeader className="bg-muted/40">
               <div className="flex justify-between items-center">
                 <CardTitle>Design Details: {selectedDesignDetails.name}</CardTitle>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={() => setSelectedDesign(null)}
-                >
+                <Button variant="ghost" size="icon" onClick={() => setSelectedDesign(null)}>
                   <X className="h-4 w-4" />
                   <span className="sr-only">Close</span>
                 </Button>
               </div>
-              <CardDescription>{selectedDesignDetails.id} • {selectedDesignDetails.type}</CardDescription>
+              <CardDescription>
+                {selectedDesignDetails.id} • {selectedDesignDetails.type}
+              </CardDescription>
             </CardHeader>
             <CardContent className="p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -422,7 +420,7 @@ const DesignHistory = () => {
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  
+
                   <div className="space-y-1 text-sm mb-4">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Date Checked:</span>
@@ -430,7 +428,11 @@ const DesignHistory = () => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Status:</span>
-                      <Badge variant={selectedDesignDetails.status === "Passed" ? "default" : "destructive"}>
+                      <Badge
+                        variant={
+                          selectedDesignDetails.status === "Passed" ? "default" : "destructive"
+                        }
+                      >
                         {selectedDesignDetails.status}
                       </Badge>
                     </div>
@@ -440,32 +442,34 @@ const DesignHistory = () => {
                     </div>
                   </div>
                 </div>
-                
+
                 <div>
                   <h3 className="text-lg font-semibold mb-4">Brand Consistency Score</h3>
                   <div className="bg-muted h-8 rounded-full overflow-hidden mb-6">
-                    <div 
+                    <div
                       className={cn(
                         "h-full rounded-full flex items-center justify-end px-3 text-white font-medium",
-                        selectedDesignDetails.score > 70 ? "bg-green-500" :
-                        selectedDesignDetails.score > 40 ? "bg-yellow-500" :
-                        "bg-red-500"
+                        selectedDesignDetails.score > 70
+                          ? "bg-green-500"
+                          : selectedDesignDetails.score > 40
+                            ? "bg-yellow-500"
+                            : "bg-red-500"
                       )}
                       style={{ width: `${selectedDesignDetails.score}%` }}
                     >
                       {selectedDesignDetails.score}%
                     </div>
                   </div>
-                  
+
                   <h3 className="text-lg font-semibold mb-2">Analysis Summary</h3>
                   <p className="text-muted-foreground mb-4">
-                    {selectedDesignDetails.score > 85 
+                    {selectedDesignDetails.score > 85
                       ? "This design performs very well against your brand guidelines with only minor adjustments needed."
                       : selectedDesignDetails.score > 70
-                      ? "This design generally follows brand guidelines but has several inconsistencies that should be addressed."
-                      : "This design has significant inconsistencies with your brand guidelines and requires major revisions."}
+                        ? "This design generally follows brand guidelines but has several inconsistencies that should be addressed."
+                        : "This design has significant inconsistencies with your brand guidelines and requires major revisions."}
                   </p>
-                  
+
                   <div className="flex justify-end mt-8">
                     <Button variant="default" className="transition-all duration-200 hover:shadow">
                       View Full Analysis

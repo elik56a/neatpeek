@@ -6,10 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 /**
  * Upload files for a brand guideline
  */
-export async function POST(
-  req: NextRequest,
-  context: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, context: { params: { id: string } }) {
   // Extract the ID from the context params
   const { id } = await Promise.resolve(context.params);
   try {
@@ -17,10 +14,7 @@ export async function POST(
     const session = await getServerSession();
 
     if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: "You must be logged in to upload files" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "You must be logged in to upload files" }, { status: 401 });
     }
 
     // Get the user ID
@@ -30,20 +24,14 @@ export async function POST(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Get the brand guideline
     const brandGuideline = await brandSetupService.getBrandGuideline(id);
 
     if (!brandGuideline) {
-      return NextResponse.json(
-        { error: "Brand guideline not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Brand guideline not found" }, { status: 404 });
     }
 
     // Check if the user owns the brand guideline
@@ -58,18 +46,18 @@ export async function POST(
     const formData = await req.formData();
 
     // Get the PDF file if available
-    const pdfFile = formData.get('pdfFile');
-    if (pdfFile && typeof pdfFile !== 'string') {
+    const pdfFile = formData.get("pdfFile");
+    if (pdfFile && typeof pdfFile !== "string") {
       try {
         // Use a more generic approach to get the buffer
         let buffer: Buffer;
 
         // Different ways to get the buffer depending on what's available
-        if ('arrayBuffer' in pdfFile && typeof pdfFile.arrayBuffer === 'function') {
+        if ("arrayBuffer" in pdfFile && typeof pdfFile.arrayBuffer === "function") {
           // Modern approach
           const arrayBuffer = await (pdfFile as any).arrayBuffer();
           buffer = Buffer.from(arrayBuffer);
-        } else if ('stream' in pdfFile && typeof pdfFile.stream === 'function') {
+        } else if ("stream" in pdfFile && typeof pdfFile.stream === "function") {
           // Stream approach
           const chunks: Buffer[] = [];
           for await (const chunk of (pdfFile as any).stream()) {
@@ -78,12 +66,12 @@ export async function POST(
           buffer = Buffer.concat(chunks);
         } else {
           // Fallback for other blob-like objects
-          throw new Error('Unable to read file data');
+          throw new Error("Unable to read file data");
         }
 
         // Get filename and mimetype safely
-        const filename = (pdfFile as any).name || 'document.pdf';
-        const mimeType = (pdfFile as any).type || 'application/pdf';
+        const filename = (pdfFile as any).name || "document.pdf";
+        const mimeType = (pdfFile as any).type || "application/pdf";
 
         await brandSetupService.uploadBrandGuidelinePdf({
           brandGuidelineId: id,
@@ -92,11 +80,8 @@ export async function POST(
           mimeType,
         });
       } catch (error) {
-        console.error('Error processing PDF file:', error);
-        return NextResponse.json(
-          { error: "Failed to process PDF file" },
-          { status: 500 }
-        );
+        console.error("Error processing PDF file:", error);
+        return NextResponse.json({ error: "Failed to process PDF file" }, { status: 500 });
       }
     }
 
@@ -110,17 +95,17 @@ export async function POST(
     }> = [];
 
     for (const [key, value] of formData.entries()) {
-      if (key.startsWith('designImages') && typeof value !== 'string') {
+      if (key.startsWith("designImages") && typeof value !== "string") {
         try {
           // Use a more generic approach to get the buffer
           let buffer: Buffer;
 
           // Different ways to get the buffer depending on what's available
-          if ('arrayBuffer' in value && typeof (value as any).arrayBuffer === 'function') {
+          if ("arrayBuffer" in value && typeof (value as any).arrayBuffer === "function") {
             // Modern approach
             const arrayBuffer = await (value as any).arrayBuffer();
             buffer = Buffer.from(arrayBuffer);
-          } else if ('stream' in value && typeof (value as any).stream === 'function') {
+          } else if ("stream" in value && typeof (value as any).stream === "function") {
             // Stream approach
             const chunks: Buffer[] = [];
             for await (const chunk of (value as any).stream()) {
@@ -134,19 +119,19 @@ export async function POST(
           }
 
           // Get filename and mimetype safely
-          const filename = (value as any).name || 'image.jpg';
-          const mimeType = (value as any).type || 'image/jpeg';
+          const filename = (value as any).name || "image.jpg";
+          const mimeType = (value as any).type || "image/jpeg";
 
           // Get the image name and description if available
-          const nameKey = key.replace('designImages', 'designImageNames');
-          const descriptionKey = key.replace('designImages', 'designImageDescriptions');
+          const nameKey = key.replace("designImages", "designImageNames");
+          const descriptionKey = key.replace("designImages", "designImageDescriptions");
 
           designImages.push({
             buffer,
             filename,
             mimeType,
-            name: formData.get(nameKey) as string || undefined,
-            description: formData.get(descriptionKey) as string || undefined,
+            name: (formData.get(nameKey) as string) || undefined,
+            description: (formData.get(descriptionKey) as string) || undefined,
           });
         } catch (error) {
           console.error(`Error processing image file for key ${key}:`, error);
@@ -163,7 +148,7 @@ export async function POST(
     }
 
     // Get the custom rules if available
-    const customRulesJson = formData.get('customRules') as string | null;
+    const customRulesJson = formData.get("customRules") as string | null;
     if (customRulesJson) {
       const customRules = JSON.parse(customRulesJson);
 
@@ -176,7 +161,7 @@ export async function POST(
     }
 
     // Start the analysis if requested
-    const startAnalysis = formData.get('startAnalysis') === 'true';
+    const startAnalysis = formData.get("startAnalysis") === "true";
     if (startAnalysis) {
       await brandSetupService.startAnalysis(id);
     }
@@ -188,9 +173,6 @@ export async function POST(
   } catch (error) {
     console.error("Error uploading files:", error);
 
-    return NextResponse.json(
-      { error: "Failed to upload files" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to upload files" }, { status: 500 });
   }
 }

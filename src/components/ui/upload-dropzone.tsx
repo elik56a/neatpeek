@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useCallback } from "react";
@@ -43,13 +42,16 @@ export const UploadDropzone = ({
         return;
       }
 
-      const invalidFiles = files.filter(file => !Object.keys(accept).some(type => {
-        if (type.endsWith("/*")) {
-          const mainType = type.split("/")[0];
-          return file.type.startsWith(`${mainType}/`);
-        }
-        return accept[type].includes(file.type);
-      }));
+      const invalidFiles = files.filter(
+        file =>
+          !Object.keys(accept).some(type => {
+            if (type.endsWith("/*")) {
+              const mainType = type.split("/")[0];
+              return file.type.startsWith(`${mainType}/`);
+            }
+            return accept[type].includes(file.type);
+          })
+      );
 
       if (invalidFiles.length > 0) {
         setError("Some files have an invalid format.");
@@ -64,7 +66,7 @@ export const UploadDropzone = ({
       }
 
       setError(null);
-      
+
       // Pass the first file to onUpload function
       if (files.length > 0) {
         onUpload(files[0]);
@@ -96,7 +98,7 @@ export const UploadDropzone = ({
       }
 
       setError(null);
-      
+
       // Pass the first file to onUpload function
       if (files.length > 0) {
         onUpload(files[0]);
@@ -123,9 +125,7 @@ export const UploadDropzone = ({
         <div className="flex flex-col items-center justify-center gap-1">
           <UploadCloud className="h-10 w-10 text-muted-foreground" />
           <div className="flex flex-col items-center justify-center text-sm">
-            <p className="font-medium">
-              Drag & drop or click to upload
-            </p>
+            <p className="font-medium">Drag & drop or click to upload</p>
             <p className="text-xs text-muted-foreground mt-1">
               {Object.keys(accept).join(", ")} up to {maxSize / (1024 * 1024)}MB
             </p>

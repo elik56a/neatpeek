@@ -1,16 +1,13 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { prisma } from '@/services/db/prisma';
-import { companyService } from '@/features/company/services';
-import { CompanyRole } from '@prisma/client';
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { prisma } from "@/services/db/prisma";
+import { companyService } from "@/features/company/services";
+import { CompanyRole } from "@prisma/client";
 
 /**
  * Get a company by ID
  */
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Extract the ID from params
     const { id } = await Promise.resolve(params);
@@ -20,7 +17,7 @@ export async function GET(
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'You must be logged in to view a company' },
+        { error: "You must be logged in to view a company" },
         { status: 401 }
       );
     }
@@ -32,16 +29,13 @@ export async function GET(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Check if the user belongs to this company
     if (user.companyId !== id) {
       return NextResponse.json(
-        { error: 'You do not have permission to view this company' },
+        { error: "You do not have permission to view this company" },
         { status: 403 }
       );
     }
@@ -50,29 +44,20 @@ export async function GET(
     const company = await companyService.getCompany(id);
 
     if (!company) {
-      return NextResponse.json(
-        { error: 'Company not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Company not found" }, { status: 404 });
     }
 
     return NextResponse.json(company);
   } catch (error) {
-    console.error('Error getting company:', error);
-    return NextResponse.json(
-      { error: 'Failed to get company' },
-      { status: 500 }
-    );
+    console.error("Error getting company:", error);
+    return NextResponse.json({ error: "Failed to get company" }, { status: 500 });
   }
 }
 
 /**
  * Update a company
  */
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Extract the ID from params
     const { id } = await Promise.resolve(params);
@@ -82,7 +67,7 @@ export async function PUT(
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'You must be logged in to update a company' },
+        { error: "You must be logged in to update a company" },
         { status: 401 }
       );
     }
@@ -94,17 +79,16 @@ export async function PUT(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Check if the user belongs to this company and has admin/owner role
-    if (user.companyId !== id || 
-        (user.companyRole !== CompanyRole.OWNER && user.companyRole !== CompanyRole.ADMIN)) {
+    if (
+      user.companyId !== id ||
+      (user.companyRole !== CompanyRole.OWNER && user.companyRole !== CompanyRole.ADMIN)
+    ) {
       return NextResponse.json(
-        { error: 'You do not have permission to update this company' },
+        { error: "You do not have permission to update this company" },
         { status: 403 }
       );
     }
@@ -123,21 +107,15 @@ export async function PUT(
 
     return NextResponse.json(company);
   } catch (error) {
-    console.error('Error updating company:', error);
-    return NextResponse.json(
-      { error: 'Failed to update company' },
-      { status: 500 }
-    );
+    console.error("Error updating company:", error);
+    return NextResponse.json({ error: "Failed to update company" }, { status: 500 });
   }
 }
 
 /**
  * Delete a company
  */
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Extract the ID from params
     const { id } = await Promise.resolve(params);
@@ -147,7 +125,7 @@ export async function DELETE(
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'You must be logged in to delete a company' },
+        { error: "You must be logged in to delete a company" },
         { status: 401 }
       );
     }
@@ -159,16 +137,13 @@ export async function DELETE(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Check if the user is the company owner
     if (user.companyId !== id || user.companyRole !== CompanyRole.OWNER) {
       return NextResponse.json(
-        { error: 'Only the company owner can delete the company' },
+        { error: "Only the company owner can delete the company" },
         { status: 403 }
       );
     }
@@ -194,10 +169,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting company:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete company' },
-      { status: 500 }
-    );
+    console.error("Error deleting company:", error);
+    return NextResponse.json({ error: "Failed to delete company" }, { status: 500 });
   }
 }

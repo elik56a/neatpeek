@@ -16,7 +16,7 @@ export async function PUT(req: NextRequest) {
   try {
     // Get the current user session
     const session = await getServerSession();
-    
+
     if (!session?.user?.email) {
       return NextResponse.json(
         { error: "You must be logged in to update your notification settings" },
@@ -26,20 +26,17 @@ export async function PUT(req: NextRequest) {
 
     // Parse the request body
     const body = await req.json();
-    
+
     // Validate the request body
     const validatedData = notificationSchema.parse(body);
-    
+
     // Get the user
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Update or create notification settings
@@ -51,21 +48,18 @@ export async function PUT(req: NextRequest) {
         ...validatedData,
       },
     });
-    
+
     return NextResponse.json(settings, { status: 200 });
   } catch (error) {
     console.error("Error updating notification settings:", error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Validation error", details: error.errors },
         { status: 400 }
       );
     }
-    
-    return NextResponse.json(
-      { error: "Failed to update notification settings" },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: "Failed to update notification settings" }, { status: 500 });
   }
 }

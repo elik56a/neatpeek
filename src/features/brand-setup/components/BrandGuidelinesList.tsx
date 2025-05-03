@@ -3,10 +3,35 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AlertCircle, ArrowRight, Building, FileText, Image, Loader2, Plus, Trash2, Users } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowRight,
+  Building,
+  FileText,
+  Image,
+  Loader2,
+  Plus,
+  Trash2,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useBrandGuidelines } from "../hooks";
@@ -30,11 +55,19 @@ export function BrandGuidelinesList() {
     }
 
     if (status === BrandGuidelineStatus.PROCESSING) {
-      return <Badge variant="secondary" className="bg-amber-100 text-amber-800 hover:bg-amber-100">Processing</Badge>;
+      return (
+        <Badge variant="secondary" className="bg-amber-100 text-amber-800 hover:bg-amber-100">
+          Processing
+        </Badge>
+      );
     }
 
     if (status === BrandGuidelineStatus.COMPLETED) {
-      return <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-100">Completed</Badge>;
+      return (
+        <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-100">
+          Completed
+        </Badge>
+      );
     }
 
     if (status === BrandGuidelineStatus.FAILED) {
@@ -104,9 +137,7 @@ export function BrandGuidelinesList() {
         <Card>
           <CardHeader>
             <CardTitle>No Brand Guidelines</CardTitle>
-            <CardDescription>
-              You haven't created any brand guidelines yet.
-            </CardDescription>
+            <CardDescription>You haven't created any brand guidelines yet.</CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground">
@@ -124,12 +155,15 @@ export function BrandGuidelinesList() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {brandGuidelines.map((guideline) => (
+          {brandGuidelines.map(guideline => (
             <Card key={guideline.id}>
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <CardTitle className="truncate">{guideline.name}</CardTitle>
-                  {getStatusBadge(guideline.status as BrandGuidelineStatus, guideline.processingStatus as ProcessingStatus)}
+                  {getStatusBadge(
+                    guideline.status as BrandGuidelineStatus,
+                    guideline.processingStatus as ProcessingStatus
+                  )}
                 </div>
                 <CardDescription className="flex flex-col gap-1">
                   <span>{new Date(guideline.createdAt).toLocaleDateString()}</span>
@@ -187,14 +221,12 @@ export function BrandGuidelinesList() {
                     <DialogHeader>
                       <DialogTitle>Delete Brand Guideline</DialogTitle>
                       <DialogDescription>
-                        Are you sure you want to delete this brand guideline? This action cannot be undone.
+                        Are you sure you want to delete this brand guideline? This action cannot be
+                        undone.
                       </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
-                      <Button
-                        variant="outline"
-                        onClick={() => {}}
-                      >
+                      <Button variant="outline" onClick={() => {}}>
                         Cancel
                       </Button>
                       <Button

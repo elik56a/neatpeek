@@ -62,38 +62,38 @@ export function useBrandGuidelines(options: UseBrandGuidelinesOptions = {}) {
    * Fetch all brand guidelines the user has access to
    */
   const fetchGuidelines = useCallback(async () => {
-    console.log('Fetching brand guidelines...');
+    console.log("Fetching brand guidelines...");
     setIsLoading(true);
     setError(null);
 
     try {
       // Build query parameters
       const params = new URLSearchParams();
-      if (options.companyId) params.append('companyId', options.companyId);
-      if (options.teamId) params.append('teamId', options.teamId);
-      
+      if (options.companyId) params.append("companyId", options.companyId);
+      if (options.teamId) params.append("teamId", options.teamId);
+
       const queryString = params.toString();
-      const url = `/api/brand-guidelines${queryString ? `?${queryString}` : ''}`;
+      const url = `/api/brand-guidelines${queryString ? `?${queryString}` : ""}`;
 
       const response = await fetch(url, {
         headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        }
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch brand guidelines');
+        throw new Error("Failed to fetch brand guidelines");
       }
 
       const data = await response.json();
-      console.log('Brand guidelines fetched:', data.length);
+      console.log("Brand guidelines fetched:", data.length);
       setGuidelines(data);
     } catch (error) {
-      console.error('Error fetching brand guidelines:', error);
-      setError(error instanceof Error ? error : new Error('Failed to fetch brand guidelines'));
-      
+      console.error("Error fetching brand guidelines:", error);
+      setError(error instanceof Error ? error : new Error("Failed to fetch brand guidelines"));
+
       toast({
         title: "Error",
         description: "Failed to load brand guidelines. Please try again.",
@@ -113,6 +113,6 @@ export function useBrandGuidelines(options: UseBrandGuidelinesOptions = {}) {
     guidelines,
     isLoading,
     error,
-    refreshGuidelines: fetchGuidelines
+    refreshGuidelines: fetchGuidelines,
   };
 }

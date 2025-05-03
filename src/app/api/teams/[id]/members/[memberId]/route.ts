@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { prisma } from '@/services/db/prisma';
-import { CompanyRole } from '@prisma/client';
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { prisma } from "@/services/db/prisma";
+import { CompanyRole } from "@prisma/client";
 
 /**
  * Remove a member from a team
@@ -19,7 +19,7 @@ export async function DELETE(
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'You must be logged in to remove team members' },
+        { error: "You must be logged in to remove team members" },
         { status: 401 }
       );
     }
@@ -31,10 +31,7 @@ export async function DELETE(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Get the team
@@ -44,37 +41,32 @@ export async function DELETE(
     });
 
     if (!team) {
-      return NextResponse.json(
-        { error: 'Team not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Team not found" }, { status: 404 });
     }
 
     // Check if the user belongs to the same company as the team
     if (user.companyId !== team.companyId) {
       return NextResponse.json(
-        { error: 'You do not have permission to remove members from this team' },
+        { error: "You do not have permission to remove members from this team" },
         { status: 403 }
       );
     }
 
     // Check if the user is a company admin or the team owner
     const isTeamOwner = team.ownerId === user.id;
-    const isCompanyAdmin = user.companyRole === CompanyRole.ADMIN || user.companyRole === CompanyRole.OWNER;
+    const isCompanyAdmin =
+      user.companyRole === CompanyRole.ADMIN || user.companyRole === CompanyRole.OWNER;
 
     if (!isTeamOwner && !isCompanyAdmin) {
       return NextResponse.json(
-        { error: 'You do not have permission to remove members from this team' },
+        { error: "You do not have permission to remove members from this team" },
         { status: 403 }
       );
     }
 
     // Check if the member to remove is the team owner
     if (memberId === team.ownerId) {
-      return NextResponse.json(
-        { error: 'Cannot remove the team owner' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Cannot remove the team owner" }, { status: 400 });
     }
 
     // Check if the member is part of the team
@@ -86,10 +78,7 @@ export async function DELETE(
     });
 
     if (!teamMember) {
-      return NextResponse.json(
-        { error: 'User is not a member of this team' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "User is not a member of this team" }, { status: 400 });
     }
 
     // Remove the member from the team by deleting the TeamMember record
@@ -101,10 +90,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error removing team member:', error);
-    return NextResponse.json(
-      { error: 'Failed to remove team member' },
-      { status: 500 }
-    );
+    console.error("Error removing team member:", error);
+    return NextResponse.json({ error: "Failed to remove team member" }, { status: 500 });
   }
 }

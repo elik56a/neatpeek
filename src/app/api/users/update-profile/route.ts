@@ -60,9 +60,6 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: "Failed to update profile" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to update profile" }, { status: 500 });
   }
 }

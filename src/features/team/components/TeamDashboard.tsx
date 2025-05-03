@@ -1,7 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FileText, Settings, Users } from "lucide-react";
 import Link from "next/link";
@@ -117,9 +124,7 @@ export function TeamDashboard({ teamId, isTeamAdmin }: TeamDashboardProps) {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">{team.name}</h1>
-          <p className="text-muted-foreground">
-            {team.description || "Team dashboard"}
-          </p>
+          <p className="text-muted-foreground">{team.description || "Team dashboard"}</p>
         </div>
         {isTeamAdmin && (
           <Button asChild>
@@ -139,9 +144,7 @@ export function TeamDashboard({ teamId, isTeamAdmin }: TeamDashboardProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.memberCount || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              People in this team
-            </p>
+            <p className="text-xs text-muted-foreground">People in this team</p>
           </CardContent>
           <CardFooter>
             <Button variant="outline" size="sm" asChild className="w-full">
@@ -157,9 +160,7 @@ export function TeamDashboard({ teamId, isTeamAdmin }: TeamDashboardProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.brandCount || 0}</div>
-            <p className="text-xs text-muted-foreground">
-              Brand guidelines in this team
-            </p>
+            <p className="text-xs text-muted-foreground">Brand guidelines in this team</p>
           </CardContent>
           <CardFooter>
             <Button variant="outline" size="sm" asChild className="w-full">
@@ -172,14 +173,12 @@ export function TeamDashboard({ teamId, isTeamAdmin }: TeamDashboardProps) {
       <Card>
         <CardHeader>
           <CardTitle>Recent Activity</CardTitle>
-          <CardDescription>
-            Recent actions taken by members of this team
-          </CardDescription>
+          <CardDescription>Recent actions taken by members of this team</CardDescription>
         </CardHeader>
         <CardContent>
           {stats?.recentActivity && stats.recentActivity.length > 0 ? (
             <div className="space-y-4">
-              {stats.recentActivity.map((activity) => (
+              {stats.recentActivity.map(activity => (
                 <div key={activity.id} className="flex items-start gap-4 rounded-lg border p-4">
                   <div className="flex-1">
                     <div className="font-medium">{activity.title}</div>

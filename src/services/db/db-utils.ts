@@ -1,13 +1,13 @@
-import { prisma } from './prisma';
+import { prisma } from "./prisma";
 
 // Using string literals for plan tiers as defined in the schema
-type PlanTier = 'FREEMIUM' | 'PRO' | 'BUSINESS';
+type PlanTier = "FREEMIUM" | "PRO" | "BUSINESS";
 
 /**
  * Helper function to check if a user has exceeded their usage limit for a feature
  */
 export async function checkUsageLimit(
-  userId: string, 
+  userId: string,
   featureKey: string
 ): Promise<{
   allowed: boolean;
@@ -18,7 +18,7 @@ export async function checkUsageLimit(
   const subscription = await prisma.subscription.findFirst({
     where: {
       userId,
-      status: 'ACTIVE',
+      status: "ACTIVE",
     },
     include: {
       plan: {
@@ -30,13 +30,11 @@ export async function checkUsageLimit(
   });
 
   if (!subscription) {
-    throw new Error('No active subscription found');
+    throw new Error("No active subscription found");
   }
 
   // Find the usage limit for this feature
-  const usageLimit = subscription.plan.usageLimits.find(
-    (limit) => limit.featureKey === featureKey
-  );
+  const usageLimit = subscription.plan.usageLimits.find(limit => limit.featureKey === featureKey);
 
   if (!usageLimit) {
     throw new Error(`No usage limit defined for feature: ${featureKey}`);
@@ -53,21 +51,21 @@ export async function checkUsageLimit(
 
   // Set the period start date based on reset period
   switch (usageLimit.resetPeriod) {
-    case 'DAILY':
+    case "DAILY":
       periodStart.setHours(0, 0, 0, 0);
       break;
-    case 'WEEKLY':
+    case "WEEKLY":
       const dayOfWeek = now.getDay();
       periodStart.setDate(now.getDate() - dayOfWeek);
       periodStart.setHours(0, 0, 0, 0);
       break;
-    case 'MONTHLY':
+    case "MONTHLY":
       periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
       break;
-    case 'YEARLY':
+    case "YEARLY":
       periodStart = new Date(now.getFullYear(), 0, 1);
       break;
-    case 'NEVER':
+    case "NEVER":
       // For cumulative limits that don't reset, we need to check all usage
       periodStart = new Date(0); // Start of epoch
       break;
@@ -109,7 +107,7 @@ export async function incrementUsage(
   const subscription = await prisma.subscription.findFirst({
     where: {
       userId,
-      status: 'ACTIVE',
+      status: "ACTIVE",
     },
     include: {
       plan: {
@@ -121,13 +119,11 @@ export async function incrementUsage(
   });
 
   if (!subscription) {
-    throw new Error('No active subscription found');
+    throw new Error("No active subscription found");
   }
 
   // Find the usage limit for this feature
-  const usageLimit = subscription.plan.usageLimits.find(
-    (limit) => limit.featureKey === featureKey
-  );
+  const usageLimit = subscription.plan.usageLimits.find(limit => limit.featureKey === featureKey);
 
   if (!usageLimit) {
     throw new Error(`No usage limit defined for feature: ${featureKey}`);
@@ -135,27 +131,27 @@ export async function incrementUsage(
 
   // Calculate period start and end based on reset period
   switch (usageLimit.resetPeriod) {
-    case 'DAILY':
+    case "DAILY":
       periodStart.setHours(0, 0, 0, 0);
       periodEnd = new Date(periodStart);
       periodEnd.setDate(periodStart.getDate() + 1);
       break;
-    case 'WEEKLY':
+    case "WEEKLY":
       const dayOfWeek = now.getDay();
       periodStart.setDate(now.getDate() - dayOfWeek);
       periodStart.setHours(0, 0, 0, 0);
       periodEnd = new Date(periodStart);
       periodEnd.setDate(periodStart.getDate() + 7);
       break;
-    case 'MONTHLY':
+    case "MONTHLY":
       periodStart = new Date(now.getFullYear(), now.getMonth(), 1);
       periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
       break;
-    case 'YEARLY':
+    case "YEARLY":
       periodStart = new Date(now.getFullYear(), 0, 1);
       periodEnd = new Date(now.getFullYear() + 1, 0, 0);
       break;
-    case 'NEVER':
+    case "NEVER":
       // For cumulative limits that don't reset
       periodStart = new Date(0); // Start of epoch
       periodEnd = new Date(3000, 0, 1); // Far future
@@ -195,7 +191,7 @@ export async function getUserPlanTier(userId: string): Promise<PlanTier | null> 
   const subscription = await prisma.subscription.findFirst({
     where: {
       userId,
-      status: 'ACTIVE',
+      status: "ACTIVE",
     },
     include: {
       plan: true,
@@ -225,7 +221,7 @@ export async function createAuditLog(data: {
       entityType: data.entityType,
       entityId: data.entityId,
       action: data.action,
-      details: data.details ? data.details as any : undefined,
+      details: data.details ? (data.details as any) : undefined,
       ipAddress: data.ipAddress,
       userAgent: data.userAgent,
     },

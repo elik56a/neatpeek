@@ -1,7 +1,7 @@
-import { companyService } from '@/features/company/services';
-import { prisma } from '@/services/db/prisma';
-import { getServerSession } from 'next-auth';
-import { NextRequest, NextResponse } from 'next/server';
+import { companyService } from "@/features/company/services";
+import { prisma } from "@/services/db/prisma";
+import { getServerSession } from "next-auth";
+import { NextRequest, NextResponse } from "next/server";
 
 /**
  * Create a new company
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'You must be logged in to create a company' },
+        { error: "You must be logged in to create a company" },
         { status: 401 }
       );
     }
@@ -25,10 +25,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Get the request body
@@ -36,10 +33,7 @@ export async function POST(req: NextRequest) {
 
     // Validate the request body
     if (!body.name) {
-      return NextResponse.json(
-        { error: 'Company name is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Company name is required" }, { status: 400 });
     }
 
     // Create the company
@@ -63,21 +57,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       company,
       user: updatedUser,
-      message: "Company created successfully. Please refresh the page or log out and log back in to see the changes."
+      message:
+        "Company created successfully. Please refresh the page or log out and log back in to see the changes.",
     });
   } catch (error) {
-    console.error('Error creating company:', error);
+    console.error("Error creating company:", error);
 
     // Check for Prisma unique constraint error
-    if (error.code === 'P2002' && error.meta?.target?.includes('domain')) {
+    if (error.code === "P2002" && error.meta?.target?.includes("domain")) {
       return NextResponse.json(
-        { error: 'A company with this domain already exists' },
+        { error: "A company with this domain already exists" },
         { status: 400 }
       );
     }
 
     return NextResponse.json(
-      { error: 'Failed to create company: ' + (error.message || 'Unknown error') },
+      { error: "Failed to create company: " + (error.message || "Unknown error") },
       { status: 500 }
     );
   }
@@ -93,7 +88,7 @@ export async function GET(req: NextRequest) {
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'You must be logged in to view companies' },
+        { error: "You must be logged in to view companies" },
         { status: 401 }
       );
     }
@@ -105,10 +100,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // If the user has a company, return it
@@ -119,10 +111,7 @@ export async function GET(req: NextRequest) {
     // Otherwise, return an empty array
     return NextResponse.json([]);
   } catch (error) {
-    console.error('Error getting companies:', error);
-    return NextResponse.json(
-      { error: 'Failed to get companies' },
-      { status: 500 }
-    );
+    console.error("Error getting companies:", error);
+    return NextResponse.json({ error: "Failed to get companies" }, { status: 500 });
   }
 }

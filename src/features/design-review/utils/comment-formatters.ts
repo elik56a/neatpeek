@@ -3,7 +3,7 @@
  * These functions ensure consistent formatting of comments across the application
  */
 
-import { BrandIssue, GeneralIssue, IssueSeverity, IssueStatus } from '../types';
+import { BrandIssue, GeneralIssue, IssueSeverity, IssueStatus } from "../types";
 
 /**
  * Get emoji for severity level
@@ -11,15 +11,15 @@ import { BrandIssue, GeneralIssue, IssueSeverity, IssueStatus } from '../types';
 export function getSeverityEmoji(severity: IssueSeverity): string {
   switch (severity) {
     case IssueSeverity.HIGH:
-      return '🚨'; // Red alert for high severity
+      return "🚨"; // Red alert for high severity
     case IssueSeverity.MEDIUM:
-      return '⚠️'; // Warning for medium severity
+      return "⚠️"; // Warning for medium severity
     case IssueSeverity.LOW:
-      return 'ℹ️'; // Info for low severity
+      return "ℹ️"; // Info for low severity
     case IssueSeverity.OPTIONAL:
-      return '💭'; // Thought bubble for optional/suggestion
+      return "💭"; // Thought bubble for optional/suggestion
     default:
-      return '⚠️'; // Default to warning
+      return "⚠️"; // Default to warning
   }
 }
 
@@ -36,7 +36,7 @@ export function formatBrandIssueComment(issue: BrandIssue): string {
   const severityText = issue.severity.toUpperCase();
 
   // Only include the fix suggestion if it exists
-  const fixPart = issue.fix_suggestion ? `\n💡 Fix: ${issue.fix_suggestion}` : '';
+  const fixPart = issue.fix_suggestion ? `\n💡 Fix: ${issue.fix_suggestion}` : "";
 
   return `${severityEmoji} ${severityText} Brand Issue: ${issue.description}\n📋 Rule: ${issue.brand_rule_violation}${fixPart}`;
 }
@@ -51,10 +51,10 @@ export function formatBrandIssueComment(issue: BrandIssue): string {
 export function formatGeneralIssueComment(issue: GeneralIssue): string {
   const severityEmoji = getSeverityEmoji(issue.severity);
   const severityText = issue.severity.toUpperCase();
-  const issueType = issue.issue_type || 'UX';
+  const issueType = issue.issue_type || "UX";
 
   // Only include the fix suggestion if it exists
-  const fixPart = issue.fix_suggestion ? `\n💡 Fix: ${issue.fix_suggestion}` : '';
+  const fixPart = issue.fix_suggestion ? `\n💡 Fix: ${issue.fix_suggestion}` : "";
 
   return `${severityEmoji} ${severityText} ${issueType} Issue: ${issue.description}${fixPart}`;
 }
@@ -67,13 +67,13 @@ export function formatRecheckComment(status: IssueStatus, details?: string): str
     case IssueStatus.FIXED:
       return `✅ Fixed. Great job!`;
     case IssueStatus.PARTIALLY_FIXED:
-      return `🔸 Partially fixed.${details ? `\n${details}` : ''}`;
+      return `🔸 Partially fixed.${details ? `\n${details}` : ""}`;
     case IssueStatus.NOT_FIXED:
       return `👀 Issue still exists.`;
     case IssueStatus.NEW:
-      return `🆕 New issue found during recheck.${details ? `\n${details}` : ''}`;
+      return `🆕 New issue found during recheck.${details ? `\n${details}` : ""}`;
     default:
-      return `⚠️ Status unknown.${details ? `\n${details}` : ''}`;
+      return `⚠️ Status unknown.${details ? `\n${details}` : ""}`;
   }
 }
 
@@ -82,7 +82,7 @@ export function formatRecheckComment(status: IssueStatus, details?: string): str
  */
 export function formatNewIssueComment(issue: BrandIssue | GeneralIssue): string {
   // Determine if it's a brand issue or general issue
-  const isBrandIssue = 'brand_rule_violation' in issue;
+  const isBrandIssue = "brand_rule_violation" in issue;
 
   // Format the comment with a 🆕 NEW prefix on its own line
   if (isBrandIssue) {

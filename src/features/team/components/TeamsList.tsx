@@ -1,9 +1,32 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,7 +42,10 @@ import { z } from "zod";
 import { useTeams } from "../hooks/useTeams";
 
 const createTeamSchema = z.object({
-  name: z.string().min(2, "Team name must be at least 2 characters").max(50, "Team name must be less than 50 characters"),
+  name: z
+    .string()
+    .min(2, "Team name must be at least 2 characters")
+    .max(50, "Team name must be less than 50 characters"),
   description: z.string().optional(),
 });
 
@@ -140,9 +166,7 @@ export function TeamsList() {
                         <FormControl>
                           <Input placeholder="Marketing Team" {...field} />
                         </FormControl>
-                        <FormDescription>
-                          The name of your team.
-                        </FormDescription>
+                        <FormDescription>The name of your team.</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -195,13 +219,11 @@ export function TeamsList() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {teams.map((team) => (
+          {teams.map(team => (
             <Card key={team.id}>
               <CardHeader>
                 <CardTitle>{team.name}</CardTitle>
-                <CardDescription>
-                  {team._count?.members || 0} members
-                </CardDescription>
+                <CardDescription>{team._count?.members || 0} members</CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground">
@@ -210,9 +232,7 @@ export function TeamsList() {
               </CardContent>
               <CardFooter className="flex justify-between">
                 <Button variant="outline" asChild>
-                  <Link href={`/teams/${team.id}`}>
-                    View Details
-                  </Link>
+                  <Link href={`/teams/${team.id}`}>View Details</Link>
                 </Button>
                 {isCompanyAdmin && (
                   <Button variant="outline" asChild>

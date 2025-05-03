@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { useCallback } from "react";
 
 interface UseCompanyResult {
-  company: Pick<Company, 'id' | 'name'> | null;
+  company: Pick<Company, "id" | "name"> | null;
   companyId: string | null;
   companyRole: CompanyRole | null;
   isCompanyOwner: boolean;
@@ -42,12 +42,12 @@ export function useCompany(): UseCompanyResult {
       const response = await fetch(`/api/companies/${companyId}`);
 
       if (!response.ok) {
-        throw new Error('Failed to fetch company details');
+        throw new Error("Failed to fetch company details");
       }
 
       return response.json();
     } catch (error) {
-      console.error('Error fetching company details:', error);
+      console.error("Error fetching company details:", error);
       return null;
     }
   }, [companyId]);

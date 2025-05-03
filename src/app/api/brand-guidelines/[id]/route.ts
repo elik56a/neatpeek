@@ -6,10 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 /**
  * Get a brand guideline by ID
  */
-export async function GET(
-  req: NextRequest,
-  context: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, context: { params: { id: string } }) {
   // Extract the ID from the context params
   const { id } = await Promise.resolve(context.params);
   try {
@@ -30,20 +27,14 @@ export async function GET(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Get the brand guideline
     const brandGuideline = await brandSetupService.getBrandGuideline(id);
 
     if (!brandGuideline) {
-      return NextResponse.json(
-        { error: "Brand guideline not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Brand guideline not found" }, { status: 404 });
     }
 
     // Check if the user owns the brand guideline
@@ -58,20 +49,14 @@ export async function GET(
   } catch (error) {
     console.error("Error getting brand guideline:", error);
 
-    return NextResponse.json(
-      { error: "Failed to get brand guideline" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to get brand guideline" }, { status: 500 });
   }
 }
 
 /**
  * Update a brand guideline
  */
-export async function PUT(
-  req: NextRequest,
-  context: { params: { id: string } }
-) {
+export async function PUT(req: NextRequest, context: { params: { id: string } }) {
   // Extract the ID from the context params
   const { id } = await Promise.resolve(context.params);
 
@@ -93,20 +78,14 @@ export async function PUT(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Get the brand guideline
     const brandGuideline = await brandSetupService.getBrandGuideline(id);
 
     if (!brandGuideline) {
-      return NextResponse.json(
-        { error: "Brand guideline not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Brand guideline not found" }, { status: 404 });
     }
 
     // Check if the user owns the brand guideline
@@ -129,21 +108,15 @@ export async function PUT(
 
     return NextResponse.json(updatedBrandGuideline);
   } catch (error) {
-    console.error('Error updating brand guideline:', error);
-    return NextResponse.json(
-      { error: "Failed to update brand guideline" },
-      { status: 500 }
-    );
+    console.error("Error updating brand guideline:", error);
+    return NextResponse.json({ error: "Failed to update brand guideline" }, { status: 500 });
   }
 }
 
 /**
  * Delete a brand guideline
  */
-export async function DELETE(
-  req: NextRequest,
-  context: { params: { id: string } }
-) {
+export async function DELETE(req: NextRequest, context: { params: { id: string } }) {
   // Extract the ID from the context params
   const { id } = await Promise.resolve(context.params);
   try {
@@ -164,20 +137,14 @@ export async function DELETE(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Get the brand guideline
     const brandGuideline = await brandSetupService.getBrandGuideline(id);
 
     if (!brandGuideline) {
-      return NextResponse.json(
-        { error: "Brand guideline not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Brand guideline not found" }, { status: 404 });
     }
 
     // Check if the user owns the brand guideline
@@ -195,9 +162,6 @@ export async function DELETE(
   } catch (error) {
     console.error("Error deleting brand guideline:", error);
 
-    return NextResponse.json(
-      { error: "Failed to delete brand guideline" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to delete brand guideline" }, { status: 500 });
   }
 }

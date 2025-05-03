@@ -7,9 +7,9 @@
  */
 
 export enum CompanyRole {
-  OWNER = 'OWNER',
-  ADMIN = 'ADMIN',
-  MEMBER = 'MEMBER'
+  OWNER = "OWNER",
+  ADMIN = "ADMIN",
+  MEMBER = "MEMBER",
 }
 
 export interface FigmaFrame {

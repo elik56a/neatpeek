@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -106,8 +105,7 @@ const FeaturesPage = () => {
     {
       icon: FileText,
       title: "Export Reports",
-      description:
-        "Generate and export detailed reports for client presentations or team reviews.",
+      description: "Generate and export detailed reports for client presentations or team reviews.",
     },
     {
       icon: Eye,
@@ -131,8 +129,7 @@ const FeaturesPage = () => {
           Powerful Features for Brand Consistency
         </h1>
         <p className="text-muted-foreground text-lg">
-          Everything you need to maintain perfect brand consistency across all
-          your designs
+          Everything you need to maintain perfect brand consistency across all your designs
         </p>
         <div className="pt-6">
           <Button size="lg" asChild>
@@ -145,9 +142,7 @@ const FeaturesPage = () => {
       <section>
         <div className="grid gap-12">
           <div className="space-y-4">
-            <h2 className="text-3xl font-bold tracking-tight text-center">
-              Core Features
-            </h2>
+            <h2 className="text-3xl font-bold tracking-tight text-center">Core Features</h2>
             <p className="text-muted-foreground text-center">
               The foundation of our brand consistency platform
             </p>
@@ -186,8 +181,8 @@ const FeaturesPage = () => {
             Ready to ensure perfect brand consistency?
           </h2>
           <p className="text-muted-foreground">
-            Start your free trial today and see how {appConfig.name} can transform
-            your brand management process.
+            Start your free trial today and see how {appConfig.name} can transform your brand
+            management process.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild>

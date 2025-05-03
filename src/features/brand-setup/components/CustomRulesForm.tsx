@@ -5,7 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { AlertCircle, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
@@ -115,7 +121,8 @@ export function CustomRulesForm({
       <div>
         <h3 className="text-lg font-medium">Custom Brand Rules</h3>
         <p className="text-sm text-muted-foreground">
-          Add custom rules that define your brand guidelines. These will be used by our AI to generate comprehensive brand rules.
+          Add custom rules that define your brand guidelines. These will be used by our AI to
+          generate comprehensive brand rules.
         </p>
       </div>
 
@@ -136,9 +143,7 @@ export function CustomRulesForm({
               <Label htmlFor="category">Category</Label>
               <Select
                 value={newRule.category}
-                onValueChange={(value) =>
-                  setNewRule({ ...newRule, category: value })
-                }
+                onValueChange={value => setNewRule({ ...newRule, category: value })}
               >
                 <SelectTrigger id="category">
                   <SelectValue placeholder="Select category" />
@@ -160,9 +165,7 @@ export function CustomRulesForm({
               <Input
                 id="name"
                 value={newRule.name}
-                onChange={(e) =>
-                  setNewRule({ ...newRule, name: e.target.value })
-                }
+                onChange={e => setNewRule({ ...newRule, name: e.target.value })}
                 placeholder="e.g., Primary Color"
               />
             </div>
@@ -173,9 +176,7 @@ export function CustomRulesForm({
             <Textarea
               id="description"
               value={newRule.description}
-              onChange={(e) =>
-                setNewRule({ ...newRule, description: e.target.value })
-              }
+              onChange={e => setNewRule({ ...newRule, description: e.target.value })}
               placeholder="Describe the rule (e.g., Our primary color is #3B82F6 and should be used for all main buttons and links)"
               rows={3}
             />
@@ -219,13 +220,13 @@ export function CustomRulesForm({
                 <div className="flex-1 mr-4">
                   <div className="flex items-center flex-wrap gap-2 mb-1">
                     <span className="text-sm font-medium">{rule.name}</span>
-                    <span className={`text-xs px-2 py-1 rounded-full ${getCategoryColor(rule.category)}`}>
+                    <span
+                      className={`text-xs px-2 py-1 rounded-full ${getCategoryColor(rule.category)}`}
+                    >
                       {getCategoryLabel(rule.category)}
                     </span>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {rule.description}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{rule.description}</p>
                 </div>
                 <Button
                   variant="ghost"

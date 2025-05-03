@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   env: {
-    DEBUG_HIDE_PRISMA_LOGS: 'true',
+    DEBUG_HIDE_PRISMA_LOGS: "true",
   },
   // Disable ESLint during production builds
   eslint: {
@@ -18,11 +18,11 @@ const nextConfig = {
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: "/(.*)",
         headers: [
           {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on',
+            key: "X-DNS-Prefetch-Control",
+            value: "on",
           },
         ],
       },
@@ -30,7 +30,7 @@ const nextConfig = {
   },
   // Configure domain/subdomain routing
   async rewrites() {
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction = process.env.NODE_ENV === "production";
 
     // In production, we'll use Netlify redirects for routing between app.domain.com and domain.com
     if (isProduction) {
@@ -41,14 +41,14 @@ const nextConfig = {
     return {
       beforeFiles: [
         {
-          source: '/:path*',
+          source: "/:path*",
           has: [
             {
-              type: 'host',
-              value: 'app.localhost:4456',
+              type: "host",
+              value: "app.localhost:4456",
             },
           ],
-          destination: '/app/:path*',
+          destination: "/app/:path*",
         },
       ],
     };
@@ -75,11 +75,11 @@ const nextConfig = {
         url: false,
         util: false,
         bcrypt: false,
-        '@mapbox/node-pre-gyp': false,
+        "@mapbox/node-pre-gyp": false,
       };
     }
     return config;
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

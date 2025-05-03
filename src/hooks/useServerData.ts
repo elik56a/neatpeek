@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import * as dbActions from '@/lib/db/actions';
+import { useState, useEffect } from "react";
+import * as dbActions from "@/lib/db/actions";
 
 // Generic hook for fetching data from server actions
 export function useServerData<T>(
@@ -15,11 +15,11 @@ export function useServerData<T>(
 
   useEffect(() => {
     let isMounted = true;
-    
+
     const fetchData = async () => {
       setIsLoading(true);
       setError(null);
-      
+
       try {
         const result = await actionFn();
         if (isMounted) {
@@ -35,14 +35,14 @@ export function useServerData<T>(
         }
       }
     };
-    
+
     fetchData();
-    
+
     return () => {
       isMounted = false;
     };
   }, dependencies);
-  
+
   return { data, isLoading, error };
 }
 

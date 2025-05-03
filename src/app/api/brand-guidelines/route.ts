@@ -35,10 +35,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Parse the request body
@@ -61,10 +58,7 @@ export async function POST(req: NextRequest) {
       });
 
       if (!team) {
-        return NextResponse.json(
-          { error: "Team not found" },
-          { status: 404 }
-        );
+        return NextResponse.json({ error: "Team not found" }, { status: 404 });
       }
 
       // Ensure the team belongs to the user's company
@@ -103,10 +97,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    return NextResponse.json(
-      { error: "Failed to create brand guideline" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to create brand guideline" }, { status: 500 });
   }
 }
 
@@ -133,17 +124,14 @@ export async function GET(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Parse query parameters
     const url = new URL(req.url);
     // @ts-ignore - TypeScript doesn't know about our custom fields
-    const companyId = url.searchParams.get('companyId') || user.companyId;
-    const teamId = url.searchParams.get('teamId');
+    const companyId = url.searchParams.get("companyId") || user.companyId;
+    const teamId = url.searchParams.get("teamId");
 
     // Get brand guidelines based on filters
     let brandGuidelines: any[];
@@ -163,9 +151,6 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error("Error getting brand guidelines:", error);
 
-    return NextResponse.json(
-      { error: "Failed to get brand guidelines" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to get brand guidelines" }, { status: 500 });
   }
 }

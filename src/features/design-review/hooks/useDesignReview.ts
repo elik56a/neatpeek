@@ -2,15 +2,15 @@
  * Hook for design review functionality
  */
 
-import { useState } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 import {
   DesignAnalysisInput,
   DesignAnalysisResult,
   DesignRecheckInput,
   DesignRecheckResult,
-  FrameSelectionState
-} from '../types';
+  FrameSelectionState,
+} from "../types";
 
 /**
  * Hook for design review functionality
@@ -34,37 +34,39 @@ export function useDesignReview() {
     setError(null);
 
     try {
-      const response = await fetch('/api/design-review/frames', {
-        method: 'POST',
+      const response = await fetch("/api/design-review/frames", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ figmaUrl }),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to get frames');
+        throw new Error(errorData.error || "Failed to get frames");
       }
 
       const data = await response.json();
 
       setFileKey(data.fileKey);
       setFileName(data.fileName);
-      setFrames(data.frames.map((frame: any) => ({
-        frameId: frame.id,
-        name: frame.name,
-        imageUrl: frame.imageUrl,
-        selected: true,
-      })));
+      setFrames(
+        data.frames.map((frame: any) => ({
+          frameId: frame.id,
+          name: frame.name,
+          imageUrl: frame.imageUrl,
+          selected: true,
+        }))
+      );
 
       return data;
     } catch (error: any) {
       setError(error);
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to get frames',
-        variant: 'destructive',
+        title: "Error",
+        description: error.message || "Failed to get frames",
+        variant: "destructive",
       });
       return null;
     } finally {
@@ -79,9 +81,7 @@ export function useDesignReview() {
   const toggleFrameSelection = (frameId: string) => {
     setFrames(prevFrames =>
       prevFrames.map(frame =>
-        frame.frameId === frameId
-          ? { ...frame, selected: !frame.selected }
-          : frame
+        frame.frameId === frameId ? { ...frame, selected: !frame.selected } : frame
       )
     );
   };
@@ -90,18 +90,14 @@ export function useDesignReview() {
    * Select all frames
    */
   const selectAllFrames = () => {
-    setFrames(prevFrames =>
-      prevFrames.map(frame => ({ ...frame, selected: true }))
-    );
+    setFrames(prevFrames => prevFrames.map(frame => ({ ...frame, selected: true })));
   };
 
   /**
    * Deselect all frames
    */
   const deselectAllFrames = () => {
-    setFrames(prevFrames =>
-      prevFrames.map(frame => ({ ...frame, selected: false }))
-    );
+    setFrames(prevFrames => prevFrames.map(frame => ({ ...frame, selected: false })));
   };
 
   /**
@@ -114,34 +110,34 @@ export function useDesignReview() {
     setAnalysisResult(null);
 
     try {
-      const response = await fetch('/api/design-review/review', {
-        method: 'POST',
+      const response = await fetch("/api/design-review/review", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(input),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to review design');
+        throw new Error(errorData.error || "Failed to review design");
       }
 
       const data = await response.json();
       setAnalysisResult(data);
 
       toast({
-        title: 'Review Complete',
-        description: 'Design review has been completed successfully.',
+        title: "Review Complete",
+        description: "Design review has been completed successfully.",
       });
 
       return data;
     } catch (error: any) {
       setError(error);
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to review design',
-        variant: 'destructive',
+        title: "Error",
+        description: error.message || "Failed to review design",
+        variant: "destructive",
       });
       return null;
     } finally {
@@ -159,34 +155,34 @@ export function useDesignReview() {
     setRecheckResult(null);
 
     try {
-      const response = await fetch('/api/design-review/recheck', {
-        method: 'POST',
+      const response = await fetch("/api/design-review/recheck", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(input),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to recheck design');
+        throw new Error(errorData.error || "Failed to recheck design");
       }
 
       const data = await response.json();
       setRecheckResult(data);
 
       toast({
-        title: 'Recheck Complete',
-        description: 'Design recheck has been completed successfully.',
+        title: "Recheck Complete",
+        description: "Design recheck has been completed successfully.",
       });
 
       return data;
     } catch (error: any) {
       setError(error);
       toast({
-        title: 'Error',
-        description: error.message || 'Failed to recheck design',
-        variant: 'destructive',
+        title: "Error",
+        description: error.message || "Failed to recheck design",
+        variant: "destructive",
       });
       return null;
     } finally {

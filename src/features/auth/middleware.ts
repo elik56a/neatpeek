@@ -7,38 +7,32 @@ import { NextRequest, NextResponse } from "next/server";
  */
 export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request });
-  const hostname = request.headers.get('host') || '';
+  const hostname = request.headers.get("host") || "";
   const path = request.nextUrl.pathname;
 
   // Check if the request is for the app subdomain
-  const isAppSubdomain = hostname.startsWith('app.');
+  const isAppSubdomain = hostname.startsWith("app.");
 
   // Define paths that should always be handled by the app
   const appPaths = [
-    '/dashboard',
-    '/brand-setup',
-    '/design-review',
-    '/design-history',
-    '/settings',
-    '/teams',
-    '/company'
+    "/dashboard",
+    "/brand-setup",
+    "/design-review",
+    "/design-history",
+    "/settings",
+    "/teams",
+    "/company",
   ];
 
   // Check if the current path is an app path
   const isAppPath = appPaths.some(appPath => path.startsWith(appPath));
 
   // Marketing paths that should be accessible without authentication
-  const marketingPaths = [
-    '/',
-    '/about',
-    '/features',
-    '/pricing',
-    '/faq'
-  ];
+  const marketingPaths = ["/", "/about", "/features", "/pricing", "/faq"];
 
   // Check if the current path is a marketing path
-  const isMarketingPath = marketingPaths.some(marketingPath =>
-    path === marketingPath || path === `${marketingPath}/`
+  const isMarketingPath = marketingPaths.some(
+    marketingPath => path === marketingPath || path === `${marketingPath}/`
   );
 
   // Allow access to authentication routes and public assets
@@ -78,6 +72,6 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     // Match all paths except for static files, api routes, and _next
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 };

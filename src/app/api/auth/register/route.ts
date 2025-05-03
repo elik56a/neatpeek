@@ -9,10 +9,7 @@ export async function POST(request: NextRequest) {
 
     // Validate input
     if (!name || !email || !password) {
-      return NextResponse.json(
-        { message: "Missing required fields" },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
     }
 
     // Check if user already exists
@@ -21,17 +18,14 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingUser) {
-      return NextResponse.json(
-        { message: "User with this email already exists" },
-        { status: 409 }
-      );
+      return NextResponse.json({ message: "User with this email already exists" }, { status: 409 });
     }
 
     // Hash password
     const hashedPassword = await hashPassword(password);
 
     // Check if the email domain matches any existing company
-    const emailDomain = email.split('@')[1];
+    const emailDomain = email.split("@")[1];
     let companyId = null;
     let companyRole = CompanyRole.MEMBER;
 
@@ -57,8 +51,8 @@ export async function POST(request: NextRequest) {
         companyRole,
         subscriptions: {
           create: {
-            planId: 'plan_freemium', // Assign freemium plan by default
-            status: 'ACTIVE',
+            planId: "plan_freemium", // Assign freemium plan by default
+            status: "ACTIVE",
             currentPeriodStart: new Date(),
             currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
           },
@@ -77,15 +71,12 @@ export async function POST(request: NextRequest) {
       {
         message: "User registered successfully",
         user: userWithoutPassword,
-        loginUrl: "/api/auth/signin?callbackUrl=/dashboard"
+        loginUrl: "/api/auth/signin?callbackUrl=/dashboard",
       },
       { status: 201 }
     );
   } catch (error) {
     console.error("Registration error:", error);
-    return NextResponse.json(
-      { message: "An error occurred during registration" },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: "An error occurred during registration" }, { status: 500 });
   }
 }

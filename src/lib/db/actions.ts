@@ -1,16 +1,16 @@
 "use server";
 
-import { prisma } from './prisma-server';
-import { revalidatePath } from 'next/cache';
+import { prisma } from "./prisma-server";
+import { revalidatePath } from "next/cache";
 
 // User actions
 export async function getCurrentUser() {
   try {
     // This would typically use the session to get the current user
     // For now, we'll just return a placeholder
-    return { id: 'placeholder', name: 'User', email: 'user@example.com' };
+    return { id: "placeholder", name: "User", email: "user@example.com" };
   } catch (error) {
-    console.error('Error getting current user:', error);
+    console.error("Error getting current user:", error);
     return null;
   }
 }
@@ -35,7 +35,7 @@ export async function getBrandGuidelines() {
       },
     });
   } catch (error) {
-    console.error('Error getting brand guidelines:', error);
+    console.error("Error getting brand guidelines:", error);
     return [];
   }
 }
@@ -67,7 +67,7 @@ export async function getDesignReviews() {
       },
     });
   } catch (error) {
-    console.error('Error getting design reviews:', error);
+    console.error("Error getting design reviews:", error);
     return [];
   }
 }

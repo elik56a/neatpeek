@@ -30,7 +30,7 @@ export function FrameRecheckSelector({
   activeFrameId,
   onFrameSelect,
   onRecheck,
-  isLoading
+  isLoading,
 }: FrameRecheckSelectorProps) {
   const [selectedFrames, setSelectedFrames] = useState<Set<string>>(new Set([activeFrameId || ""]));
 
@@ -39,7 +39,7 @@ export function FrameRecheckSelector({
     frameId: review.image.frame_id,
     name: review.image.name,
     imageUrl: review.image.url,
-    selected: selectedFrames.has(review.image.frame_id)
+    selected: selectedFrames.has(review.image.frame_id),
   }));
 
   // Toggle frame selection
@@ -105,7 +105,7 @@ export function FrameRecheckSelector({
       {/* Vertical scrolling frame list */}
       <div className="border rounded-md p-3">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-4 place-content-center">
-          {frames.map((frame) => (
+          {frames.map(frame => (
             <div key={frame.frameId} className="relative w-[140px] flex flex-col">
               {/* Frame name at the top */}
               <div className="mb-1 text-center">
@@ -132,15 +132,12 @@ export function FrameRecheckSelector({
               {/* Selection checkbox centered at the bottom */}
               <div
                 className="mt-1 flex justify-center cursor-pointer"
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   toggleFrameSelection(frame.frameId);
                 }}
               >
-                <Checkbox
-                  checked={selectedFrames.has(frame.frameId)}
-                  className="h-4 w-4"
-                />
+                <Checkbox checked={selectedFrames.has(frame.frameId)} className="h-4 w-4" />
               </div>
             </div>
           ))}

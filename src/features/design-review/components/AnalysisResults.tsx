@@ -4,16 +4,9 @@ import { useState } from "react";
 import { DesignAnalysisResult } from "../types";
 import { History } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 // Drawer imports removed as we're using a custom drawer
-import {
-  ExportButton,
-  AnalysisDetails
-} from "./analysis-results";
+import { ExportButton, AnalysisDetails } from "./analysis-results";
 import { TimelineDrawer } from "./timeline";
 import { FrameRecheckSelector } from "./recheck-results";
 
@@ -34,7 +27,7 @@ export function AnalysisResults({
   onRecheck,
   figmaFileName,
   showTimeline = false,
-  isRecheckLoading = false
+  isRecheckLoading = false,
 }: AnalysisResultsProps) {
   const [isTimelineVisible, setIsTimelineVisible] = useState(false);
   const [activeFrameId, setActiveFrameId] = useState<string | null>(

@@ -9,11 +9,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/utils/cn";
 import { Check, ChevronDown } from "lucide-react";
 import { useState } from "react";
@@ -85,11 +81,16 @@ export function GuidelineSelector({
       </PopoverTrigger>
       <PopoverContent className="w-[260px] p-0 border-border shadow-md" align="end">
         <Command className="rounded-lg overflow-hidden">
-          <CommandInput placeholder="Search guidelines..." className="h-14 border-none focus:ring-0" />
+          <CommandInput
+            placeholder="Search guidelines..."
+            className="h-14 border-none focus:ring-0"
+          />
           <CommandList className="max-h-[300px] overflow-auto py-1">
-            <CommandEmpty className="py-4 text-center text-sm text-muted-foreground">No guidelines found</CommandEmpty>
+            <CommandEmpty className="py-4 text-center text-sm text-muted-foreground">
+              No guidelines found
+            </CommandEmpty>
             <CommandGroup className="px-1 py-1">
-              {guidelines.map((guideline) => {
+              {guidelines.map(guideline => {
                 const isSelected = guideline.id === selectedId;
                 return (
                   <CommandItem
@@ -101,13 +102,19 @@ export function GuidelineSelector({
                     }}
                     className={cn(
                       "flex items-center gap-2 px-3 py-2.5 rounded-md transition-colors duration-150 cursor-pointer ",
-                      isSelected ? "bg-primary/10 text-primary hover:bg-accent/10" : "hover:bg-accent/10"
+                      isSelected
+                        ? "bg-primary/10 text-primary hover:bg-accent/10"
+                        : "hover:bg-accent/10"
                     )}
                   >
-                    <div className={cn(
-                      "flex-shrink-0 h-7 w-7 rounded-full flex items-center justify-center border",
-                      isSelected ? "bg-primary/10 border-primary/20 text-primary" : "bg-accent/50 border-border"
-                    )}>
+                    <div
+                      className={cn(
+                        "flex-shrink-0 h-7 w-7 rounded-full flex items-center justify-center border",
+                        isSelected
+                          ? "bg-primary/10 border-primary/20 text-primary"
+                          : "bg-accent/50 border-border"
+                      )}
+                    >
                       <span className="text-sm font-medium">{guideline.name.charAt(0)}</span>
                     </div>
                     <span className="truncate font-medium flex-1">{guideline.name}</span>

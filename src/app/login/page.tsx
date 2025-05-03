@@ -1,4 +1,3 @@
-
 "use client";
 
 import { LoginPage } from "@/features/auth/components/pages";

@@ -23,20 +23,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  const user = session?.user ? {
-    id: session.user.id,
-    email: session.user.email || '',
-    name: session.user.name || '',
-    image: session.user.image,
-    role: session.user.role,
-    companyId: session.user.companyId,
-    companyName: session.user.companyName,
-    companyRole: session.user.companyRole,
-    figmaUserId: session.user.figmaUserId,
-    figmaAccessToken: session.user.figmaAccessToken,
-    figmaRefreshToken: session.user.figmaRefreshToken,
-    figmaTokenExpiry: session.user.figmaTokenExpiry,
-  } : null;
+  const user = session?.user
+    ? {
+        id: session.user.id,
+        email: session.user.email || "",
+        name: session.user.name || "",
+        image: session.user.image,
+        role: session.user.role,
+        companyId: session.user.companyId,
+        companyName: session.user.companyName,
+        companyRole: session.user.companyRole,
+        figmaUserId: session.user.figmaUserId,
+        figmaAccessToken: session.user.figmaAccessToken,
+        figmaRefreshToken: session.user.figmaRefreshToken,
+        figmaTokenExpiry: session.user.figmaTokenExpiry,
+      }
+    : null;
 
   const isLoading = status === "loading";
   const isAuthenticated = status === "authenticated";

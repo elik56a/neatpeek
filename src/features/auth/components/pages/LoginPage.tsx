@@ -23,16 +23,17 @@ const LoginPage = () => {
 
   // Check if user just registered
   useEffect(() => {
-    const registered = searchParams.get('registered');
-    if (registered === 'true') {
+    const registered = searchParams.get("registered");
+    if (registered === "true") {
       toast({
         title: "Welcome to NeatPeek!",
-        description: "Your account has been created successfully. Please log in with your credentials.",
-        variant: "default"
+        description:
+          "Your account has been created successfully. Please log in with your credentials.",
+        variant: "default",
       });
 
       // Pre-fill the email if it's in the URL
-      const emailParam = searchParams.get('email');
+      const emailParam = searchParams.get("email");
       if (emailParam) {
         setEmail(emailParam);
       }
@@ -165,7 +166,7 @@ const LoginPage = () => {
               type="email"
               placeholder="name@example.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
               required
               disabled={isLoading}
               className={error ? "border-destructive" : ""}
@@ -185,7 +186,7 @@ const LoginPage = () => {
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={e => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
                 className={error ? "border-destructive" : ""}
@@ -198,9 +199,7 @@ const LoginPage = () => {
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
-            {error && (
-              <p className="text-sm text-destructive mt-1">{error}</p>
-            )}
+            {error && <p className="text-sm text-destructive mt-1">{error}</p>}
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>

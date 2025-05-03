@@ -19,10 +19,10 @@ export const PROVIDERS: Record<string, ProviderConfig & { provider: any }> = {
     config: {
       authorization: {
         params: {
-          prompt: "select_account"
-        }
-      }
-    }
+          prompt: "select_account",
+        },
+      },
+    },
   },
   figma: {
     id: "figma",
@@ -30,8 +30,8 @@ export const PROVIDERS: Record<string, ProviderConfig & { provider: any }> = {
     clientId: process.env.FIGMA_CLIENT_ID!,
     clientSecret: process.env.FIGMA_CLIENT_SECRET!,
     provider: FigmaProvider,
-    config: {}
-  }
+    config: {},
+  },
 };
 
-export type ProviderId = keyof typeof PROVIDERS; 
+export type ProviderId = keyof typeof PROVIDERS;

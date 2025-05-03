@@ -1,16 +1,23 @@
-import { DesignAnalysisResult, DesignReviewExportRow, DesignReviewExportOptions, IssueSeverity } from "../types";
+import {
+  DesignAnalysisResult,
+  DesignReviewExportRow,
+  DesignReviewExportOptions,
+  IssueSeverity,
+} from "../types";
 
 /**
  * Prepare design review data for export
  * @param result Design analysis result
  * @returns Array of export data rows
  */
-export function prepareDesignReviewExportData(result: DesignAnalysisResult): DesignReviewExportRow[] {
+export function prepareDesignReviewExportData(
+  result: DesignAnalysisResult
+): DesignReviewExportRow[] {
   const exportData: DesignReviewExportRow[] = [];
 
   // Process each review
   result.reviews.forEach(review => {
-    const frameName = review.image?.name || 'Unknown';
+    const frameName = review.image?.name || "Unknown";
 
     // Add brand issues
     if (review.brand_issues && review.brand_issues.length > 0) {
@@ -21,7 +28,7 @@ export function prepareDesignReviewExportData(result: DesignAnalysisResult): Des
           category: issue.element_type || "",
           severity: issue.severity || "",
           description: issue.description || "",
-          recommendation: issue.fix_suggestion || ""
+          recommendation: issue.fix_suggestion || "",
         });
       });
     }
@@ -35,7 +42,7 @@ export function prepareDesignReviewExportData(result: DesignAnalysisResult): Des
           category: issue.element_type || "",
           severity: issue.severity || "",
           description: issue.description || "",
-          recommendation: issue.fix_suggestion || ""
+          recommendation: issue.fix_suggestion || "",
         });
       });
     }
@@ -49,7 +56,7 @@ export function prepareDesignReviewExportData(result: DesignAnalysisResult): Des
           category: aspect.element_type || "",
           severity: aspect.impact || "",
           description: aspect.description || "",
-          recommendation: ""
+          recommendation: "",
         });
       });
     }
@@ -69,7 +76,7 @@ export function getDesignReviewExportHeaders() {
     category: "Category",
     severity: "Severity",
     description: "Description",
-    recommendation: "Recommendation"
+    recommendation: "Recommendation",
   };
 }
 
@@ -79,20 +86,23 @@ export function getDesignReviewExportHeaders() {
  * @param figmaFileName Optional Figma file name
  * @returns Formatted filename
  */
-export function generateExportFilename(options: DesignReviewExportOptions, figmaFileName?: string): string {
-  let filename = options.fileName || 'design_review_report';
+export function generateExportFilename(
+  options: DesignReviewExportOptions,
+  figmaFileName?: string
+): string {
+  let filename = options.fileName || "design_review_report";
 
   // Add Figma filename if available and requested
   if (options.includeFigmaFileName && figmaFileName) {
     // Clean up the Figma filename to be safe for filenames
-    const cleanFigmaName = figmaFileName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const cleanFigmaName = figmaFileName.replace(/[^a-z0-9]/gi, "_").toLowerCase();
     filename = `${filename}_${cleanFigmaName}`;
   }
 
   // Add timestamp if requested
   if (options.includeTimestamp) {
     const now = new Date();
-    const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+    const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}_${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}`;
     filename = `${filename}_${timestamp}`;
   }
 
@@ -109,7 +119,7 @@ export function sortIssuesBySeverity<T extends { severity: string }>(issues: T[]
     [IssueSeverity.HIGH]: 0,
     [IssueSeverity.MEDIUM]: 1,
     [IssueSeverity.LOW]: 2,
-    [IssueSeverity.OPTIONAL]: 3
+    [IssueSeverity.OPTIONAL]: 3,
   };
 
   return [...issues].sort((a, b) => {
@@ -117,8 +127,12 @@ export function sortIssuesBySeverity<T extends { severity: string }>(issues: T[]
     const bSeverity = (b.severity || IssueSeverity.LOW).toLowerCase();
 
     // Default to lowest priority (OPTIONAL) if severity is not in the order map
-    const aOrder = severityOrder[aSeverity as keyof typeof severityOrder] ?? severityOrder[IssueSeverity.OPTIONAL];
-    const bOrder = severityOrder[bSeverity as keyof typeof severityOrder] ?? severityOrder[IssueSeverity.OPTIONAL];
+    const aOrder =
+      severityOrder[aSeverity as keyof typeof severityOrder] ??
+      severityOrder[IssueSeverity.OPTIONAL];
+    const bOrder =
+      severityOrder[bSeverity as keyof typeof severityOrder] ??
+      severityOrder[IssueSeverity.OPTIONAL];
 
     return aOrder - bOrder;
   });

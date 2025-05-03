@@ -1,4 +1,3 @@
-
 "use client";
 
 import { AboutPage } from "@/features/marketing";

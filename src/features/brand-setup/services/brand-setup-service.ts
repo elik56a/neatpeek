@@ -1,6 +1,6 @@
-import { prisma } from '@/services/db/prisma';
-import { BrandGuideline, BrandGuidelineStatus, CustomRule, ProcessingStatus } from '../types';
-import { storageProvider } from '@/services/storage';
+import { prisma } from "@/services/db/prisma";
+import { BrandGuideline, BrandGuidelineStatus, CustomRule, ProcessingStatus } from "../types";
+import { storageProvider } from "@/services/storage";
 
 /**
  * Service for brand setup functionality
@@ -13,7 +13,7 @@ export class BrandSetupService {
    */
   private async initAIProvider() {
     if (!this.aiProvider) {
-      const { getAIService } = await import('@/services/ai');
+      const { getAIService } = await import("@/services/ai");
       this.aiProvider = await getAIService();
     }
     return this.aiProvider;
@@ -131,14 +131,16 @@ export class BrandSetupService {
     }>;
   }): Promise<BrandGuideline> {
     // Upload each image
-    const imagePromises = params.images.map((image) => this.uploadDesignImage({
-      brandGuidelineId: params.brandGuidelineId,
-      buffer: image.buffer,
-      filename: image.filename,
-      mimeType: image.mimeType,
-      name: image.name,
-      description: image.description,
-    }));
+    const imagePromises = params.images.map(image =>
+      this.uploadDesignImage({
+        brandGuidelineId: params.brandGuidelineId,
+        buffer: image.buffer,
+        filename: image.filename,
+        mimeType: image.mimeType,
+        name: image.name,
+        description: image.description,
+      })
+    );
 
     await Promise.all(imagePromises);
 
@@ -159,7 +161,7 @@ export class BrandSetupService {
     rules: CustomRule[];
   }): Promise<BrandGuideline> {
     // Create each custom rule
-    const rulePromises = params.rules.map((rule) => {
+    const rulePromises = params.rules.map(rule => {
       return prisma.customRule.create({
         data: {
           brandGuidelineId: params.brandGuidelineId,
@@ -200,8 +202,8 @@ export class BrandSetupService {
     });
 
     // Start the analysis in the background
-    this.analyzeInBackground(brandGuideline).catch((error) => {
-      console.error('Error analyzing brand guideline:', error);
+    this.analyzeInBackground(brandGuideline).catch(error => {
+      console.error("Error analyzing brand guideline:", error);
     });
 
     return brandGuideline;
@@ -232,7 +234,7 @@ export class BrandSetupService {
         try {
           pdfBuffer = await storageProvider.getFile(brandGuideline.pdfPath);
         } catch (error) {
-          console.error('Error fetching PDF file:', error);
+          console.error("Error fetching PDF file:", error);
           // Continue without the PDF
         }
       }
@@ -246,7 +248,7 @@ export class BrandSetupService {
               const mimeType = this.getMimeTypeFromFilename(image.path);
               designImages.push({ buffer, mimeType });
             } catch (error) {
-              console.error('Error fetching design image:', error);
+              console.error("Error fetching design image:", error);
               // Continue without this image
             }
           }
@@ -272,7 +274,7 @@ export class BrandSetupService {
         customRules: customRules.map(rule => ({
           category: rule.category,
           name: rule.name,
-          description: rule.description
+          description: rule.description,
         })),
         brandName: brandGuideline.name,
       });
@@ -284,7 +286,7 @@ export class BrandSetupService {
       if (result.colors && Array.isArray(result.colors)) {
         for (const color of result.colors) {
           rules.push({
-            category: 'COLOR',
+            category: "COLOR",
             name: color.name,
             value: color.value,
             description: color.description,
@@ -296,7 +298,7 @@ export class BrandSetupService {
       if (result.typography && Array.isArray(result.typography)) {
         for (const font of result.typography) {
           rules.push({
-            category: 'TYPOGRAPHY',
+            category: "TYPOGRAPHY",
             name: font.name,
             value: font.value,
             description: font.description,
@@ -308,7 +310,7 @@ export class BrandSetupService {
       if (result.spacing && Array.isArray(result.spacing)) {
         for (const space of result.spacing) {
           rules.push({
-            category: 'SPACING',
+            category: "SPACING",
             name: space.name,
             value: space.value,
             description: space.description,
@@ -320,7 +322,7 @@ export class BrandSetupService {
       if (result.logo && Array.isArray(result.logo)) {
         for (const logoRule of result.logo) {
           rules.push({
-            category: 'LOGO',
+            category: "LOGO",
             name: logoRule.name,
             value: logoRule.value,
             description: logoRule.description,
@@ -332,7 +334,7 @@ export class BrandSetupService {
       if (result.icons && Array.isArray(result.icons)) {
         for (const icon of result.icons) {
           rules.push({
-            category: 'ICON',
+            category: "ICON",
             name: icon.name,
             value: icon.value,
             description: icon.description,
@@ -344,7 +346,7 @@ export class BrandSetupService {
       if (result.layout && Array.isArray(result.layout)) {
         for (const layoutRule of result.layout) {
           rules.push({
-            category: 'LAYOUT',
+            category: "LAYOUT",
             name: layoutRule.name,
             value: layoutRule.value,
             description: layoutRule.description,
@@ -356,7 +358,7 @@ export class BrandSetupService {
       if (result.general && Array.isArray(result.general)) {
         for (const generalRule of result.general) {
           rules.push({
-            category: 'GENERAL',
+            category: "GENERAL",
             name: generalRule.name,
             value: generalRule.value,
             description: generalRule.description,
@@ -377,7 +379,7 @@ export class BrandSetupService {
         },
       });
     } catch (error) {
-      console.error('Failed to analyze brand guideline:', error);
+      console.error("Failed to analyze brand guideline:", error);
 
       // Update the brand guideline status
       await prisma.brandGuideline.update({
@@ -385,7 +387,7 @@ export class BrandSetupService {
         data: {
           status: BrandGuidelineStatus.FAILED,
           processingStatus: ProcessingStatus.FAILED,
-          processingMessage: `Analysis failed: ${error.message || 'Unknown error'}`,
+          processingMessage: `Analysis failed: ${error.message || "Unknown error"}`,
         },
       });
     }
@@ -395,22 +397,22 @@ export class BrandSetupService {
    * Get the MIME type from a filename
    */
   private getMimeTypeFromFilename(filename: string): string {
-    const extension = filename.split('.').pop()?.toLowerCase();
+    const extension = filename.split(".").pop()?.toLowerCase();
 
     switch (extension) {
-      case 'pdf':
-        return 'application/pdf';
-      case 'png':
-        return 'image/png';
-      case 'jpg':
-      case 'jpeg':
-        return 'image/jpeg';
-      case 'gif':
-        return 'image/gif';
-      case 'svg':
-        return 'image/svg+xml';
+      case "pdf":
+        return "application/pdf";
+      case "png":
+        return "image/png";
+      case "jpg":
+      case "jpeg":
+        return "image/jpeg";
+      case "gif":
+        return "image/gif";
+      case "svg":
+        return "image/svg+xml";
       default:
-        return 'application/octet-stream';
+        return "application/octet-stream";
     }
   }
 
@@ -438,7 +440,7 @@ export class BrandSetupService {
           brandGuidelineId,
           category: rule.category,
           name: rule.name,
-          value: rule.value ,
+          value: rule.value,
           description: rule.description,
         },
       });
@@ -462,7 +464,10 @@ export class BrandSetupService {
   /**
    * Get all brand guidelines for a user
    */
-  async getBrandGuidelinesForUser(userId: string, options?: { companyId?: string; teamId?: string }): Promise<BrandGuideline[]> {
+  async getBrandGuidelinesForUser(
+    userId: string,
+    options?: { companyId?: string; teamId?: string }
+  ): Promise<BrandGuideline[]> {
     const where: any = { userId };
 
     // Add company and team filters if provided
@@ -481,7 +486,7 @@ export class BrandSetupService {
         customRules: true,
         brandRules: true,
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
   }
 
@@ -498,7 +503,7 @@ export class BrandSetupService {
         user: true,
         team: true,
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
   }
 
@@ -514,7 +519,7 @@ export class BrandSetupService {
         brandRules: true,
         user: true,
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
   }
 
@@ -531,7 +536,7 @@ export class BrandSetupService {
     });
 
     if (!brandGuideline) {
-      throw new Error('Brand guideline not found');
+      throw new Error("Brand guideline not found");
     }
 
     // Delete the PDF file if it exists
@@ -539,7 +544,7 @@ export class BrandSetupService {
       try {
         await storageProvider.deleteFile(brandGuideline.pdfPath);
       } catch (error) {
-        console.error('Error deleting PDF file:', error);
+        console.error("Error deleting PDF file:", error);
       }
     }
 
@@ -550,7 +555,7 @@ export class BrandSetupService {
           await storageProvider.deleteFile(image.path);
         }
       } catch (error) {
-        console.error('Error deleting image file:', error);
+        console.error("Error deleting image file:", error);
       }
     }
 

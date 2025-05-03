@@ -115,9 +115,7 @@ const RegisterPage = () => {
             </div>
           </Link>
           <h2 className="text-2xl font-bold">Create your account</h2>
-          <p className="text-sm text-muted-foreground mt-1">
-            Get started with {appConfig.name}
-          </p>
+          <p className="text-sm text-muted-foreground mt-1">Get started with {appConfig.name}</p>
         </div>
 
         <div className="space-y-3">
@@ -185,7 +183,7 @@ const RegisterPage = () => {
               type="text"
               placeholder="John Doe"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={e => setName(e.target.value)}
               required
               disabled={isLoading}
             />
@@ -198,7 +196,7 @@ const RegisterPage = () => {
               type="email"
               placeholder="name@example.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
               required
               disabled={isLoading}
             />
@@ -212,7 +210,7 @@ const RegisterPage = () => {
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={e => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
                 className={error ? "border-destructive" : ""}
@@ -234,16 +232,14 @@ const RegisterPage = () => {
                 <li>One special character</li>
               </ul>
             </p>
-            {error && (
-              <p className="text-sm text-destructive mt-1">{error}</p>
-            )}
+            {error && <p className="text-sm text-destructive mt-1">{error}</p>}
           </div>
 
           <div className="flex items-start space-x-2">
             <Checkbox
               id="terms"
               checked={agreedToTerms}
-              onCheckedChange={(checked) => setAgreedToTerms(checked as boolean)}
+              onCheckedChange={checked => setAgreedToTerms(checked as boolean)}
               disabled={isLoading}
             />
             <div className="grid gap-1.5 leading-none">
@@ -256,7 +252,10 @@ const RegisterPage = () => {
                   terms of service
                 </Link>{" "}
                 and{" "}
-                <Link href="/privacy" className="text-brand-600 dark:text-brand-400 hover:underline">
+                <Link
+                  href="/privacy"
+                  className="text-brand-600 dark:text-brand-400 hover:underline"
+                >
                   privacy policy
                 </Link>
                 .

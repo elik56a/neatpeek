@@ -9,9 +9,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
       <Sidebar />
       <div className="flex-1 overflow-y-auto">
         <main className="p-6 md:p-8 max-w-7xl mx-auto min-h-screen">
-          <PageTransition>
-            {children}
-          </PageTransition>
+          <PageTransition>{children}</PageTransition>
         </main>
       </div>
     </div>

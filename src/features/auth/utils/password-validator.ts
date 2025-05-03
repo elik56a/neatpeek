@@ -1,4 +1,3 @@
-
 export const validatePassword = (password: string): string | null => {
   const minLength = 8;
   const hasUpperCase = /[A-Z]/.test(password);
@@ -22,4 +21,4 @@ export const validatePassword = (password: string): string | null => {
     return "Password must contain at least one special character";
   }
   return null;
-}; 
+};

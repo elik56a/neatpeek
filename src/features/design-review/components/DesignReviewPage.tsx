@@ -1,6 +1,13 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { CustomLoader } from "@/components/ui/custom-loader";
 import { useBrandGuidelines } from "@/hooks/useBrandGuidelines";
 import { useAppDataContext } from "@/providers/AppDataProvider";
@@ -14,7 +21,7 @@ import { DesignReview } from "./DesignReview";
 export function DesignReviewPage() {
   const { company } = useAppDataContext();
   const { guidelines, isLoading } = useBrandGuidelines({
-    companyId: company?.id
+    companyId: company?.id,
   });
   const [selectedGuidelineId, setSelectedGuidelineId] = useState<string>("");
 
@@ -47,9 +54,7 @@ export function DesignReviewPage() {
         <Card>
           <CardHeader>
             <CardTitle>Design Review</CardTitle>
-            <CardDescription>
-              Check your designs against your brand guidelines
-            </CardDescription>
+            <CardDescription>Check your designs against your brand guidelines</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-center p-8">
@@ -61,10 +66,7 @@ export function DesignReviewPage() {
             </div>
           </CardContent>
           <CardFooter className="flex justify-center">
-            <a
-              href="/brand-setup"
-              className="text-primary hover:underline"
-            >
+            <a href="/brand-setup" className="text-primary hover:underline">
               Create Brand Guidelines
             </a>
           </CardFooter>
@@ -86,7 +88,9 @@ export function DesignReviewPage() {
         ) : (
           <Card>
             <CardContent className="p-8 text-center">
-              <p className="text-muted-foreground">Please wait while we load your brand guidelines...</p>
+              <p className="text-muted-foreground">
+                Please wait while we load your brand guidelines...
+              </p>
             </CardContent>
           </Card>
         )}

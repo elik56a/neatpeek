@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -19,7 +18,8 @@ const LandingPage = () => {
                 Ensure Your Design Meets Your <span className="text-primary">Brand Guidelines</span>
               </h1>
               <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
-                {appConfig.name} helps design teams maintain consistent branding by automatically checking designs against your brand guidelines.
+                {appConfig.name} helps design teams maintain consistent branding by automatically
+                checking designs against your brand guidelines.
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
@@ -29,9 +29,7 @@ const LandingPage = () => {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" asChild>
-                <Link href="/features">
-                  See Features
-                </Link>
+                <Link href="/features">See Features</Link>
               </Button>
             </div>
           </div>
@@ -60,7 +58,8 @@ const LandingPage = () => {
                   </div>
                   <h3 className="text-xl font-bold">1. Set Up Brand Guidelines</h3>
                   <p className="mt-2 text-muted-foreground">
-                    Define your brand's colors, typography, spacing, and more in our intuitive platform.
+                    Define your brand's colors, typography, spacing, and more in our intuitive
+                    platform.
                   </p>
                 </CardContent>
               </Card>
@@ -72,7 +71,8 @@ const LandingPage = () => {
                   </div>
                   <h3 className="text-xl font-bold">2. Upload Your Design</h3>
                   <p className="mt-2 text-muted-foreground">
-                    Simply upload any design file, and our system will analyze it against your guidelines.
+                    Simply upload any design file, and our system will analyze it against your
+                    guidelines.
                   </p>
                 </CardContent>
               </Card>
@@ -84,7 +84,8 @@ const LandingPage = () => {
                   </div>
                   <h3 className="text-xl font-bold">3. Get Actionable Insights</h3>
                   <p className="mt-2 text-muted-foreground">
-                    Receive detailed reports on any inconsistencies with specific recommendations for fixes.
+                    Receive detailed reports on any inconsistencies with specific recommendations
+                    for fixes.
                   </p>
                 </CardContent>
               </Card>
@@ -102,7 +103,8 @@ const LandingPage = () => {
                 Maintain Perfect Brand Consistency
               </h2>
               <p className="text-muted-foreground">
-                {appConfig.name} helps design teams create cohesive brand experiences that build trust and recognition.
+                {appConfig.name} helps design teams create cohesive brand experiences that build
+                trust and recognition.
               </p>
               <ul className="grid gap-3">
                 <li className="flex items-center gap-2">
@@ -128,9 +130,7 @@ const LandingPage = () => {
               </ul>
               <div className="pt-4">
                 <Button asChild>
-                  <Link href="/register">
-                    Start Your Free Trial
-                  </Link>
+                  <Link href="/register">Start Your Free Trial</Link>
                 </Button>
               </div>
             </div>
@@ -159,9 +159,7 @@ const LandingPage = () => {
             </div>
             <div className="pt-4">
               <Button size="lg" asChild>
-                <Link href="/register">
-                  Get Started for Free
-                </Link>
+                <Link href="/register">Get Started for Free</Link>
               </Button>
             </div>
           </div>

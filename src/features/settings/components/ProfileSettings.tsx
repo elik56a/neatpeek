@@ -2,7 +2,14 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/features/auth";
@@ -25,9 +32,15 @@ export function ProfileSettings() {
         <div className="flex flex-col md:flex-row gap-6">
           <div className="flex flex-col items-center space-y-2">
             <Avatar className="h-24 w-24 mb-4">
-              <AvatarImage src={user?.image} alt={user?.name || ''} />
+              <AvatarImage src={user?.image} alt={user?.name || ""} />
               <AvatarFallback className="text-2xl bg-primary text-primary-foreground font-medium">
-                {user?.name ? user.name.split(' ').map(n => n[0]?.toUpperCase()).join('').substring(0, 2) : ''}
+                {user?.name
+                  ? user.name
+                      .split(" ")
+                      .map(n => n[0]?.toUpperCase())
+                      .join("")
+                      .substring(0, 2)
+                  : ""}
               </AvatarFallback>
             </Avatar>
             <Button variant="outline" size="sm">
@@ -88,11 +101,7 @@ export function ProfileSettings() {
         </div>
       </CardContent>
       <CardFooter className="flex justify-end">
-        <SaveButton
-          isLoading={isLoading}
-          saveSuccess={saveSuccess}
-          onClick={handleSubmit}
-        />
+        <SaveButton isLoading={isLoading} saveSuccess={saveSuccess} onClick={handleSubmit} />
       </CardFooter>
     </Card>
   );

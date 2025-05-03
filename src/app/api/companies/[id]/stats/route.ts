@@ -1,6 +1,6 @@
-import { prisma } from '@/services/db/prisma';
-import { getServerSession } from 'next-auth';
-import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from "@/services/db/prisma";
+import { getServerSession } from "next-auth";
+import { NextRequest, NextResponse } from "next/server";
 
 // Store a map of company IDs to timestamps to prevent excessive API calls
 const companyChecks = new Map<string, number>();
@@ -11,10 +11,7 @@ const THROTTLE_TIME = 5000; // 5 seconds
 /**
  * Get statistics for a company
  */
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Extract the ID from params
     const { id } = await Promise.resolve(params);
@@ -35,7 +32,7 @@ export async function GET(
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'You must be logged in to view company statistics' },
+        { error: "You must be logged in to view company statistics" },
         { status: 401 }
       );
     }
@@ -47,16 +44,13 @@ export async function GET(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Check if the user belongs to this company
     if (user.companyId !== id) {
       return NextResponse.json(
-        { error: 'You do not have permission to view statistics for this company' },
+        { error: "You do not have permission to view statistics for this company" },
         { status: 403 }
       );
     }
@@ -81,22 +75,22 @@ export async function GET(
     // In a real application, you would fetch this from a dedicated activity log table
     const recentActivity = [
       {
-        id: '1',
-        type: 'brand_created',
-        title: 'New brand guideline created',
+        id: "1",
+        type: "brand_created",
+        title: "New brand guideline created",
         date: new Date().toISOString(),
         user: {
-          name: session.user.name || 'User',
+          name: session.user.name || "User",
           email: session.user.email,
         },
       },
       {
-        id: '2',
-        type: 'team_created',
-        title: 'New team created',
+        id: "2",
+        type: "team_created",
+        title: "New team created",
         date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
         user: {
-          name: session.user.name || 'User',
+          name: session.user.name || "User",
           email: session.user.email,
         },
       },
@@ -109,10 +103,7 @@ export async function GET(
       recentActivity,
     });
   } catch (error) {
-    console.error('Error getting company statistics:', error);
-    return NextResponse.json(
-      { error: 'Failed to get company statistics' },
-      { status: 500 }
-    );
+    console.error("Error getting company statistics:", error);
+    return NextResponse.json({ error: "Failed to get company statistics" }, { status: 500 });
   }
 }

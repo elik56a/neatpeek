@@ -1,23 +1,35 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Moon, Sun } from "lucide-react";
 import { useAppearanceSettings } from "../hooks";
 import { SaveButton } from "./SaveButton";
 
 export function AppearanceSettings() {
-  const { settings, isLoading, saveSuccess, handleThemeChange, handleChange, handleSubmit } = useAppearanceSettings();
+  const { settings, isLoading, saveSuccess, handleThemeChange, handleChange, handleSubmit } =
+    useAppearanceSettings();
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Appearance</CardTitle>
-        <CardDescription>
-          Customize the appearance of the application.
-        </CardDescription>
+        <CardDescription>Customize the appearance of the application.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">
@@ -25,7 +37,7 @@ export function AppearanceSettings() {
             <Label>Theme</Label>
             <RadioGroup
               defaultValue={settings.theme}
-              onValueChange={(value) => handleThemeChange(value)}
+              onValueChange={value => handleThemeChange(value)}
               className="grid grid-cols-3 gap-4"
             >
               <div>
@@ -97,7 +109,7 @@ export function AppearanceSettings() {
             <Label htmlFor="fontSize">Font Size</Label>
             <Select
               value={settings.fontSize}
-              onValueChange={(value) => handleChange("fontSize", value)}
+              onValueChange={value => handleChange("fontSize", value)}
               disabled={isLoading}
             >
               <SelectTrigger id="fontSize">
@@ -115,7 +127,7 @@ export function AppearanceSettings() {
             <Label htmlFor="colorScheme">Color Scheme</Label>
             <Select
               value={settings.colorScheme}
-              onValueChange={(value) => handleChange("colorScheme", value)}
+              onValueChange={value => handleChange("colorScheme", value)}
               disabled={isLoading}
             >
               <SelectTrigger id="colorScheme">
@@ -132,11 +144,7 @@ export function AppearanceSettings() {
         </div>
       </CardContent>
       <CardFooter className="flex justify-end">
-        <SaveButton
-          isLoading={isLoading}
-          saveSuccess={saveSuccess}
-          onClick={handleSubmit}
-        />
+        <SaveButton isLoading={isLoading} saveSuccess={saveSuccess} onClick={handleSubmit} />
       </CardFooter>
     </Card>
   );

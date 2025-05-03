@@ -1,4 +1,4 @@
-import { CompanyRole } from '@/types';
+import { CompanyRole } from "@/types";
 import { DefaultSession } from "next-auth";
 
 declare module "next-auth" {
