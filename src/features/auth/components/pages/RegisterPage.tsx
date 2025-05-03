@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { appConfig } from "@/config/app";
 import { useAuth } from "@/features/auth";
+import { validatePassword } from "@/features/auth/utils/password-validator";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { appConfig } from "@/config/app";
 
 const RegisterPage = () => {
   const [name, setName] = useState("");
@@ -18,11 +19,13 @@ const RegisterPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { register, loginWithGoogle, loginWithFigma } = useAuth();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
     if (!agreedToTerms) {
       toast({
@@ -33,15 +36,26 @@ const RegisterPage = () => {
       return;
     }
 
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      setError(passwordError);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       await register(name, email, password);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Registration failed:", error);
+      if (error.message?.includes("email")) {
+        setError("This email is already registered. Please use a different email or log in.");
+      } else {
+        setError("There was an issue creating your account. Please try again.");
+      }
       toast({
         title: "Registration failed",
-        description: "There was an issue creating your account. Please try again.",
+        description: error.message || "There was an issue creating your account. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -201,6 +215,7 @@ const RegisterPage = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
+                className={error ? "border-destructive" : ""}
               />
               <button
                 type="button"
@@ -211,8 +226,17 @@ const RegisterPage = () => {
               </button>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Password must be at least 8 characters long.
+              Password must be at least 8 characters long and contain:
+              <ul className="list-disc list-inside mt-1">
+                <li>One uppercase letter</li>
+                <li>One lowercase letter</li>
+                <li>One number</li>
+                <li>One special character</li>
+              </ul>
             </p>
+            {error && (
+              <p className="text-sm text-destructive mt-1">{error}</p>
+            )}
           </div>
 
           <div className="flex items-start space-x-2">

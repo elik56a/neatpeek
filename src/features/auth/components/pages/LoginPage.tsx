@@ -3,19 +3,20 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { appConfig } from "@/config/app";
 import { useAuth } from "@/features/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { appConfig } from "@/config/app";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { login, loginWithGoogle, loginWithFigma } = useAuth();
   const { toast } = useToast();
   const searchParams = useSearchParams();
@@ -25,8 +26,8 @@ const LoginPage = () => {
     const registered = searchParams.get('registered');
     if (registered === 'true') {
       toast({
-        title: "Registration successful",
-        description: "Your account has been created. Please log in with your credentials.",
+        title: "Welcome to NeatPeek!",
+        description: "Your account has been created successfully. Please log in with your credentials.",
         variant: "default"
       });
 
@@ -40,16 +41,14 @@ const LoginPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     setIsLoading(true);
 
     try {
       await login(email, password);
-      toast({
-        title: "Login successful",
-        description: `Welcome back to ${appConfig.name}!`,
-      });
     } catch (error) {
       console.error("Login failed:", error);
+      setError("Invalid email or password");
       toast({
         title: "Login failed",
         description: "Please check your credentials and try again.",
@@ -169,6 +168,7 @@ const LoginPage = () => {
               onChange={(e) => setEmail(e.target.value)}
               required
               disabled={isLoading}
+              className={error ? "border-destructive" : ""}
             />
           </div>
 
@@ -188,6 +188,7 @@ const LoginPage = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
+                className={error ? "border-destructive" : ""}
               />
               <button
                 type="button"
@@ -197,6 +198,9 @@ const LoginPage = () => {
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
+            {error && (
+              <p className="text-sm text-destructive mt-1">{error}</p>
+            )}
           </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>
