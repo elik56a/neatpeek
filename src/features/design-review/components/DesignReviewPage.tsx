@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { CustomLoader } from "@/components/ui/custom-loader";
-import { useBrandGuidelines } from "@/hooks/useBrandGuidelines";
+import { useBrandGuidelines } from "@/features/brand-setup/hooks/useBrandGuidelines";
 import { useAppDataContext } from "@/providers/AppDataProvider";
 import { AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";

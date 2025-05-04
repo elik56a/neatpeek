@@ -11,7 +11,6 @@ export async function GET(req: NextRequest) {
 
     // Get the current user session
     const session = await getServerSession();
-    console.log("Session:", session);
 
     if (!session?.user?.email) {
       console.log("No authenticated user found");
@@ -54,12 +53,6 @@ export async function GET(req: NextRequest) {
       console.log("User not found in database");
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
-
-    console.log("User data fetched successfully:", {
-      id: user.id,
-      email: user.email,
-      companyId: user.companyId,
-    });
 
     return NextResponse.json(user);
   } catch (error) {
