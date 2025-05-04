@@ -18,7 +18,7 @@ interface StatusChangeHighlightProps {
 export function StatusChangeHighlight({
   status,
   previousStatus,
-  showAnimation = true
+  showAnimation = true,
 }: StatusChangeHighlightProps) {
   const [animate, setAnimate] = useState(showAnimation);
 
@@ -42,18 +42,13 @@ export function StatusChangeHighlight({
   return (
     <Badge
       variant={getStatusBadgeVariant(status) as any}
-      className={cn(
-        "flex items-center",
-        animate && isStatusChange && "animate-pulse"
-      )}
+      className={cn("flex items-center", animate && isStatusChange && "animate-pulse")}
     >
       <StatusIcon className="h-3 w-3 mr-1" />
       <span>{getStatusLabel(status)}</span>
 
       {isStatusChange && (
-        <span className="ml-1 text-xs opacity-70">
-          (was {getStatusLabel(previousStatus)})
-        </span>
+        <span className="ml-1 text-xs opacity-70">(was {getStatusLabel(previousStatus)})</span>
       )}
     </Badge>
   );

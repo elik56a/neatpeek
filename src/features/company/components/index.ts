@@ -1,3 +1,2 @@
-export * from './CompanyDashboard';
-export * from './CompanySelector';
-
+export * from "./CompanyDashboard";
+export * from "./CompanySelector";

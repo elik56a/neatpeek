@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -15,9 +14,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { 
-  Check, Copy, AlertCircle, Image as ImageIcon, FileText, Link2, 
-  ExternalLink, X, LineChart, BarChart3, Trash2
+import {
+  Check,
+  Copy,
+  AlertCircle,
+  Image as ImageIcon,
+  FileText,
+  Link2,
+  ExternalLink,
+  X,
+  LineChart,
+  BarChart3,
+  Trash2,
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
@@ -39,7 +47,7 @@ interface AnalysisResult {
 }
 
 // Type for design type
-type DesignType = 'web' | 'mobile' | 'email' | 'social' | 'print' | 'logo' | null;
+type DesignType = "web" | "mobile" | "email" | "social" | "print" | "logo" | null;
 
 const designTypes = [
   { id: "web", name: "Web Design", icon: <LineChart className="h-12 w-12" /> },
@@ -72,22 +80,22 @@ const DesignChecker = () => {
 
   const tabVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
-      transition: { duration: 0.4, ease: "easeOut" }
+      transition: { duration: 0.4, ease: "easeOut" },
     },
-    exit: { 
-      opacity: 0, 
+    exit: {
+      opacity: 0,
       y: -20,
-      transition: { duration: 0.3, ease: "easeIn" }
-    }
+      transition: { duration: 0.3, ease: "easeIn" },
+    },
   };
 
   useEffect(() => {
     // Smooth scroll to results when analysis is complete
     if (analysisResult && resultsRef.current) {
-      resultsRef.current.scrollIntoView({ behavior: 'smooth' });
+      resultsRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [analysisResult]);
 
@@ -112,10 +120,10 @@ const DesignChecker = () => {
       //   headers: { 'Content-Type': 'application/json' }
       // });
       // const data = await response.json();
-      
+
       // For now, we'll simulate an API call with a timeout
       await new Promise(resolve => setTimeout(resolve, 3000));
-      
+
       // Mock analysis result
       setAnalysisResult({
         brandConsistencyScore: 85,
@@ -136,13 +144,13 @@ const DesignChecker = () => {
         designImages: [
           {
             imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158",
-            issues: ["Primary color #3A86FF doesn't match brand color #8344FF"]
+            issues: ["Primary color #3A86FF doesn't match brand color #8344FF"],
           },
           {
             imageUrl: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b",
-            issues: ["Heading font 'Montserrat' doesn't match brand font 'Inter'"]
-          }
-        ]
+            issues: ["Heading font 'Montserrat' doesn't match brand font 'Inter'"],
+          },
+        ],
       });
     } catch (error) {
       console.error("Error analyzing Figma design:", error);
@@ -159,10 +167,10 @@ const DesignChecker = () => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const files = Array.from(e.target.files);
-      
+
       // Create URLs for previews
       const newPreviewUrls = files.map(file => URL.createObjectURL(file));
-      
+
       setUploadedImages(files);
       setImagePreviewUrls(newPreviewUrls);
     }
@@ -172,7 +180,7 @@ const DesignChecker = () => {
     e.stopPropagation();
     // Revoke the URL to prevent memory leaks
     URL.revokeObjectURL(imagePreviewUrls[index]);
-    
+
     setUploadedImages(prev => prev.filter((_, i) => i !== index));
     setImagePreviewUrls(prev => prev.filter((_, i) => i !== index));
   };
@@ -197,7 +205,7 @@ const DesignChecker = () => {
       //   formData.append(`image${index}`, image);
       // });
       // formData.append('designType', designType || 'general');
-      // 
+      //
       // const response = await fetch('/api/analyze-design', {
       //   method: 'POST',
       //   body: formData
@@ -206,7 +214,7 @@ const DesignChecker = () => {
 
       // For now, we'll simulate an API call with a timeout
       await new Promise(resolve => setTimeout(resolve, 3000));
-      
+
       // Mock analysis result
       setAnalysisResult({
         brandConsistencyScore: 65,
@@ -224,8 +232,8 @@ const DesignChecker = () => {
         ],
         designImages: uploadedImages.map((_, index) => ({
           imageUrl: imagePreviewUrls[index],
-          issues: ["Color palette mismatch", "Typography inconsistency"]
-        }))
+          issues: ["Color palette mismatch", "Typography inconsistency"],
+        })),
       });
     } catch (error) {
       console.error("Error analyzing images:", error);
@@ -256,18 +264,20 @@ const DesignChecker = () => {
       </CardHeader>
       <CardContent className="text-center py-4">
         <div className="relative h-24 w-24 mx-auto">
-          <div 
+          <div
             className={cn(
               "absolute top-0 left-0 h-full w-full rounded-full",
               "bg-muted overflow-hidden"
             )}
           >
-            <div 
+            <div
               className={cn(
                 "absolute top-0 left-0 h-full rounded-full transform-gpu origin-left",
-                score > 70 ? "bg-gradient-to-r from-green-500 to-green-600" :
-                score > 40 ? "bg-gradient-to-r from-yellow-500 to-yellow-600" :
-                "bg-gradient-to-r from-red-500 to-red-600"
+                score > 70
+                  ? "bg-gradient-to-r from-green-500 to-green-600"
+                  : score > 40
+                    ? "bg-gradient-to-r from-yellow-500 to-yellow-600"
+                    : "bg-gradient-to-r from-red-500 to-red-600"
               )}
               style={{ width: `${score}%` }}
             />
@@ -290,16 +300,16 @@ const DesignChecker = () => {
             Select the type of design you want to analyze
           </p>
         </div>
-        
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
-          {designTypes.map((type) => (
+          {designTypes.map(type => (
             <motion.div
               key={type.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: designTypes.indexOf(type) * 0.1 }}
             >
-              <Card 
+              <Card
                 key={type.id}
                 className="hover-scale cursor-pointer hover:border-primary/50 transition-all duration-200"
                 onClick={() => setDesignType(type.id as DesignType)}
@@ -326,19 +336,18 @@ const DesignChecker = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Design Checker</h1>
         <p className="text-muted-foreground">
-          Checking <span className="font-medium">{designType.charAt(0).toUpperCase() + designType.slice(1)} Design</span> against your brand guidelines
+          Checking{" "}
+          <span className="font-medium">
+            {designType.charAt(0).toUpperCase() + designType.slice(1)} Design
+          </span>{" "}
+          against your brand guidelines
         </p>
         <Button variant="outline" className="mt-2" onClick={() => setDesignType(null)}>
           Change Design Type
         </Button>
       </div>
 
-      <Tabs 
-        defaultValue="figma" 
-        value={value} 
-        onValueChange={setValue} 
-        className="w-full"
-      >
+      <Tabs defaultValue="figma" value={value} onValueChange={setValue} className="w-full">
         <TabsList className="relative">
           <TabsTrigger value="figma" className="relative z-10 overflow-hidden group">
             <span className="relative z-10 flex items-center">
@@ -352,24 +361,19 @@ const DesignChecker = () => {
               Analyze Design Images
             </span>
           </TabsTrigger>
-          <div 
+          <div
             className="absolute h-full bottom-0 bg-primary/10 transition-all duration-300 ease-out rounded"
-            style={{ 
-              left: value === "figma" ? "0%" : "50%", 
-              width: "50%" 
+            style={{
+              left: value === "figma" ? "0%" : "50%",
+              width: "50%",
             }}
           />
         </TabsList>
-        
+
         <AnimatePresence mode="wait">
           {value === "figma" && (
             <TabsContent value="figma" className="space-y-4" forceMount>
-              <motion.div
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                variants={tabVariants}
-              >
+              <motion.div initial="hidden" animate="visible" exit="exit" variants={tabVariants}>
                 <div className="grid gap-2">
                   <Label htmlFor="figmaUrl">Figma Design URL</Label>
                   <Input
@@ -377,15 +381,15 @@ const DesignChecker = () => {
                     placeholder="https://www.figma.com/file/..."
                     type="url"
                     value={figmaUrl}
-                    onChange={(e) => setFigmaUrl(e.target.value)}
+                    onChange={e => setFigmaUrl(e.target.value)}
                     className="hover:border-primary/50 transition-colors duration-200"
                   />
                   <p className="text-sm text-muted-foreground">
                     Paste a link to your Figma design file to analyze it for brand consistency
                   </p>
                 </div>
-                <Button 
-                  onClick={handleFigmaAnalysis} 
+                <Button
+                  onClick={handleFigmaAnalysis}
                   disabled={loading}
                   className="mt-4 hover-scale"
                 >
@@ -401,18 +405,13 @@ const DesignChecker = () => {
               </motion.div>
             </TabsContent>
           )}
-          
+
           {value === "image" && (
             <TabsContent value="image" className="space-y-4" forceMount>
-              <motion.div
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-                variants={tabVariants}
-              >
+              <motion.div initial="hidden" animate="visible" exit="exit" variants={tabVariants}>
                 <div className="grid gap-4">
                   <Label htmlFor="imageUpload">Upload Design Images</Label>
-                  <div 
+                  <div
                     className="border-2 border-dashed rounded-lg p-8 text-center hover:bg-muted/50 transition-colors cursor-pointer hover-scale"
                     onClick={() => fileInputRef.current?.click()}
                   >
@@ -435,20 +434,23 @@ const DesignChecker = () => {
                       </p>
                     </div>
                   </div>
-                  
+
                   {imagePreviewUrls.length > 0 && (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                       {imagePreviewUrls.map((url, index) => (
-                        <div key={index} className="border rounded-md overflow-hidden hover-scale group relative">
+                        <div
+                          key={index}
+                          className="border rounded-md overflow-hidden hover-scale group relative"
+                        >
                           <div className="relative">
-                            <img 
-                              src={url} 
-                              alt={`Design ${index + 1}`} 
+                            <img
+                              src={url}
+                              alt={`Design ${index + 1}`}
                               className="w-full h-48 object-cover"
                             />
                             <button
                               className="absolute top-2 right-2 h-8 w-8 rounded-full bg-background/80 flex items-center justify-center border text-destructive hover:bg-destructive hover:text-white hover:border-destructive transform hover:scale-110 transition-all duration-200"
-                              onClick={(e) => removeImage(index, e)}
+                              onClick={e => removeImage(index, e)}
                               aria-label={`Remove design ${index + 1}`}
                             >
                               <Trash2 className="h-4 w-4" />
@@ -462,8 +464,8 @@ const DesignChecker = () => {
                     </div>
                   )}
 
-                  <Button 
-                    onClick={handleImageAnalysis} 
+                  <Button
+                    onClick={handleImageAnalysis}
                     disabled={loading || imagePreviewUrls.length === 0}
                     className="mt-2 hover-scale"
                   >
@@ -484,11 +486,7 @@ const DesignChecker = () => {
       </Tabs>
 
       {loading && (
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="mt-8 text-center"
-        >
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-8 text-center">
           <div className="inline-flex items-center justify-center p-8">
             <CustomLoader size="xl" />
           </div>
@@ -496,14 +494,14 @@ const DesignChecker = () => {
             We're checking your design against your brand guidelines
           </h3>
           <p className="text-muted-foreground mt-2 max-w-md mx-auto">
-            Our AI is analyzing your {value === "figma" ? "Figma design" : "images"} for color, typography, 
-            spacing, and other brand elements to ensure consistency.
+            Our AI is analyzing your {value === "figma" ? "Figma design" : "images"} for color,
+            typography, spacing, and other brand elements to ensure consistency.
           </p>
         </motion.div>
       )}
 
       {analysisResult && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -511,7 +509,7 @@ const DesignChecker = () => {
           ref={resultsRef}
         >
           <h2 className="text-2xl font-bold">Brand Consistency Analysis</h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {renderScoreCircle(analysisResult.brandConsistencyScore, "Brand Consistency")}
             {renderScoreCircle(analysisResult.colorMatchScore, "Color Match")}
@@ -523,13 +521,13 @@ const DesignChecker = () => {
 
           <div className="space-y-6">
             <h3 className="text-xl font-bold mb-4">Design Issues by Image</h3>
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {analysisResult.designImages?.map((designImage, imageIndex) => (
                 <Card key={imageIndex} className="overflow-hidden hover-scale">
                   <div className="aspect-video bg-muted">
-                    <img 
-                      src={designImage.imageUrl} 
+                    <img
+                      src={designImage.imageUrl}
                       alt={`Design ${imageIndex + 1}`}
                       className="w-full h-full object-cover"
                     />
@@ -543,7 +541,7 @@ const DesignChecker = () => {
                       {designImage.issues.map((issue, issueIndex) => {
                         // Extract hex colors from the issue text
                         const colorHexCodes = extractHexColors(issue);
-                        
+
                         return (
                           <div key={issueIndex} className="flex items-start p-2 rounded-md border">
                             <Badge variant="destructive" className="mr-2 mt-0.5 shrink-0">
@@ -555,8 +553,8 @@ const DesignChecker = () => {
                                 <div className="flex gap-2 mt-2">
                                   {colorHexCodes.map((hex, hexIndex) => (
                                     <div key={hexIndex} className="flex items-center">
-                                      <div 
-                                        className="w-6 h-6 rounded-full border mr-1" 
+                                      <div
+                                        className="w-6 h-6 rounded-full border mr-1"
                                         style={{ backgroundColor: hex }}
                                       />
                                       <span className="text-xs">{hex}</span>
@@ -590,9 +588,12 @@ const DesignChecker = () => {
                   {analysisResult.errors.map((error, index) => {
                     // Extract hex colors from the error text
                     const colorHexCodes = extractHexColors(error);
-                    
+
                     return (
-                      <div key={index} className="flex items-start p-3 rounded-lg border bg-background hover-scale">
+                      <div
+                        key={index}
+                        className="flex items-start p-3 rounded-lg border bg-background hover-scale"
+                      >
                         <Badge variant="destructive" className="mr-2 mt-0.5 shrink-0">
                           Error
                         </Badge>
@@ -602,8 +603,8 @@ const DesignChecker = () => {
                             <div className="flex gap-3 mt-2">
                               {colorHexCodes.map((hex, hexIndex) => (
                                 <div key={hexIndex} className="flex items-center">
-                                  <div 
-                                    className="w-6 h-6 rounded-full border mr-1" 
+                                  <div
+                                    className="w-6 h-6 rounded-full border mr-1"
                                     style={{ backgroundColor: hex }}
                                   />
                                   <span className="text-xs">{hex}</span>
@@ -633,7 +634,10 @@ const DesignChecker = () => {
               {analysisResult.warnings.length > 0 ? (
                 <div className="space-y-3">
                   {analysisResult.warnings.map((warning, index) => (
-                    <div key={index} className="flex items-start p-3 rounded-lg border bg-background hover-scale">
+                    <div
+                      key={index}
+                      className="flex items-start p-3 rounded-lg border bg-background hover-scale"
+                    >
                       <Badge className="mr-2 mt-0.5 bg-amber-500 hover:bg-amber-600 shrink-0">
                         Suggestion
                       </Badge>
@@ -667,7 +671,9 @@ const DesignChecker = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-muted-foreground mb-2">File URL:</p>
-                      <p className="text-sm font-medium truncate max-w-[300px]">{analysisResult.figmaLink}</p>
+                      <p className="text-sm font-medium truncate max-w-[300px]">
+                        {analysisResult.figmaLink}
+                      </p>
                     </div>
                     <Button variant="outline" className="hover-scale">
                       <ExternalLink className="mr-2 h-4 w-4" />
@@ -687,20 +693,18 @@ const DesignChecker = () => {
             <Card className="mt-6">
               <CardHeader>
                 <CardTitle>Analysis Summary</CardTitle>
-                <CardDescription>
-                  Here's a summary of the brand consistency check
-                </CardDescription>
+                <CardDescription>Here's a summary of the brand consistency check</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="rounded-lg border p-4 bg-muted/50">
                   <p className="text-sm">
-                    {analysisResult.brandConsistencyScore > 80 
+                    {analysisResult.brandConsistencyScore > 80
                       ? "Your design shows strong brand consistency! There are just a few minor issues to address."
                       : analysisResult.brandConsistencyScore > 60
-                      ? "Your design has good brand consistency with some issues that should be addressed."
-                      : "Your design needs significant improvements to align with your brand guidelines."}
+                        ? "Your design has good brand consistency with some issues that should be addressed."
+                        : "Your design needs significant improvements to align with your brand guidelines."}
                   </p>
-                  
+
                   <div className="mt-4 text-sm">
                     <p className="font-medium">Key areas to improve:</p>
                     <ul className="list-disc pl-5 mt-2 space-y-1">
@@ -712,9 +716,9 @@ const DesignChecker = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button 
-                  onClick={handleCopyCode} 
-                  variant="outline" 
+                <Button
+                  onClick={handleCopyCode}
+                  variant="outline"
                   disabled={copied}
                   className="hover-scale"
                 >

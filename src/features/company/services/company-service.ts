@@ -1,5 +1,5 @@
-import { prisma } from '@/services/db/prisma';
-import { Company, CompanyRole, User } from '@prisma/client';
+import { prisma } from "@/services/db/prisma";
+import { Company, CompanyRole, User } from "@prisma/client";
 
 /**
  * Service for managing companies
@@ -20,8 +20,8 @@ export class CompanyService {
     const company = await prisma.company.create({
       data: {
         name,
-        domain: domain && domain.trim() !== '' ? domain : null,
-        logo: logo && logo.trim() !== '' ? logo : null,
+        domain: domain && domain.trim() !== "" ? domain : null,
+        logo: logo && logo.trim() !== "" ? logo : null,
         isActive: true,
       },
     });
@@ -71,11 +71,11 @@ export class CompanyService {
 
     // Handle empty domain and logo values
     if (data.domain !== undefined) {
-      data.domain = data.domain && data.domain.trim() !== '' ? data.domain : null;
+      data.domain = data.domain && data.domain.trim() !== "" ? data.domain : null;
     }
 
     if (data.logo !== undefined) {
-      data.logo = data.logo && data.logo.trim() !== '' ? data.logo : null;
+      data.logo = data.logo && data.logo.trim() !== "" ? data.logo : null;
     }
 
     return prisma.company.update({

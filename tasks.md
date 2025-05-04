@@ -41,6 +41,7 @@
 ## Design Review Service Updates
 
 - [*] Update saveAnalysisResults method:
+
   - [*] Remove FigmaFile creation
   - [*] Update FigmaFrame creation to include file metadata
   - [*] Add userId and brandGuidelineId to DesignReview
@@ -58,11 +59,13 @@
 ## Review History Timeline
 
 - [*] Create ReviewHistory model in Prisma schema:
+
   - [*] Include designReviewId, timestamp, action fields
   - [*] Include summary field for human-readable description
   - [*] Include changes field (JSON) to store structured data about changes
 
 - [*] Implement history tracking:
+
   - [*] Track initial review creation
   - [*] Track rechecks with summary (e.g., "Fixed 2 issues, 1 partially fixed, 3 still pending")
   - [*] Track new issues added during rechecks
@@ -73,6 +76,7 @@
 ## Handling New Issues During Rechecks
 
 - [*] Implement special handling for new issues discovered during rechecks:
+
   - [*] Add new issues to existing reviewJson arrays (brand_issues or general_issues)
   - [*] Mark new issues with a special status "new"
   - [*] Add timestamp to track when new issues were discovered
@@ -80,6 +84,7 @@
   - [*] Store Figma comment IDs for new issues
 
 - [*] Update history tracking for new issues:
+
   - [*] Create specific history entries when new issues are found
   - [*] Include count and summary of new issues in history
   - [*] Track severity and types of new issues
@@ -98,12 +103,14 @@
 ## Frontend Components
 
 - [ ] Create ReviewTimeline component to display history:
+
   - [ ] Style timeline entries with appropriate icons and formatting
   - [ ] Design timeline as a collapsible sidebar component (similar to Jira)
   - [ ] Show timeline only when user explicitly clicks on history icon
   - [ ] Ensure timeline doesn't take full focus from the main review content
 
 - [ ] Implement URL-based navigation:
+
   - [ ] Update URL to include review ID after analysis is complete (design-review/[id])
   - [ ] Enable direct access to specific review via URL
   - [ ] Preserve user's state on page reload
@@ -126,26 +133,31 @@
 ## Code Refactoring
 
 - [*] Define clear types for all parameters and return values:
+
   - [*] Create proper TypeScript interfaces for service methods
   - [*] Avoid using `any` type to ensure type safety
   - [*] Use existing types from type definitions where possible
 
 - [*] Create a dedicated Design Recheck Service:
+
   - [*] Separate recheck functionality from main DesignReviewService
   - [*] Define clear interfaces for all methods
   - [*] Ensure proper typing for all parameters and return values
 
 - [*] Break down large methods into smaller functions:
+
   - [*] Split recheckDesign method into focused functions
   - [*] Give each function a single responsibility
   - [*] Use descriptive names that indicate what each function does
 
 - [*] Extract common logic to utility functions:
+
   - [*] Identify shared logic between analyze and recheck operations
   - [*] Move shared logic to utility functions
   - [*] Ensure utility functions are properly typed
 
 - [*] Update the main DesignReviewService:
+
   - [*] Refactor to use the new Design Recheck Service
   - [*] Simplify by delegating to specialized services
   - [*] Remove unused methods that reference old models

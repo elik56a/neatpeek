@@ -53,16 +53,16 @@ export function FileUploader({
 
     // Check file type
     if (accept) {
-      const acceptedTypes = accept.split(',');
+      const acceptedTypes = accept.split(",");
       const invalidFiles = fileArray.filter(file => {
         // For image/* type checks
-        if (accept === 'image/*' && !file.type.startsWith('image/')) {
+        if (accept === "image/*" && !file.type.startsWith("image/")) {
           return true;
         }
         // For specific file types
         return !acceptedTypes.some(type => {
-          if (type.includes('*')) {
-            const prefix = type.split('*')[0];
+          if (type.includes("*")) {
+            const prefix = type.split("*")[0];
             return file.type.startsWith(prefix);
           }
           return file.type === type;
@@ -79,7 +79,7 @@ export function FileUploader({
 
     // Reset the input value so the same file can be selected again if needed
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
@@ -120,7 +120,7 @@ export function FileUploader({
 
   // Create file preview URL
   const getFilePreview = (file: File) => {
-    if (file.type.startsWith('image/')) {
+    if (file.type.startsWith("image/")) {
       return URL.createObjectURL(file);
     }
     return null;
@@ -165,8 +165,8 @@ export function FileUploader({
               {accept === "application/pdf"
                 ? "PDF files only"
                 : accept === "image/*"
-                ? "Image files only (JPG, PNG, GIF)"
-                : "Upload files"}
+                  ? "Image files only (JPG, PNG, GIF)"
+                  : "Upload files"}
               {maxSize && ` up to ${maxSize / 1024 / 1024}MB`}
             </p>
           </div>
@@ -176,10 +176,12 @@ export function FileUploader({
       {error && <p className="text-sm text-destructive">{error}</p>}
 
       {selectedFiles.length > 0 && (
-        <div className={cn(
-          "grid gap-4",
-          accept === "image/*" ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4" : "grid-cols-1"
-        )}>
+        <div
+          className={cn(
+            "grid gap-4",
+            accept === "image/*" ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4" : "grid-cols-1"
+          )}
+        >
           {selectedFiles.map((file, index) => {
             const previewUrl = getFilePreview(file);
 
@@ -187,16 +189,12 @@ export function FileUploader({
               // Image preview
               <div key={`${file.name}-${index}`} className="relative group">
                 <div className="relative aspect-square rounded-md overflow-hidden border">
-                  <img
-                    src={previewUrl}
-                    alt={file.name}
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={previewUrl} alt={file.name} className="w-full h-full object-cover" />
                   <Button
                     variant="destructive"
                     size="icon"
                     className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       URL.revokeObjectURL(previewUrl);
                       onFileRemoved(index);
@@ -216,19 +214,11 @@ export function FileUploader({
                 <div className="flex items-center space-x-2">
                   <FileIcon className="h-5 w-5 text-muted-foreground" />
                   <div>
-                    <p className="text-sm font-medium truncate max-w-[200px]">
-                      {file.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatFileSize(file.size)}
-                    </p>
+                    <p className="text-sm font-medium truncate max-w-[200px]">{file.name}</p>
+                    <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
                   </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onFileRemoved(index)}
-                >
+                <Button variant="ghost" size="icon" onClick={() => onFileRemoved(index)}>
                   <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
                 </Button>
               </div>

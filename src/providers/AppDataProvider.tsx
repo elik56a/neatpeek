@@ -38,11 +38,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   // Use the hook to fetch and manage app data
   const appData = useAppData();
 
-  return (
-    <AppDataContext.Provider value={appData}>
-      {children}
-    </AppDataContext.Provider>
-  );
+  return <AppDataContext.Provider value={appData}>{children}</AppDataContext.Provider>;
 }
 
 /**
@@ -52,7 +48,7 @@ export function useAppDataContext() {
   const context = useContext(AppDataContext);
 
   if (context === undefined) {
-    throw new Error('useAppDataContext must be used within an AppDataProvider');
+    throw new Error("useAppDataContext must be used within an AppDataProvider");
   }
 
   return context;

@@ -1,7 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { useAuth } from "@/features/auth";
 import { Building, CheckCircle, XCircle } from "lucide-react";
@@ -28,7 +35,9 @@ export default function InvitationPage({ params }: { params: { token: string } }
   const router = useRouter();
   const { user, isAuthenticated, isLoading } = useAuth();
   const [invitation, setInvitation] = useState<Invitation | null>(null);
-  const [invitationStatus, setInvitationStatus] = useState<"loading" | "valid" | "invalid" | "accepted" | "error">("loading");
+  const [invitationStatus, setInvitationStatus] = useState<
+    "loading" | "valid" | "invalid" | "accepted" | "error"
+  >("loading");
   const [isAccepting, setIsAccepting] = useState(false);
 
   // Fetch invitation details
@@ -50,7 +59,8 @@ export default function InvitationPage({ params }: { params: { token: string } }
         setInvitationStatus("invalid");
         toast({
           title: "Invalid Invitation",
-          description: error instanceof Error ? error.message : "This invitation is not valid or has expired.",
+          description:
+            error instanceof Error ? error.message : "This invitation is not valid or has expired.",
           variant: "destructive",
         });
       }
@@ -136,9 +146,7 @@ export default function InvitationPage({ params }: { params: { token: string } }
             </CardDescription>
           </CardHeader>
           <CardFooter className="flex justify-center">
-            <Button onClick={() => router.push("/dashboard")}>
-              Go to Dashboard
-            </Button>
+            <Button onClick={() => router.push("/dashboard")}>Go to Dashboard</Button>
           </CardFooter>
         </Card>
       </div>
@@ -159,9 +167,7 @@ export default function InvitationPage({ params }: { params: { token: string } }
             </CardDescription>
           </CardHeader>
           <CardFooter className="flex justify-center">
-            <Button onClick={() => router.push("/dashboard")}>
-              Go to Dashboard
-            </Button>
+            <Button onClick={() => router.push("/dashboard")}>Go to Dashboard</Button>
           </CardFooter>
         </Card>
       </div>
@@ -183,13 +189,27 @@ export default function InvitationPage({ params }: { params: { token: string } }
           </CardHeader>
           <CardContent className="text-center">
             <p className="mb-4">
-              Please log in or create an account with <strong>{invitation?.email}</strong> to accept this invitation.
+              Please log in or create an account with <strong>{invitation?.email}</strong> to accept
+              this invitation.
             </p>
             <div className="flex justify-center gap-4">
-              <Button onClick={() => router.push(`/login?email=${encodeURIComponent(invitation?.email || "")}&callbackUrl=${encodeURIComponent(`/invitations/${token}`)}`)}>
+              <Button
+                onClick={() =>
+                  router.push(
+                    `/login?email=${encodeURIComponent(invitation?.email || "")}&callbackUrl=${encodeURIComponent(`/invitations/${token}`)}`
+                  )
+                }
+              >
                 Log In
               </Button>
-              <Button variant="outline" onClick={() => router.push(`/register?email=${encodeURIComponent(invitation?.email || "")}&callbackUrl=${encodeURIComponent(`/invitations/${token}`)}`)}>
+              <Button
+                variant="outline"
+                onClick={() =>
+                  router.push(
+                    `/register?email=${encodeURIComponent(invitation?.email || "")}&callbackUrl=${encodeURIComponent(`/invitations/${token}`)}`
+                  )
+                }
+              >
                 Register
               </Button>
             </div>

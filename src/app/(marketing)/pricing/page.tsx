@@ -1,4 +1,3 @@
-
 "use client";
 
 import { PricingPage } from "@/features/marketing";

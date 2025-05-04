@@ -8,19 +8,19 @@ import { BrandGuideline, BrandSetupFormData } from "../types";
 
 interface UseBrandSetupFormProps {
   brandId?: string;
-  mode?: 'create' | 'edit';
+  mode?: "create" | "edit";
 }
 
 /**
  * Hook for managing the brand setup form
  */
-export function useBrandSetupForm({ brandId, mode = 'create' }: UseBrandSetupFormProps = {}) {
+export function useBrandSetupForm({ brandId, mode = "create" }: UseBrandSetupFormProps = {}) {
   // Get company context
   const { company } = useAppDataContext();
 
   const [formData, setFormData] = useState<BrandSetupFormData>({
-    name: company?.name || '',
-    description: '',
+    name: company?.name || "",
+    description: "",
     pdfFile: null,
     designImages: [],
     customRules: [],
@@ -35,43 +35,45 @@ export function useBrandSetupForm({ brandId, mode = 'create' }: UseBrandSetupFor
 
   // Load existing brand data in edit mode
   useEffect(() => {
-    if (mode === 'edit' && brandId) {
+    if (mode === "edit" && brandId) {
       setIsLoading(true);
       fetch(`/api/brand-guidelines/${brandId}`)
         .then(response => {
           if (!response.ok) {
-            throw new Error('Failed to fetch brand guideline');
+            throw new Error("Failed to fetch brand guideline");
           }
           return response.json();
         })
         .then((data: BrandGuideline) => {
           setFormData({
             name: data.name,
-            description: data.description || '',
+            description: data.description || "",
             pdfFile: null, // Can't load the actual file, but we can keep the path
             pdfPath: data.pdfPath,
             designImages: [], // Can't load the actual files, but we can keep the paths
-            designImagePaths: data.designImages?.map(img => ({
-              id: img.id,
-              path: img.path,
-              url: img.url,
-              name: img.name || '',
-              description: img.description || '',
-            })) || [],
-            customRules: data.customRules?.map(rule => ({
-              id: rule.id,
-              category: rule.category,
-              name: rule.name,
-              description: rule.description,
-            })) || [],
+            designImagePaths:
+              data.designImages?.map(img => ({
+                id: img.id,
+                path: img.path,
+                url: img.url,
+                name: img.name || "",
+                description: img.description || "",
+              })) || [],
+            customRules:
+              data.customRules?.map(rule => ({
+                id: rule.id,
+                category: rule.category,
+                name: rule.name,
+                description: rule.description,
+              })) || [],
           });
         })
         .catch(error => {
-          console.error('Error fetching brand guideline:', error);
+          console.error("Error fetching brand guideline:", error);
           toast({
-            title: 'Error',
-            description: 'Failed to load brand guideline data',
-            variant: 'destructive',
+            title: "Error",
+            description: "Failed to load brand guideline data",
+            variant: "destructive",
           });
         })
         .finally(() => {
@@ -82,30 +84,33 @@ export function useBrandSetupForm({ brandId, mode = 'create' }: UseBrandSetupFor
 
   // Set default guideline name to company name
   useEffect(() => {
-   if(mode === 'create' && formData.name === '' && company?.name) {
-    setFormData((prev) => ({
-      ...prev,
-      name: `${company.name} Main Brand Guideline`,
-    }));
-  }
+    if (mode === "create" && formData.name === "" && company?.name) {
+      setFormData(prev => ({
+        ...prev,
+        name: `${company.name} Main Brand Guideline`,
+      }));
+    }
   }, [company]);
 
   // Update form data
   const updateFormData = useCallback((data: Partial<BrandSetupFormData>) => {
-    setFormData((prev) => ({ ...prev, ...data }));
+    setFormData(prev => ({ ...prev, ...data }));
   }, []);
 
   // Add a custom rule
-  const addCustomRule = useCallback((rule: { category: string; name: string; description: string }) => {
-    setFormData((prev) => ({
-      ...prev,
-      customRules: [...(prev.customRules || []), rule],
-    }));
-  }, []);
+  const addCustomRule = useCallback(
+    (rule: { category: string; name: string; description: string }) => {
+      setFormData(prev => ({
+        ...prev,
+        customRules: [...(prev.customRules || []), rule],
+      }));
+    },
+    []
+  );
 
   // Remove a custom rule
   const removeCustomRule = useCallback((index: number) => {
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       customRules: prev.customRules?.filter((_, i) => i !== index) || [],
     }));
@@ -113,7 +118,7 @@ export function useBrandSetupForm({ brandId, mode = 'create' }: UseBrandSetupFor
 
   // Add design images
   const addDesignImages = useCallback((files: File[]) => {
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       designImages: [...(prev.designImages || []), ...files],
     }));
@@ -121,7 +126,7 @@ export function useBrandSetupForm({ brandId, mode = 'create' }: UseBrandSetupFor
 
   // Remove a design image
   const removeDesignImage = useCallback((index: number) => {
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       designImages: prev.designImages?.filter((_, i) => i !== index) || [],
     }));
@@ -129,7 +134,7 @@ export function useBrandSetupForm({ brandId, mode = 'create' }: UseBrandSetupFor
 
   // Set PDF file
   const setPdfFile = useCallback((file: File | null) => {
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       pdfFile: file,
     }));
@@ -137,12 +142,12 @@ export function useBrandSetupForm({ brandId, mode = 'create' }: UseBrandSetupFor
 
   // Go to next step
   const nextStep = useCallback(() => {
-    setCurrentStep((prev) => prev + 1);
+    setCurrentStep(prev => prev + 1);
   }, []);
 
   // Go to previous step
   const prevStep = useCallback(() => {
-    setCurrentStep((prev) => Math.max(0, prev - 1));
+    setCurrentStep(prev => Math.max(0, prev - 1));
   }, []);
 
   // Submit the form
@@ -152,7 +157,7 @@ export function useBrandSetupForm({ brandId, mode = 'create' }: UseBrandSetupFor
     try {
       // Validate form data
       if (!formData.name) {
-        throw new Error('Brand name is required');
+        throw new Error("Brand name is required");
       }
 
       // Check if at least one of PDF, design images, or custom rules is provided
@@ -161,17 +166,17 @@ export function useBrandSetupForm({ brandId, mode = 'create' }: UseBrandSetupFor
       const hasCustomRules = formData.customRules && formData.customRules.length > 0;
 
       if (!hasPdf && !hasDesignImages && !hasCustomRules) {
-        throw new Error('At least one of PDF, design images, or custom rules is required');
+        throw new Error("At least one of PDF, design images, or custom rules is required");
       }
 
       let brandGuideline;
 
-      if (mode === 'edit' && brandId) {
+      if (mode === "edit" && brandId) {
         // Update the brand guideline
         const updateResponse = await fetch(`/api/brand-guidelines/${brandId}`, {
-          method: 'PUT',
+          method: "PUT",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             name: formData.name,
@@ -181,16 +186,16 @@ export function useBrandSetupForm({ brandId, mode = 'create' }: UseBrandSetupFor
 
         if (!updateResponse.ok) {
           const errorData = await updateResponse.json();
-          throw new Error(errorData.error || 'Failed to update brand guideline');
+          throw new Error(errorData.error || "Failed to update brand guideline");
         }
 
         brandGuideline = await updateResponse.json();
       } else {
         // Create the brand guideline
-        const createResponse = await fetch('/api/brand-guidelines', {
-          method: 'POST',
+        const createResponse = await fetch("/api/brand-guidelines", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             name: formData.name,
@@ -202,7 +207,7 @@ export function useBrandSetupForm({ brandId, mode = 'create' }: UseBrandSetupFor
 
         if (!createResponse.ok) {
           const errorData = await createResponse.json();
-          throw new Error(errorData.error || 'Failed to create brand guideline');
+          throw new Error(errorData.error || "Failed to create brand guideline");
         }
 
         brandGuideline = await createResponse.json();
@@ -213,7 +218,7 @@ export function useBrandSetupForm({ brandId, mode = 'create' }: UseBrandSetupFor
 
       // Add PDF file if available
       if (formData.pdfFile) {
-        uploadFormData.append('pdfFile', formData.pdfFile);
+        uploadFormData.append("pdfFile", formData.pdfFile);
       }
 
       // Add design images if available
@@ -225,34 +230,34 @@ export function useBrandSetupForm({ brandId, mode = 'create' }: UseBrandSetupFor
 
       // Add custom rules if available
       if (formData.customRules && formData.customRules.length > 0) {
-        uploadFormData.append('customRules', JSON.stringify(formData.customRules));
+        uploadFormData.append("customRules", JSON.stringify(formData.customRules));
       }
 
       // Start analysis immediately
-      uploadFormData.append('startAnalysis', 'true');
+      uploadFormData.append("startAnalysis", "true");
 
       // Upload files and start analysis
       const uploadResponse = await fetch(`/api/brand-guidelines/${brandGuideline.id}/upload`, {
-        method: 'POST',
+        method: "POST",
         body: uploadFormData,
       });
 
       if (!uploadResponse.ok) {
         const errorData = await uploadResponse.json();
-        throw new Error(errorData.error || 'Failed to upload files');
+        throw new Error(errorData.error || "Failed to upload files");
       }
 
       const updatedBrandGuideline = await uploadResponse.json();
 
       toast({
-        title: 'Success',
-        description: 'Brand guideline created and analysis started. This may take a few minutes.',
+        title: "Success",
+        description: "Brand guideline created and analysis started. This may take a few minutes.",
       });
 
       // Reset form data
       setFormData({
-        name: '',
-        description: '',
+        name: "",
+        description: "",
         pdfFile: null,
         designImages: [],
         customRules: [],
@@ -263,12 +268,12 @@ export function useBrandSetupForm({ brandId, mode = 'create' }: UseBrandSetupFor
 
       return updatedBrandGuideline;
     } catch (error) {
-      console.error('Error submitting form:', error);
+      console.error("Error submitting form:", error);
 
       toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to submit form',
-        variant: 'destructive',
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to submit form",
+        variant: "destructive",
       });
 
       return null;

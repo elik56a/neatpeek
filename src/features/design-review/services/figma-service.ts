@@ -7,11 +7,18 @@
  * - Adding and managing comments
  */
 
-import { FigmaInfo, FigmaMetadata, FrameImageData, FrameInfo, FrameMetadata, FramePosition } from '../types';
+import {
+  FigmaInfo,
+  FigmaMetadata,
+  FrameImageData,
+  FrameInfo,
+  FrameMetadata,
+  FramePosition,
+} from "../types";
 
 // Constants
-const FIGMA_API_BASE_URL = 'https://api.figma.com';
-const FIGMA_API_VERSION = 'v1';
+const FIGMA_API_BASE_URL = "https://api.figma.com";
+const FIGMA_API_VERSION = "v1";
 
 /**
  * Figma API Service
@@ -37,24 +44,24 @@ export class FigmaService {
    */
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
-    
+
     const headers = {
-      'Authorization': `Bearer ${this.figmaToken}`,
-      'Content-Type': 'application/json',
-      ...options.headers
+      Authorization: `Bearer ${this.figmaToken}`,
+      "Content-Type": "application/json",
+      ...options.headers,
     };
 
     try {
       const response = await fetch(url, {
         ...options,
-        headers
+        headers,
       });
 
       if (!response.ok) {
         throw new Error(`Figma API error: ${response.status} ${response.statusText}`);
       }
 
-      return await response.json() as T;
+      return (await response.json()) as T;
     } catch (error) {
       console.error(`Error in Figma API request to ${endpoint}:`, error);
       throw error;
@@ -69,16 +76,16 @@ export class FigmaService {
   extractFigmaInfo(url: string): FigmaInfo {
     try {
       const urlObj = new URL(url);
-      const pathParts = urlObj.pathname.split('/');
+      const pathParts = urlObj.pathname.split("/");
       const fileKey = pathParts[2];
       const nodeIdMatch = urlObj.search.match(/node-id=([^&]+)/);
 
       // Convert node ID format from URL (e.g., "6-60") to API format (e.g., "6:60")
-      const nodeId = nodeIdMatch ? nodeIdMatch[1].replace('-', ':') : null;
+      const nodeId = nodeIdMatch ? nodeIdMatch[1].replace("-", ":") : null;
 
       return { fileKey, nodeId };
     } catch (error) {
-      console.error('Failed to parse Figma URL:', error);
+      console.error("Failed to parse Figma URL:", error);
       return { fileKey: null, nodeId: null };
     }
   }
@@ -91,7 +98,7 @@ export class FigmaService {
   extractFileKey(figmaUrl: string): string {
     const info = this.extractFigmaInfo(figmaUrl);
     if (!info.fileKey) {
-      throw new Error('Invalid Figma URL');
+      throw new Error("Invalid Figma URL");
     }
     return info.fileKey;
   }
@@ -112,7 +119,7 @@ export class FigmaService {
    * @returns Node information
    */
   async getNodeInfo(fileKey: string, nodeId: string): Promise<any> {
-    const formattedNodeId = nodeId.includes(':') ? nodeId : nodeId.replace('-', ':');
+    const formattedNodeId = nodeId.includes(":") ? nodeId : nodeId.replace("-", ":");
     return this.request<any>(`/files/${fileKey}/nodes?ids=${formattedNodeId}`);
   }
 
@@ -123,8 +130,12 @@ export class FigmaService {
    * @param format Image format
    * @returns Object mapping node IDs to image URLs
    */
-  async getImageUrls(fileKey: string, nodeIds: string[], format: 'png' | 'jpg' | 'svg' | 'pdf' = 'png'): Promise<any> {
-    return this.request<any>(`/images/${fileKey}?ids=${nodeIds.join(',')}&format=${format}`);
+  async getImageUrls(
+    fileKey: string,
+    nodeIds: string[],
+    format: "png" | "jpg" | "svg" | "pdf" = "png"
+  ): Promise<any> {
+    return this.request<any>(`/images/${fileKey}?ids=${nodeIds.join(",")}&format=${format}`);
   }
 
   /**
@@ -137,11 +148,11 @@ export class FigmaService {
     try {
       const data = await this.getNodeInfo(fileKey, nodeId);
       const frames: FrameInfo[] = [];
-      const formattedNodeId = nodeId.includes(':') ? nodeId : nodeId.replace('-', ':');
+      const formattedNodeId = nodeId.includes(":") ? nodeId : nodeId.replace("-", ":");
 
       function processNode(node: any) {
         // Only process top-level frames (direct children of the parent node)
-        if (node.type === 'FRAME' || node.type === 'COMPONENT' || node.type === 'INSTANCE') {
+        if (node.type === "FRAME" || node.type === "COMPONENT" || node.type === "INSTANCE") {
           if (node.absoluteBoundingBox) {
             frames.push({
               id: node.id,
@@ -151,15 +162,15 @@ export class FigmaService {
                 x: node.absoluteBoundingBox.x,
                 y: node.absoluteBoundingBox.y,
                 width: node.absoluteBoundingBox.width,
-                height: node.absoluteBoundingBox.height
-              }
+                height: node.absoluteBoundingBox.height,
+              },
             });
           }
         }
 
         // Only process children if the current node is the document or canvas
         // This ensures we only get top-level frames
-        if (node.type === 'DOCUMENT' || node.type === 'CANVAS') {
+        if (node.type === "DOCUMENT" || node.type === "CANVAS") {
           node.children?.forEach(processNode);
         }
       }
@@ -169,10 +180,10 @@ export class FigmaService {
         processNode(nodes.document);
       }
 
-      console.log('Found top-level frames:', frames.length);
+      console.log("Found top-level frames:", frames.length);
       return frames;
     } catch (error) {
-      console.error('Error retrieving frames:', error);
+      console.error("Error retrieving frames:", error);
       throw error;
     }
   }
@@ -183,7 +194,10 @@ export class FigmaService {
    * @param frames Array of frame information
    * @returns Record of frame name to image data
    */
-  async getFrameImages(fileKey: string, frames: FrameInfo[]): Promise<Record<string, FrameImageData>> {
+  async getFrameImages(
+    fileKey: string,
+    frames: FrameInfo[]
+  ): Promise<Record<string, FrameImageData>> {
     try {
       const nodeIds = frames.map(frame => frame.id);
       const data = await this.getImageUrls(fileKey, nodeIds);
@@ -196,14 +210,14 @@ export class FigmaService {
             id: frame.id,
             url: imageUrls[frame.id],
             type: frame.type,
-            position: frame.absoluteBoundingBox
+            position: frame.absoluteBoundingBox,
           };
         }
       });
 
       return frameImages;
     } catch (error) {
-      console.error('Error retrieving image URLs:', error);
+      console.error("Error retrieving image URLs:", error);
       throw error;
     }
   }
@@ -222,17 +236,17 @@ export class FigmaService {
       const { fileKey, nodeId } = this.extractFigmaInfo(figmaUrl);
 
       if (!fileKey) {
-        throw new Error('Invalid Figma URL');
+        throw new Error("Invalid Figma URL");
       }
 
       // Get the starting node ID (either the one from the URL or the root)
-      const startNodeId = nodeId || '0:1';
+      const startNodeId = nodeId || "0:1";
 
       // Get child frames directly without fetching the entire file
       const frames = await this.getChildFrames(fileKey, startNodeId);
 
       if (frames.length === 0) {
-        throw new Error('No frames found in Figma file');
+        throw new Error("No frames found in Figma file");
       }
 
       // Get frame images
@@ -249,7 +263,7 @@ export class FigmaService {
             id: frame.id,
             name: frame.name,
             position: frame.absoluteBoundingBox,
-            url: imageData.url
+            url: imageData.url,
           });
           imageUrls.push(imageData.url);
         }
@@ -263,15 +277,15 @@ export class FigmaService {
         fileKey,
         fileName: fileInfo.name,
         extractionDate: new Date().toISOString(),
-        frames: frameMetadata
+        frames: frameMetadata,
       };
 
       return {
         imageUrls,
-        metadata
+        metadata,
       };
     } catch (error) {
-      console.error('Error extracting designs from Figma:', error);
+      console.error("Error extracting designs from Figma:", error);
       throw error;
     }
   }
@@ -286,7 +300,7 @@ export class FigmaService {
       const response = await this.request<any>(`/files/${fileKey}/comments`);
       return response.comments || [];
     } catch (error) {
-      console.error('Error fetching Figma comments:', error);
+      console.error("Error fetching Figma comments:", error);
       throw error;
     }
   }
@@ -308,26 +322,25 @@ export class FigmaService {
     framePosition: FramePosition
   ): Promise<string> {
     try {
-
       const requestBody = {
         message,
         client_meta: {
           node_id: frameId,
           node_offset: {
             x: coordinates.x * framePosition.width,
-            y: coordinates.y * framePosition.height
-          }
-        }
+            y: coordinates.y * framePosition.height,
+          },
+        },
       };
 
       const response = await this.request<any>(`/files/${fileKey}/comments`, {
-        method: 'POST',
-        body: JSON.stringify(requestBody)
+        method: "POST",
+        body: JSON.stringify(requestBody),
       });
 
       return response.id;
     } catch (error) {
-      console.error('Error adding Figma comment:', error);
+      console.error("Error adding Figma comment:", error);
       throw error;
     }
   }
@@ -339,25 +352,21 @@ export class FigmaService {
    * @param message Comment message
    * @returns Comment ID
    */
-  async addThreadComment(
-    fileKey: string,
-    commentId: string,
-    message: string
-  ): Promise<string> {
+  async addThreadComment(fileKey: string, commentId: string, message: string): Promise<string> {
     try {
       const requestBody = {
         message,
-        comment_id: commentId
+        comment_id: commentId,
       };
 
       const response = await this.request<any>(`/files/${fileKey}/comments`, {
-        method: 'POST',
-        body: JSON.stringify(requestBody)
+        method: "POST",
+        body: JSON.stringify(requestBody),
       });
 
       return response.id;
     } catch (error) {
-      console.error('Error adding thread comment:', error);
+      console.error("Error adding thread comment:", error);
       throw error;
     }
   }
@@ -371,17 +380,17 @@ export class FigmaService {
     try {
       const response = await fetch(url);
       const arrayBuffer = await response.arrayBuffer();
-      const base64 = Buffer.from(arrayBuffer).toString('base64');
-      const mimeType = response.headers.get('content-type') || 'image/png';
+      const base64 = Buffer.from(arrayBuffer).toString("base64");
+      const mimeType = response.headers.get("content-type") || "image/png";
 
       return {
         inlineData: {
           data: base64,
-          mimeType
-        }
+          mimeType,
+        },
       };
     } catch (error) {
-      console.error('Error converting URL to inline data:', error);
+      console.error("Error converting URL to inline data:", error);
       throw error;
     }
   }

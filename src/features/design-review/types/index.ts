@@ -14,12 +14,12 @@ import {
   IssueCoordinates,
   IssueStatus,
   IssueSeverity,
-  IssueType
-} from './review-json';
-import { ReviewHistoryAction, HistoryChanges, IssueSummary } from './review-history';
-import { ReviewStatus } from './review-status';
-import { ScoreCategory } from './score-category';
-import { ExportFileType } from './file-type';
+  IssueType,
+} from "./review-json";
+import { ReviewHistoryAction, HistoryChanges, IssueSummary } from "./review-history";
+import { ReviewStatus } from "./review-status";
+import { ScoreCategory } from "./score-category";
+import { ExportFileType } from "./file-type";
 
 // Re-export the review-json types
 export type {
@@ -30,17 +30,22 @@ export type {
   DesignScore,
   ScoreBreakdown,
   FrameImage,
-  IssueCoordinates
+  IssueCoordinates,
 };
 
 // Re-export the review-history types
-export type {
-  HistoryChanges,
-  IssueSummary
-};
+export type { HistoryChanges, IssueSummary };
 
 // Re-export enums (these don't need 'export type' since they're values, not just types)
-export { IssueStatus, IssueSeverity, IssueType, ReviewHistoryAction, ReviewStatus, ScoreCategory, ExportFileType };
+export {
+  IssueStatus,
+  IssueSeverity,
+  IssueType,
+  ReviewHistoryAction,
+  ReviewStatus,
+  ScoreCategory,
+  ExportFileType,
+};
 
 /**
  * Frame position in a Figma file

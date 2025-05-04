@@ -42,9 +42,9 @@ export function useFileExport() {
       csvContent += headerRow + "\n";
 
       // Add data rows
-      data.forEach((item) => {
+      data.forEach(item => {
         const row = Object.keys(headers)
-          .map((key) => {
+          .map(key => {
             // Escape quotes and wrap in quotes
             const value = item[key] !== undefined && item[key] !== null ? String(item[key]) : "";
             return `"${value.replace(/"/g, '""')}"`;
@@ -88,10 +88,7 @@ export function useFileExport() {
    * @param content Content to export
    * @param options Export options
    */
-  const exportRawContent = (
-    content: string,
-    options?: UseFileExportOptions
-  ) => {
+  const exportRawContent = (content: string, options?: UseFileExportOptions) => {
     const fileName = options?.fileName || "export";
     const fileType = options?.fileType || "txt";
     const mimeType = options?.mimeType || "text/plain;charset=utf-8";

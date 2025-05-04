@@ -1,6 +1,6 @@
-import fs from 'fs';
-import path from 'path';
-import { SaveFileParams, SaveFileResult, StorageProvider } from './types';
+import fs from "fs";
+import path from "path";
+import { SaveFileParams, SaveFileResult, StorageProvider } from "./types";
 
 /**
  * Implementation of StorageProvider using local file system
@@ -40,7 +40,7 @@ export class LocalStorageProvider implements StorageProvider {
 
     // Generate the URL and path
     const relativePath = path.join(params.folder, uniqueFilename);
-    const url = `${this.baseUrl}/${relativePath.replace(/\\/g, '/')}`;
+    const url = `${this.baseUrl}/${relativePath.replace(/\\/g, "/")}`;
 
     return {
       url,
@@ -52,7 +52,7 @@ export class LocalStorageProvider implements StorageProvider {
    * Get a file URL from local storage
    */
   getFileUrl(path: string): string {
-    return `${this.baseUrl}/${path.replace(/\\/g, '/')}`;
+    return `${this.baseUrl}/${path.replace(/\\/g, "/")}`;
   }
 
   /**

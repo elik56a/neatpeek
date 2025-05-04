@@ -1,7 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppDataContext } from "@/providers";
 import { Building, FileText, Plus, Settings, Users } from "lucide-react";
@@ -14,7 +21,7 @@ interface ActivityItem {
   type: string;
   title: string;
   date: string;
-  user: Pick<User, 'name' | 'email'>;
+  user: Pick<User, "name" | "email">;
 }
 
 interface CompanyStats {
@@ -76,13 +83,13 @@ export function CompanyDashboard() {
     brandCount: 1,
     recentActivity: [
       {
-        id: '1',
-        type: 'brand_created',
-        title: 'New brand guideline created',
+        id: "1",
+        type: "brand_created",
+        title: "New brand guideline created",
         date: new Date().toISOString(),
         user: {
-          name: 'Test User',
-          email: 'test@example.com',
+          name: "Test User",
+          email: "test@example.com",
         },
       },
     ],
@@ -116,9 +123,7 @@ export function CompanyDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.memberCount}</div>
-            <p className="text-xs text-muted-foreground">
-              People in your company
-            </p>
+            <p className="text-xs text-muted-foreground">People in your company</p>
           </CardContent>
           <CardFooter>
             <Button variant="outline" size="sm" asChild className="w-full">
@@ -134,9 +139,7 @@ export function CompanyDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.teamCount}</div>
-            <p className="text-xs text-muted-foreground">
-              Teams in your company
-            </p>
+            <p className="text-xs text-muted-foreground">Teams in your company</p>
           </CardContent>
           <CardFooter>
             <Button variant="outline" size="sm" asChild className="w-full">
@@ -152,9 +155,7 @@ export function CompanyDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.brandCount}</div>
-            <p className="text-xs text-muted-foreground">
-              Brand guidelines in your company
-            </p>
+            <p className="text-xs text-muted-foreground">Brand guidelines in your company</p>
           </CardContent>
           <CardFooter>
             <Button variant="outline" size="sm" asChild className="w-full">
@@ -167,14 +168,12 @@ export function CompanyDashboard() {
       <Card>
         <CardHeader>
           <CardTitle>Recent Activity</CardTitle>
-          <CardDescription>
-            Recent actions taken by members of your company
-          </CardDescription>
+          <CardDescription>Recent actions taken by members of your company</CardDescription>
         </CardHeader>
         <CardContent>
           {stats.recentActivity && stats.recentActivity.length > 0 ? (
             <div className="space-y-4">
-              {stats.recentActivity.map((activity) => (
+              {stats.recentActivity.map(activity => (
                 <div key={activity.id} className="flex items-start gap-4 rounded-lg border p-4">
                   <div className="flex-1">
                     <div className="font-medium">{activity.title}</div>

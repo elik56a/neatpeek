@@ -1,8 +1,23 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { useAppDataContext } from "@/providers";
@@ -141,9 +156,7 @@ export default function CompanySettingsPage() {
             <Building className="h-6 w-6" />
             <CardTitle>Company Settings</CardTitle>
           </div>
-          <CardDescription>
-            Manage your company settings and preferences.
-          </CardDescription>
+          <CardDescription>Manage your company settings and preferences.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -157,9 +170,7 @@ export default function CompanySettingsPage() {
                     <FormControl>
                       <Input placeholder="Acme Inc." {...field} />
                     </FormControl>
-                    <FormDescription>
-                      The name of your company or organization.
-                    </FormDescription>
+                    <FormDescription>The name of your company or organization.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -191,9 +202,7 @@ export default function CompanySettingsPage() {
                     <FormControl>
                       <Input placeholder="https://example.com/logo.png" {...field} />
                     </FormControl>
-                    <FormDescription>
-                      A URL to your company logo.
-                    </FormDescription>
+                    <FormDescription>A URL to your company logo.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

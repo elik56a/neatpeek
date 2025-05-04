@@ -3,7 +3,11 @@
  */
 
 import { AIAnalysisResult, BrandRule } from "@/features/brand-setup/types";
-import { DesignAnalysisResult, DesignRecheckResult, FigmaMetadata } from "@/features/design-review/types";
+import {
+  DesignAnalysisResult,
+  DesignRecheckResult,
+  FigmaMetadata,
+} from "@/features/design-review/types";
 
 /**
  * Parameters for analyzing a brand guideline
@@ -46,12 +50,12 @@ export interface AnalyzeDesignParams {
    * Image parts for the AI model
    */
   imageParts: any[];
-  
+
   /**
    * Figma metadata
    */
   metadata: FigmaMetadata;
-  
+
   /**
    * Brand rules
    */
@@ -66,17 +70,17 @@ export interface RecheckDesignParams {
    * Image parts for the AI model
    */
   imageParts: any[];
-  
+
   /**
    * Figma metadata
    */
   metadata: FigmaMetadata;
-  
+
   /**
    * Brand rules
    */
   brandRules: any;
-  
+
   /**
    * Comments grouped by frame
    */
@@ -91,12 +95,12 @@ export interface AIService {
    * Analyze a brand guideline PDF and return structured data
    */
   analyzeBrandGuideline(params: AnalyzeBrandGuidelineParams): Promise<AIAnalysisResult>;
-  
+
   /**
    * Analyze designs against brand rules
    */
   analyzeDesign(params: AnalyzeDesignParams): Promise<DesignAnalysisResult>;
-  
+
   /**
    * Recheck designs against previous comments
    */

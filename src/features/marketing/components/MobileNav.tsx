@@ -1,12 +1,7 @@
-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 
 interface MobileNavProps {
@@ -27,14 +22,12 @@ export function MobileNav({ items, isMarketing }: MobileNavProps) {
       </SheetTrigger>
       <SheetContent side="right">
         <nav className="flex flex-col space-y-4">
-          {items.map((item) => (
+          {items.map(item => (
             <Link
               key={item.href}
               href={item.href}
               className={
-                pathname === item.href
-                  ? "text-foreground font-medium"
-                  : "text-muted-foreground"
+                pathname === item.href ? "text-foreground font-medium" : "text-muted-foreground"
               }
             >
               {item.title}

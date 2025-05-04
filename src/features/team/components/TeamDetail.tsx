@@ -2,11 +2,34 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { useAppDataContext } from "@/providers";
@@ -161,7 +184,7 @@ export function TeamDetail({ teamId }: TeamDetailProps) {
       }
 
       // Update the members list
-      setMembers(members.filter((member) => member.id !== memberId));
+      setMembers(members.filter(member => member.id !== memberId));
 
       toast({
         title: "Member removed",
@@ -239,9 +262,7 @@ export function TeamDetail({ teamId }: TeamDetailProps) {
           <Card>
             <CardHeader>
               <CardTitle>Team Information</CardTitle>
-              <CardDescription>
-                Basic information about the team.
-              </CardDescription>
+              <CardDescription>Basic information about the team.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -337,7 +358,7 @@ export function TeamDetail({ teamId }: TeamDetailProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {members.map((member) => (
+                  {members.map(member => (
                     <TableRow key={member.id}>
                       <TableCell className="font-medium">{member.name}</TableCell>
                       <TableCell>{member.email}</TableCell>
@@ -353,11 +374,7 @@ export function TeamDetail({ teamId }: TeamDetailProps) {
                           >
                             <Mail className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeMember(member.id)}
-                          >
+                          <Button variant="ghost" size="sm" onClick={() => removeMember(member.id)}>
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </TableCell>

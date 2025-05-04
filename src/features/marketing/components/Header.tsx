@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -29,12 +28,13 @@ const marketingNavItems = [
 
 export function Header() {
   const pathname = usePathname();
-  const isMarketing = !pathname?.startsWith("/dashboard") &&
-                      !pathname?.startsWith("/design-") &&
-                      !pathname?.startsWith("/brand-") &&
-                      !pathname?.startsWith("/app") &&
-                      pathname !== "/login" &&
-                      pathname !== "/register";
+  const isMarketing =
+    !pathname?.startsWith("/dashboard") &&
+    !pathname?.startsWith("/design-") &&
+    !pathname?.startsWith("/brand-") &&
+    !pathname?.startsWith("/app") &&
+    pathname !== "/login" &&
+    pathname !== "/register";
 
   return (
     <header className="border-b bg-background sticky top-0 z-50">
@@ -46,16 +46,16 @@ export function Header() {
         {isMarketing ? (
           <>
             <nav className="hidden md:flex items-center space-x-2">
-              {marketingNavItems.map((item) => (
+              {marketingNavItems.map(item => (
                 <Button
                   key={item.href}
                   variant="ghost"
                   asChild
                   className={cn(
                     "transition-colors duration-200",
-                    pathname === item.href ?
-                      "bg-muted text-foreground font-medium" :
-                      "hover:bg-muted/70 hover:text-foreground"
+                    pathname === item.href
+                      ? "bg-muted text-foreground font-medium"
+                      : "hover:bg-muted/70 hover:text-foreground"
                   )}
                 >
                   <Link href={item.href}>

@@ -2,14 +2,36 @@
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppDataContext } from "@/providers";
-import { AlertCircle, ArrowRight, Building, CheckCircle, FileText, Loader2, Trash2, Users } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowRight,
+  Building,
+  CheckCircle,
+  FileText,
+  Loader2,
+  Trash2,
+  Users,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useBrandSetupForm } from "../hooks";
 import { CustomRule } from "../types";
@@ -18,16 +40,15 @@ import { CustomRulesForm } from "./CustomRulesForm";
 import { FileUploader } from "./FileUploader";
 import { Team } from "@/types";
 
-
 interface BrandSetupFormProps {
   brandId?: string;
-  mode?: 'create' | 'edit';
+  mode?: "create" | "edit";
 }
 
-export function BrandSetupForm({ brandId, mode = 'create' }: BrandSetupFormProps) {
+export function BrandSetupForm({ brandId, mode = "create" }: BrandSetupFormProps) {
   const [activeTab, setActiveTab] = useState("basic");
   const { company, companyId, hasCompany } = useAppDataContext();
-  const [teams, setTeams] = useState<Pick<Team, 'id' | 'name'>[]>([]);
+  const [teams, setTeams] = useState<Pick<Team, "id" | "name">[]>([]);
 
   // Fetch teams when component mounts
   useEffect(() => {
@@ -42,7 +63,7 @@ export function BrandSetupForm({ brandId, mode = 'create' }: BrandSetupFormProps
           setTeams(data);
         }
       } catch (error) {
-        console.error('Error fetching teams:', error);
+        console.error("Error fetching teams:", error);
       }
     };
 
@@ -58,15 +79,15 @@ export function BrandSetupForm({ brandId, mode = 'create' }: BrandSetupFormProps
     setPdfFile,
     addCustomRule,
     removeCustomRule,
-    submitForm
+    submitForm,
   } = useBrandSetupForm({ brandId, mode });
 
   // Show loading state while form data is being loaded
-  const [isLoading, setIsLoading] = useState(mode === 'edit');
+  const [isLoading, setIsLoading] = useState(mode === "edit");
 
   // Set loading to false when form data is loaded
   useEffect(() => {
-    if (formData.name && mode === 'edit') {
+    if (formData.name && mode === "edit") {
       setIsLoading(false);
     }
   }, [formData.name, mode]);
@@ -122,11 +143,9 @@ export function BrandSetupForm({ brandId, mode = 'create' }: BrandSetupFormProps
         setSuccess(true);
       }
     } catch (err: any) {
-      setError(err.message || 'An error occurred');
+      setError(err.message || "An error occurred");
     }
   };
-
-
 
   // Show loading indicator if data is being loaded
   if (isLoading) {
@@ -134,9 +153,7 @@ export function BrandSetupForm({ brandId, mode = 'create' }: BrandSetupFormProps
       <Card className="w-full max-w-4xl mx-auto">
         <CardHeader>
           <CardTitle>Loading...</CardTitle>
-          <CardDescription>
-            Loading brand guideline data...
-          </CardDescription>
+          <CardDescription>Loading brand guideline data...</CardDescription>
         </CardHeader>
         <CardContent className="flex justify-center py-8">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
@@ -148,9 +165,11 @@ export function BrandSetupForm({ brandId, mode = 'create' }: BrandSetupFormProps
   return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
-        <CardTitle>{mode === 'edit' ? 'Edit Brand Guidelines' : 'Brand Setup'}</CardTitle>
+        <CardTitle>{mode === "edit" ? "Edit Brand Guidelines" : "Brand Setup"}</CardTitle>
         <CardDescription>
-          {mode === 'edit' ? 'Update your brand guidelines' : 'Upload your brand guidelines, design examples, and custom rules to get started.'}
+          {mode === "edit"
+            ? "Update your brand guidelines"
+            : "Upload your brand guidelines, design examples, and custom rules to get started."}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -184,8 +203,8 @@ export function BrandSetupForm({ brandId, mode = 'create' }: BrandSetupFormProps
               <Label htmlFor="name">Brand Name *</Label>
               <Input
                 id="name"
-                value={formData.name || ''}
-                onChange={(e) => updateFormData({ name: e.target.value })}
+                value={formData.name || ""}
+                onChange={e => updateFormData({ name: e.target.value })}
                 placeholder="Enter your brand name"
                 required
               />
@@ -195,8 +214,8 @@ export function BrandSetupForm({ brandId, mode = 'create' }: BrandSetupFormProps
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
-                value={formData.description || ''}
-                onChange={(e) => updateFormData({ description: e.target.value })}
+                value={formData.description || ""}
+                onChange={e => updateFormData({ description: e.target.value })}
                 placeholder="Describe your brand"
                 rows={4}
               />
@@ -209,9 +228,9 @@ export function BrandSetupForm({ brandId, mode = 'create' }: BrandSetupFormProps
                   <Label>Company</Label>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  {company?.name || 'Your Company'}
+                  {company?.name || "Your Company"}
                 </div>
-                <input type="hidden" value={companyId || ''} />
+                <input type="hidden" value={companyId || ""} />
               </div>
             )}
 
@@ -222,15 +241,17 @@ export function BrandSetupForm({ brandId, mode = 'create' }: BrandSetupFormProps
                   <Label htmlFor="teamId">Team (Optional)</Label>
                 </div>
                 <Select
-                  value={formData.teamId || ''}
-                  onValueChange={(value) => updateFormData({ teamId: value === 'none' ? undefined : value })}
+                  value={formData.teamId || ""}
+                  onValueChange={value =>
+                    updateFormData({ teamId: value === "none" ? undefined : value })
+                  }
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select a team" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">None</SelectItem>
-                    {teams.map((team) => (
+                    {teams.map(team => (
                       <SelectItem key={team.id} value={team.id}>
                         {team.name}
                       </SelectItem>
@@ -265,14 +286,14 @@ export function BrandSetupForm({ brandId, mode = 'create' }: BrandSetupFormProps
                 />
 
                 {/* Display existing PDF in edit mode */}
-                {mode === 'edit' && formData.pdfPath && !formData.pdfFile && (
+                {mode === "edit" && formData.pdfPath && !formData.pdfFile && (
                   <div className="mt-4 border rounded-md p-3 flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <FileText className="h-5 w-5 text-muted-foreground" />
                       <div>
                         <p className="text-sm font-medium">Current PDF</p>
                         <p className="text-xs text-muted-foreground">
-                          {formData.pdfPath.split('/').pop() || 'brand-guidelines.pdf'}
+                          {formData.pdfPath.split("/").pop() || "brand-guidelines.pdf"}
                         </p>
                       </div>
                     </div>
@@ -299,38 +320,33 @@ export function BrandSetupForm({ brandId, mode = 'create' }: BrandSetupFormProps
                 />
 
                 {/* Display existing images in edit mode */}
-                {mode === 'edit' && formData.designImagePaths && formData.designImagePaths.length > 0 && (
-                  <div className="mt-4">
-                    <h3 className="text-sm font-medium mb-2">Existing Images:</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {formData.designImagePaths.map((image) => (
-                        <div key={image.id} className="border rounded-md p-2">
-                          <img
-                            src={image.url}
-                            alt={image.name || 'Design image'}
-                            className="w-full h-32 object-cover rounded-md mb-2"
-                          />
-                          <p className="text-xs truncate">{image.name || 'Unnamed image'}</p>
-                        </div>
-                      ))}
+                {mode === "edit" &&
+                  formData.designImagePaths &&
+                  formData.designImagePaths.length > 0 && (
+                    <div className="mt-4">
+                      <h3 className="text-sm font-medium mb-2">Existing Images:</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {formData.designImagePaths.map(image => (
+                          <div key={image.id} className="border rounded-md p-2">
+                            <img
+                              src={image.url}
+                              alt={image.name || "Design image"}
+                              className="w-full h-32 object-cover rounded-md mb-2"
+                            />
+                            <p className="text-xs truncate">{image.name || "Unnamed image"}</p>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
               </div>
             </div>
 
             <div className="flex justify-between">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setActiveTab("basic")}
-              >
+              <Button type="button" variant="outline" onClick={() => setActiveTab("basic")}>
                 Back
               </Button>
-              <Button
-                type="button"
-                onClick={() => setActiveTab("rules")}
-              >
+              <Button type="button" onClick={() => setActiveTab("rules")}>
                 Next: Custom Rules
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -345,25 +361,19 @@ export function BrandSetupForm({ brandId, mode = 'create' }: BrandSetupFormProps
             />
 
             <div className="flex justify-between">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setActiveTab("files")}
-              >
+              <Button type="button" variant="outline" onClick={() => setActiveTab("files")}>
                 Back
               </Button>
-              <Button
-                type="submit"
-                onClick={handleSubmit}
-                disabled={!canSubmit || isSubmitting}
-              >
+              <Button type="submit" onClick={handleSubmit} disabled={!canSubmit || isSubmitting}>
                 {isSubmitting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Processing...
                   </>
+                ) : mode === "edit" ? (
+                  "Update Brand Guidelines"
                 ) : (
-                  mode === 'edit' ? "Update Brand Guidelines" : "Create Brand Guidelines"
+                  "Create Brand Guidelines"
                 )}
               </Button>
             </div>
@@ -371,9 +381,7 @@ export function BrandSetupForm({ brandId, mode = 'create' }: BrandSetupFormProps
         </Tabs>
       </CardContent>
       <CardFooter className="flex justify-between border-t pt-6">
-        <div className="text-sm text-muted-foreground">
-          * Required fields
-        </div>
+        <div className="text-sm text-muted-foreground">* Required fields</div>
         <div className="text-sm text-muted-foreground">
           At least one of: PDF, design images, or custom rules is required.
         </div>

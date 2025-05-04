@@ -3,11 +3,16 @@
  */
 
 // This service is server-side only and should not be imported on the client
-import { auth } from 'google-auth-library';
+import { auth } from "google-auth-library";
 import { AIAnalysisResult } from "@/features/brand-setup/types";
 import { DesignAnalysisResult, DesignRecheckResult } from "@/features/design-review/types";
-import { AIService, AnalyzeBrandGuidelineParams, AnalyzeDesignParams, RecheckDesignParams } from "./types";
-import { VertexAI } from '@google-cloud/vertexai';
+import {
+  AIService,
+  AnalyzeBrandGuidelineParams,
+  AnalyzeDesignParams,
+  RecheckDesignParams,
+} from "./types";
+import { VertexAI } from "@google-cloud/vertexai";
 
 export class VertexAIProvider implements AIService {
   private vertexAI: VertexAI;
@@ -28,8 +33,8 @@ export class VertexAIProvider implements AIService {
    */
   constructor(
     project: string,
-    location: string = 'us-central1',
-    modelName: string = 'gemini-2.5-pro-exp-03-25'
+    location: string = "us-central1",
+    modelName: string = "gemini-2.5-pro-exp-03-25"
   ) {
     this.project = project;
     this.location = location;
@@ -49,27 +54,25 @@ export class VertexAIProvider implements AIService {
 
     this.initPromise = (async () => {
       try {
-
         const serviceAccount = {
-          type: 'service_account',
+          type: "service_account",
           project_id: process.env.GOOGLE_PROJECT_ID,
           private_key_id: process.env.GOOGLE_PRIVATE_KEY_ID,
-          private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+          private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
           client_email: process.env.GOOGLE_CLIENT_EMAIL,
           client_id: process.env.GOOGLE_CLIENT_ID,
-          auth_uri: 'https://accounts.google.com/o/oauth2/auth',
-          token_uri: 'https://oauth2.googleapis.com/token',
-          auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
+          auth_uri: "https://accounts.google.com/o/oauth2/auth",
+          token_uri: "https://oauth2.googleapis.com/token",
+          auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
           client_x509_cert_url: process.env.GOOGLE_CLIENT_CERT_URL,
-          universe_domain: 'googleapis.com'
-              };
+          universe_domain: "googleapis.com",
+        };
 
-
-       this.vertexAI = new VertexAI({
+        this.vertexAI = new VertexAI({
           project: this.project,
           location: this.location,
-          googleAuthOptions: { credentials: serviceAccount }
-        })
+          googleAuthOptions: { credentials: serviceAccount },
+        });
 
         this.generativeModel = this.vertexAI.getGenerativeModel({
           model: this.modelName,
@@ -77,7 +80,7 @@ export class VertexAIProvider implements AIService {
 
         this.isInitialized = true;
       } catch (error) {
-        console.error('Error initializing AI service:', error);
+        console.error("Error initializing AI service:", error);
         throw error;
       }
     })();
@@ -105,9 +108,9 @@ export class VertexAIProvider implements AIService {
       if (params.pdfBuffer) {
         parts.push({
           inlineData: {
-            mimeType: 'application/pdf',
-            data: params.pdfBuffer.toString('base64'),
-          }
+            mimeType: "application/pdf",
+            data: params.pdfBuffer.toString("base64"),
+          },
         });
       }
 
@@ -117,15 +120,15 @@ export class VertexAIProvider implements AIService {
           parts.push({
             inlineData: {
               mimeType: image.mimeType,
-              data: image.buffer.toString('base64'),
-            }
+              data: image.buffer.toString("base64"),
+            },
           });
         }
       }
 
       // Make the API request using the SDK
       const result = await this.generativeModel.generateContent({
-        contents: [{ role: 'user', parts }],
+        contents: [{ role: "user", parts }],
         generationConfig: {
           temperature: 0.2,
         },
@@ -135,11 +138,11 @@ export class VertexAIProvider implements AIService {
       const responseText = response.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!responseText) {
-        throw new Error('No response from Vertex AI');
+        throw new Error("No response from Vertex AI");
       }
 
       // Extract and parse the JSON response
-      console.log('Raw response from Vertex AI:', responseText);
+      console.log("Raw response from Vertex AI:", responseText);
 
       // Clean the response by removing code block markers
       const cleanedResponse = this.cleanJsonResponse(responseText);
@@ -148,21 +151,21 @@ export class VertexAIProvider implements AIService {
         // Try to parse the JSON
         return JSON.parse(cleanedResponse);
       } catch (parseError) {
-        console.error('Failed to parse JSON response:', parseError);
-        console.error('First 100 chars of response:', cleanedResponse.substring(0, 100));
+        console.error("Failed to parse JSON response:", parseError);
+        console.error("First 100 chars of response:", cleanedResponse.substring(0, 100));
 
         // Return a default empty response instead of throwing
         return {
-          metadata: { companyName: 'Unknown', industry: 'Unknown' },
+          metadata: { companyName: "Unknown", industry: "Unknown" },
           colors: [],
           typography: [],
           spacing: [],
-          general: []
+          general: [],
         };
       }
     } catch (error) {
-      console.error('Failed to analyze brand guideline with Vertex AI:', error);
-      throw new Error('Failed to analyze brand guideline, please try again.');
+      console.error("Failed to analyze brand guideline with Vertex AI:", error);
+      throw new Error("Failed to analyze brand guideline, please try again.");
     }
   }
 
@@ -170,22 +173,25 @@ export class VertexAIProvider implements AIService {
    * Build the prompt for brand guideline analysis
    */
   private buildBrandGuidelinePrompt(params: AnalyzeBrandGuidelineParams): string {
-    let prompt = 'Analyze the provided brand materials and create a comprehensive JSON object of brand guidelines.';
+    let prompt =
+      "Analyze the provided brand materials and create a comprehensive JSON object of brand guidelines.";
 
     if (params.brandName) {
       prompt += ` The brand name is "${params.brandName}".`;
     }
 
     if (params.pdfBuffer) {
-      prompt += ' Read the PDF brand book file, understand it deeply, and extract all brand guidelines.';
+      prompt +=
+        " Read the PDF brand book file, understand it deeply, and extract all brand guidelines.";
     }
 
     if (params.designImages && params.designImages.length > 0) {
-      prompt += ' Analyze the provided design examples to extract visual design patterns and rules.';
+      prompt +=
+        " Analyze the provided design examples to extract visual design patterns and rules.";
     }
 
     if (params.customRules && params.customRules.length > 0) {
-      prompt += ' Incorporate the following custom rules provided by the user:';
+      prompt += " Incorporate the following custom rules provided by the user:";
       for (const rule of params.customRules) {
         prompt += `\n- Category: ${rule.category}, Name: ${rule.name}, Description: ${rule.description}`;
       }
@@ -236,7 +242,7 @@ export class VertexAIProvider implements AIService {
       // Initialize the AI service
       await this.initialize();
 
-      console.log('Start analyzeDesign with params:', params);
+      console.log("Start analyzeDesign with params:", params);
 
       // Construct the review prompt
       const reviewPrompt = `You are a brand compliance and design reviewer specializing in enforcing brand guidelines while ensuring good UX practices. Your primary focus is to ensure strict adherence to the provided brand rules and guidelines.
@@ -279,13 +285,15 @@ export class VertexAIProvider implements AIService {
       - Avoid clustering comments - spread them around the relevant areas
 
       Here are the images with their frame data:
-      ${params.metadata.frames.map(frame => {
-        return `
+      ${params.metadata.frames
+        .map(frame => {
+          return `
         URL: ${frame.url}
         Frame ID: ${frame.id}
         Frame Size: ${frame.position.width}x${frame.position.height}
         `;
-      }).join('\n')}
+        })
+        .join("\n")}
 
       Here are the brand rules:
       ${JSON.stringify(params.brandRules, null, 2)}
@@ -372,18 +380,15 @@ export class VertexAIProvider implements AIService {
       const result = await this.generativeModel.generateContent({
         contents: [
           {
-            role: 'user',
-            parts: [
-              { text: reviewPrompt },
-              ...params.imageParts
-            ]
-          }
-        ]
+            role: "user",
+            parts: [{ text: reviewPrompt }, ...params.imageParts],
+          },
+        ],
       });
 
       const responseText = result.response.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!responseText) throw new Error('No response from Gemini.');
-      console.log('Raw response from Vertex AI:', responseText);
+      if (!responseText) throw new Error("No response from Gemini.");
+      console.log("Raw response from Vertex AI:", responseText);
 
       // Clean the response by removing code block markers
       const cleanedResponse = this.cleanJsonResponse(responseText);
@@ -391,14 +396,14 @@ export class VertexAIProvider implements AIService {
       try {
         return JSON.parse(cleanedResponse);
       } catch (parseError) {
-        console.error('Failed to parse JSON response:', parseError.message);
-        console.error('First 100 chars of response:', cleanedResponse.substring(0, 100));
+        console.error("Failed to parse JSON response:", parseError.message);
+        console.error("First 100 chars of response:", cleanedResponse.substring(0, 100));
 
         // Return a default empty response instead of throwing
         return { reviews: [] };
       }
     } catch (error) {
-      console.error('Error analyzing design:', error);
+      console.error("Error analyzing design:", error);
       throw error;
     }
   }
@@ -441,21 +446,25 @@ export class VertexAIProvider implements AIService {
       Distribute comments logically near the relevant elements and avoid clustering.
 
       Here are the frames with their previous unfixed comments:
-      ${Object.entries(params.commentsByFrame).map(([frameId, comments]) => {
-        const frame = params.metadata.frames.find(f => f.id === frameId);
-        return `
+      ${Object.entries(params.commentsByFrame)
+        .map(([frameId, comments]) => {
+          const frame = params.metadata.frames.find(f => f.id === frameId);
+          return `
         Frame ID: ${frameId}
         Frame Name: ${frame?.name}
         Frame Size: ${frame?.position.width}x${frame?.position.height}
         Previous Comments:
-        ${(comments as any[]).map(c => {
-          // Convert absolute coordinates back to relative for context
-          const relX = c.client_meta?.node_offset?.x / frame?.position.width;
-          const relY = c.client_meta?.node_offset?.y / frame?.position.height;
-          return `- ${c.id}: ${c.message} (at x=${relX?.toFixed(2)}, y=${relY?.toFixed(2)})`;
-        }).join('\n')}
+        ${(comments as any[])
+          .map(c => {
+            // Convert absolute coordinates back to relative for context
+            const relX = c.client_meta?.node_offset?.x / frame?.position.width;
+            const relY = c.client_meta?.node_offset?.y / frame?.position.height;
+            return `- ${c.id}: ${c.message} (at x=${relX?.toFixed(2)}, y=${relY?.toFixed(2)})`;
+          })
+          .join("\n")}
         `;
-      }).join('\n')}
+        })
+        .join("\n")}
 
       Here are the brand rules:
       ${JSON.stringify(params.brandRules, null, 2)}
@@ -514,17 +523,14 @@ export class VertexAIProvider implements AIService {
       const result = await this.generativeModel.generateContent({
         contents: [
           {
-            role: 'user',
-            parts: [
-              { text: recheckPrompt },
-              ...params.imageParts
-            ]
-          }
-        ]
+            role: "user",
+            parts: [{ text: recheckPrompt }, ...params.imageParts],
+          },
+        ],
       });
 
       const responseText = result.response.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!responseText) throw new Error('No response from Gemini.');
+      if (!responseText) throw new Error("No response from Gemini.");
 
       // Clean the response by removing code block markers
       const cleanedResponse = this.cleanJsonResponse(responseText);
@@ -532,14 +538,14 @@ export class VertexAIProvider implements AIService {
       try {
         return JSON.parse(cleanedResponse);
       } catch (parseError) {
-        console.error('Failed to parse JSON response:', parseError.message);
-        console.error('First 100 chars of response:', cleanedResponse.substring(0, 100));
+        console.error("Failed to parse JSON response:", parseError.message);
+        console.error("First 100 chars of response:", cleanedResponse.substring(0, 100));
 
         // Return a default empty response instead of throwing
         return { recheck_results: [] };
       }
     } catch (error) {
-      console.error('Error rechecking design:', error);
+      console.error("Error rechecking design:", error);
       throw error;
     }
   }
@@ -549,21 +555,23 @@ export class VertexAIProvider implements AIService {
    */
   private cleanJsonResponse(input: string): string {
     try {
-      console.log('Cleaning JSON response, input length:', input.length);
+      console.log("Cleaning JSON response, input length:", input.length);
 
       // Check if the input starts with ```json and ends with ```
-      if (input.trim().startsWith('```json') && input.trim().endsWith('```')) {
-        console.log('Found JSON code block, extracting content');
+      if (input.trim().startsWith("```json") && input.trim().endsWith("```")) {
+        console.log("Found JSON code block, extracting content");
         // Extract everything between the first ``` and the last ```
-        return input.trim().substring(7, input.trim().length - 3).trim();
+        return input
+          .trim()
+          .substring(7, input.trim().length - 3)
+          .trim();
       }
 
       // If no code blocks, just return the input
       return input;
     } catch (e) {
-      console.error('Error cleaning JSON response:', e);
+      console.error("Error cleaning JSON response:", e);
       return input; // Return original input if any error occurs
     }
   }
 }
-

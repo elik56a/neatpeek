@@ -1,15 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { prisma } from '@/services/db/prisma';
-import { CompanyRole } from '@prisma/client';
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { prisma } from "@/services/db/prisma";
+import { CompanyRole } from "@prisma/client";
 
 /**
  * Get all members of a team
  */
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Extract the ID from params
     const { id } = await Promise.resolve(params);
@@ -19,7 +16,7 @@ export async function GET(
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'You must be logged in to view team members' },
+        { error: "You must be logged in to view team members" },
         { status: 401 }
       );
     }
@@ -31,10 +28,7 @@ export async function GET(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Get the team
@@ -44,16 +38,13 @@ export async function GET(
     });
 
     if (!team) {
-      return NextResponse.json(
-        { error: 'Team not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Team not found" }, { status: 404 });
     }
 
     // Check if the user belongs to the same company as the team
     if (user.companyId !== team.companyId) {
       return NextResponse.json(
-        { error: 'You do not have permission to view members of this team' },
+        { error: "You do not have permission to view members of this team" },
         { status: 403 }
       );
     }
@@ -78,21 +69,15 @@ export async function GET(
 
     return NextResponse.json(members);
   } catch (error) {
-    console.error('Error getting team members:', error);
-    return NextResponse.json(
-      { error: 'Failed to get team members' },
-      { status: 500 }
-    );
+    console.error("Error getting team members:", error);
+    return NextResponse.json({ error: "Failed to get team members" }, { status: 500 });
   }
 }
 
 /**
  * Add a member to a team
  */
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     // Extract the ID from params
     const { id } = await Promise.resolve(params);
@@ -102,7 +87,7 @@ export async function POST(
 
     if (!session?.user?.email) {
       return NextResponse.json(
-        { error: 'You must be logged in to add team members' },
+        { error: "You must be logged in to add team members" },
         { status: 401 }
       );
     }
@@ -114,10 +99,7 @@ export async function POST(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Get the team
@@ -127,27 +109,25 @@ export async function POST(
     });
 
     if (!team) {
-      return NextResponse.json(
-        { error: 'Team not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Team not found" }, { status: 404 });
     }
 
     // Check if the user belongs to the same company as the team
     if (user.companyId !== team.companyId) {
       return NextResponse.json(
-        { error: 'You do not have permission to add members to this team' },
+        { error: "You do not have permission to add members to this team" },
         { status: 403 }
       );
     }
 
     // Check if the user is a company admin or the team owner
     const isTeamOwner = team.ownerId === user.id;
-    const isCompanyAdmin = user.companyRole === CompanyRole.ADMIN || user.companyRole === CompanyRole.OWNER;
+    const isCompanyAdmin =
+      user.companyRole === CompanyRole.ADMIN || user.companyRole === CompanyRole.OWNER;
 
     if (!isTeamOwner && !isCompanyAdmin) {
       return NextResponse.json(
-        { error: 'You do not have permission to add members to this team' },
+        { error: "You do not have permission to add members to this team" },
         { status: 403 }
       );
     }
@@ -157,10 +137,7 @@ export async function POST(
 
     // Validate the request body
     if (!body.email) {
-      return NextResponse.json(
-        { error: 'Email is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
     // Find the user to add
@@ -170,16 +147,13 @@ export async function POST(
     });
 
     if (!userToAdd) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Check if the user to add belongs to the same company
     if (userToAdd.companyId !== team.companyId) {
       return NextResponse.json(
-        { error: 'User does not belong to the same company' },
+        { error: "User does not belong to the same company" },
         { status: 400 }
       );
     }
@@ -193,10 +167,7 @@ export async function POST(
     });
 
     if (isMember) {
-      return NextResponse.json(
-        { error: 'User is already a member of this team' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "User is already a member of this team" }, { status: 400 });
     }
 
     // Add the user to the team by creating a TeamMember record
@@ -204,16 +175,13 @@ export async function POST(
       data: {
         teamId: id,
         userId: userToAdd.id,
-        role: 'MEMBER',
+        role: "MEMBER",
       },
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error adding team member:', error);
-    return NextResponse.json(
-      { error: 'Failed to add team member' },
-      { status: 500 }
-    );
+    console.error("Error adding team member:", error);
+    return NextResponse.json({ error: "Failed to add team member" }, { status: 500 });
   }
 }

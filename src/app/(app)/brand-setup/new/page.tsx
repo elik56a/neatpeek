@@ -16,7 +16,7 @@ export default function NewBrandSetupPage() {
         </Button>
         <h1 className="text-2xl font-bold">Create New Brand Guideline</h1>
       </div>
-      
+
       <BrandSetupForm />
     </div>
   );

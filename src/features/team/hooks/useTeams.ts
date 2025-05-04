@@ -5,7 +5,7 @@ import { Team as CoreTeam } from "@/types";
 import { useCallback, useEffect, useState } from "react";
 
 // Extend the core Team type with additional properties needed for this feature
-interface Team extends Omit<CoreTeam, 'createdAt' | 'updatedAt'> {
+interface Team extends Omit<CoreTeam, "createdAt" | "updatedAt"> {
   createdAt: string; // Override Date with string for API response
   updatedAt: string; // Override Date with string for API response
   _count?: {

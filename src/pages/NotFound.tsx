@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
@@ -9,10 +8,7 @@ const NotFound = () => {
 
   useEffect(() => {
     if (router.isReady) {
-      console.error(
-        "404 Error: User attempted to access non-existent route:",
-        router.asPath
-      );
+      console.error("404 Error: User attempted to access non-existent route:", router.asPath);
     }
   }, [router.isReady, router.asPath]);
 

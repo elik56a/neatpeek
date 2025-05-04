@@ -1,6 +1,6 @@
-import { prisma } from '@/services/db/prisma';
-import { getServerSession } from 'next-auth';
-import { NextResponse } from 'next/server';
+import { prisma } from "@/services/db/prisma";
+import { getServerSession } from "next-auth";
+import { NextResponse } from "next/server";
 
 /**
  * Get all brands the current user has access to
@@ -11,17 +11,14 @@ import { NextResponse } from 'next/server';
  */
 export async function GET() {
   try {
-    console.log('Fetching accessible brands...');
+    console.log("Fetching accessible brands...");
 
     // Get the current user session
     const session = await getServerSession();
 
     if (!session?.user?.email) {
-      console.log('No authenticated user found');
-      return NextResponse.json(
-        { error: 'You must be logged in to view brands' },
-        { status: 401 }
-      );
+      console.log("No authenticated user found");
+      return NextResponse.json({ error: "You must be logged in to view brands" }, { status: 401 });
     }
 
     // Get the user with company info
@@ -32,17 +29,14 @@ export async function GET() {
         companyId: true,
         teams: {
           select: {
-            teamId: true
-          }
-        }
+            teamId: true,
+          },
+        },
       },
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Get team IDs the user is a member of
@@ -50,7 +44,7 @@ export async function GET() {
 
     // Create conditions for the OR array
     const conditions: any[] = [
-      { userId: user.id },  // Brands created by the user
+      { userId: user.id }, // Brands created by the user
     ];
 
     // Add company condition if user has a company
@@ -66,7 +60,7 @@ export async function GET() {
     // Fetch all brands the user has access to
     const brands = await prisma.brand.findMany({
       where: {
-        OR: conditions
+        OR: conditions,
       },
       select: {
         id: true,
@@ -77,17 +71,14 @@ export async function GET() {
         updatedAt: true,
       },
       orderBy: {
-        updatedAt: 'desc'
-      }
+        updatedAt: "desc",
+      },
     });
 
     console.log(`Found ${brands.length} accessible brands`);
     return NextResponse.json(brands);
   } catch (error) {
-    console.error('Error fetching brands:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch brands' },
-      { status: 500 }
-    );
+    console.error("Error fetching brands:", error);
+    return NextResponse.json({ error: "Failed to fetch brands" }, { status: 500 });
   }
 }

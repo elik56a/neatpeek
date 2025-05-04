@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -8,7 +7,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Check, ArrowRight, FileCheck } from "lucide-react";
 import { motion } from "framer-motion";
@@ -36,21 +35,21 @@ const CompletionModal = ({
   brandName,
   primaryColor,
   primaryFont,
-  nextStep
+  nextStep,
 }: CompletionModalProps) => {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
+    visible: { opacity: 1, y: 0 },
   };
 
   const circleVariants = {
@@ -61,9 +60,9 @@ const CompletionModal = ({
         delay: 0.2,
         type: "spring",
         stiffness: 200,
-        damping: 10
-      }
-    }
+        damping: 10,
+      },
+    },
   };
 
   const checkVariants = {
@@ -72,9 +71,9 @@ const CompletionModal = ({
       pathLength: 1,
       transition: {
         delay: 0.4,
-        duration: 0.5
-      }
-    }
+        duration: 0.5,
+      },
+    },
   };
 
   return (
@@ -82,19 +81,17 @@ const CompletionModal = ({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>
-            {description}
-          </DialogDescription>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        
+
         <div className="flex justify-center py-6">
-          <motion.div 
+          <motion.div
             className="relative h-24 w-24"
             initial="hidden"
             animate="visible"
             variants={containerVariants}
           >
-            <motion.div 
+            <motion.div
               className="h-full w-full rounded-full bg-primary/20 flex items-center justify-center"
               variants={circleVariants}
             >
@@ -115,15 +112,15 @@ const CompletionModal = ({
             </motion.div>
           </motion.div>
         </div>
-        
-        <motion.div 
+
+        <motion.div
           className="space-y-4"
           initial="hidden"
           animate="visible"
           variants={containerVariants}
         >
           {brandName && (
-            <motion.div 
+            <motion.div
               className="flex items-center justify-between border rounded-lg p-3"
               variants={itemVariants}
             >
@@ -131,25 +128,22 @@ const CompletionModal = ({
               <span className="text-sm">{brandName}</span>
             </motion.div>
           )}
-          
+
           {primaryColor && (
-            <motion.div 
+            <motion.div
               className="flex items-center justify-between border rounded-lg p-3"
               variants={itemVariants}
             >
               <span className="text-sm font-medium">Primary Color</span>
               <div className="flex items-center gap-2">
-                <div 
-                  className="h-4 w-4 rounded-full" 
-                  style={{ backgroundColor: primaryColor }}
-                />
+                <div className="h-4 w-4 rounded-full" style={{ backgroundColor: primaryColor }} />
                 <span className="text-sm">{primaryColor}</span>
               </div>
             </motion.div>
           )}
-          
+
           {primaryFont && (
-            <motion.div 
+            <motion.div
               className="flex items-center justify-between border rounded-lg p-3"
               variants={itemVariants}
             >
@@ -158,7 +152,7 @@ const CompletionModal = ({
             </motion.div>
           )}
         </motion.div>
-        
+
         <DialogFooter className="sm:justify-between">
           <Button variant="outline" onClick={onClose}>
             Close

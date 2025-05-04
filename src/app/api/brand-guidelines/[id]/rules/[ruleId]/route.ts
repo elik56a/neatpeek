@@ -5,10 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 /**
  * Update a specific brand rule
  */
-export async function PUT(
-  req: NextRequest,
-  context: { params: { id: string; ruleId: string } }
-) {
+export async function PUT(req: NextRequest, context: { params: { id: string; ruleId: string } }) {
   // Extract the IDs from the context params
   const { id, ruleId } = await Promise.resolve(context.params);
 
@@ -30,10 +27,7 @@ export async function PUT(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Get the brand guideline
@@ -43,10 +37,7 @@ export async function PUT(
     });
 
     if (!brandGuideline) {
-      return NextResponse.json(
-        { error: "Brand guideline not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Brand guideline not found" }, { status: 404 });
     }
 
     // Check if the user owns the brand guideline
@@ -64,10 +55,7 @@ export async function PUT(
     });
 
     if (!brandRule) {
-      return NextResponse.json(
-        { error: "Brand rule not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Brand rule not found" }, { status: 404 });
     }
 
     // Check if the brand rule belongs to the brand guideline
@@ -88,16 +76,13 @@ export async function PUT(
         name: body.name,
         description: body.description,
         value: body.value,
-        updatedAt: new Date(), 
+        updatedAt: new Date(),
       },
     });
 
     return NextResponse.json(updatedBrandRule);
   } catch (error) {
-    console.error('Error updating brand rule:', error);
-    return NextResponse.json(
-      { error: "Failed to update brand rule" },
-      { status: 500 }
-    );
+    console.error("Error updating brand rule:", error);
+    return NextResponse.json({ error: "Failed to update brand rule" }, { status: 500 });
   }
 }

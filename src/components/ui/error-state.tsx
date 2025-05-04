@@ -9,11 +9,7 @@ interface ErrorStateProps {
   title?: string;
 }
 
-export function ErrorState({ 
-  error, 
-  action, 
-  title = "Error" 
-}: ErrorStateProps) {
+export function ErrorState({ error, action, title = "Error" }: ErrorStateProps) {
   return (
     <div className="container mx-auto py-8">
       <Card className="border-destructive">

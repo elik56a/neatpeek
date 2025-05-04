@@ -23,7 +23,7 @@ export function TimelineDrawer({ reviewId, isOpen, onClose }: TimelineDrawerProp
         onClose();
       }
     };
-    
+
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
@@ -32,9 +32,7 @@ export function TimelineDrawer({ reviewId, isOpen, onClose }: TimelineDrawerProp
     <div
       className={cn(
         "fixed right-4 bottom-4 z-50 w-[350px] sm:w-[400px] max-h-[80vh] rounded-lg border bg-card text-card-foreground shadow-lg transition-all duration-300 ease-in-out",
-        isOpen
-          ? "translate-x-0 opacity-100"
-          : "translate-x-[120%] opacity-0 pointer-events-none"
+        isOpen ? "translate-x-0 opacity-100" : "translate-x-[120%] opacity-0 pointer-events-none"
       )}
     >
       <div className="flex flex-col">

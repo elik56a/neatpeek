@@ -14,7 +14,11 @@ export function SaveButton({ isLoading, saveSuccess, onClick }: SaveButtonProps)
     <Button
       onClick={onClick}
       disabled={isLoading}
-      className={saveSuccess ? "bg-green-600 hover:bg-green-700 transition-colors duration-300" : "transition-colors duration-300"}
+      className={
+        saveSuccess
+          ? "bg-green-600 hover:bg-green-700 transition-colors duration-300"
+          : "transition-colors duration-300"
+      }
     >
       {isLoading ? (
         <>

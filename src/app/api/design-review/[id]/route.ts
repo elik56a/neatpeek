@@ -4,14 +4,11 @@
  * This is a server-side only route that handles design review requests.
  */
 
-import { prisma } from '@/services/db/prisma';
-import { getServerSession } from 'next-auth';
-import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from "@/services/db/prisma";
+import { getServerSession } from "next-auth";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(
-  req: NextRequest,
-  context: { params: { id: string } }
-) {
+export async function GET(req: NextRequest, context: { params: { id: string } }) {
   try {
     // Get the design review ID from the URL
     const params = await Promise.resolve(context?.params);
@@ -34,17 +31,11 @@ export async function GET(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     if (!id) {
-      return NextResponse.json(
-        { error: "Review ID is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Review ID is required" }, { status: 400 });
     }
 
     // Fetch the design review
@@ -77,10 +68,7 @@ export async function GET(
     });
 
     if (!review) {
-      return NextResponse.json(
-        { error: "Review not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Review not found" }, { status: 404 });
     }
 
     // Check if the review belongs to the user

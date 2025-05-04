@@ -2,15 +2,15 @@
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,8 @@ interface BrandGuidelineDetailsProps {
 }
 
 export function BrandGuidelineDetails({ id }: BrandGuidelineDetailsProps) {
-  const { brandGuideline, isLoading, error, startAnalysis, deleteBrandGuideline } = useBrandGuideline(id);
+  const { brandGuideline, isLoading, error, startAnalysis, deleteBrandGuideline } =
+    useBrandGuideline(id);
   const [isStartingAnalysis, setIsStartingAnalysis] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
@@ -49,9 +50,9 @@ export function BrandGuidelineDetails({ id }: BrandGuidelineDetailsProps) {
     setIsDeleting(true);
     try {
       await deleteBrandGuideline();
-      router.push('/brand-setup');
+      router.push("/brand-setup");
     } catch (error) {
-      console.error('Error deleting brand guideline:', error);
+      console.error("Error deleting brand guideline:", error);
     } finally {
       setIsDeleting(false);
     }
@@ -64,11 +65,19 @@ export function BrandGuidelineDetails({ id }: BrandGuidelineDetailsProps) {
     }
 
     if (status === BrandGuidelineStatus.PROCESSING) {
-      return <Badge variant="secondary" className="bg-amber-100 text-amber-800 hover:bg-amber-100">Processing</Badge>;
+      return (
+        <Badge variant="secondary" className="bg-amber-100 text-amber-800 hover:bg-amber-100">
+          Processing
+        </Badge>
+      );
     }
 
     if (status === BrandGuidelineStatus.COMPLETED) {
-      return <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-100">Completed</Badge>;
+      return (
+        <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-100">
+          Completed
+        </Badge>
+      );
     }
 
     if (status === BrandGuidelineStatus.FAILED) {
@@ -82,14 +91,17 @@ export function BrandGuidelineDetails({ id }: BrandGuidelineDetailsProps) {
   const groupRulesByCategory = () => {
     if (!brandGuideline?.brandRules) return {};
 
-    return brandGuideline.brandRules.reduce((acc, rule) => {
-      const category = rule.category as RuleCategory;
-      if (!acc[category]) {
-        acc[category] = [];
-      }
-      acc[category].push(rule);
-      return acc;
-    }, {} as Record<RuleCategory, any[]>);
+    return brandGuideline.brandRules.reduce(
+      (acc, rule) => {
+        const category = rule.category as RuleCategory;
+        if (!acc[category]) {
+          acc[category] = [];
+        }
+        acc[category].push(rule);
+        return acc;
+      },
+      {} as Record<RuleCategory, any[]>
+    );
   };
 
   if (isLoading) {
@@ -152,7 +164,10 @@ export function BrandGuidelineDetails({ id }: BrandGuidelineDetailsProps) {
             </Link>
           </Button>
           <h1 className="text-2xl font-bold">{brandGuideline.name}</h1>
-          {getStatusBadge(brandGuideline.status as BrandGuidelineStatus, brandGuideline.processingStatus as ProcessingStatus)}
+          {getStatusBadge(
+            brandGuideline.status as BrandGuidelineStatus,
+            brandGuideline.processingStatus as ProcessingStatus
+          )}
         </div>
 
         <div className="flex items-center space-x-2">
@@ -176,8 +191,8 @@ export function BrandGuidelineDetails({ id }: BrandGuidelineDetailsProps) {
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete the brand guideline
-                  and all associated data.
+                  This action cannot be undone. This will permanently delete the brand guideline and
+                  all associated data.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -189,7 +204,7 @@ export function BrandGuidelineDetails({ id }: BrandGuidelineDetailsProps) {
                       Deleting...
                     </>
                   ) : (
-                    'Delete'
+                    "Delete"
                   )}
                 </AlertDialogAction>
               </AlertDialogFooter>
@@ -198,10 +213,7 @@ export function BrandGuidelineDetails({ id }: BrandGuidelineDetailsProps) {
 
           {/* Start Analysis Button */}
           {brandGuideline.status === BrandGuidelineStatus.DRAFT && (
-            <Button
-              onClick={handleStartAnalysis}
-              disabled={isStartingAnalysis}
-            >
+            <Button onClick={handleStartAnalysis} disabled={isStartingAnalysis}>
               {isStartingAnalysis ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -219,16 +231,20 @@ export function BrandGuidelineDetails({ id }: BrandGuidelineDetailsProps) {
       </div>
 
       {brandGuideline.processingMessage && (
-        <Alert variant={brandGuideline.processingStatus === ProcessingStatus.FAILED ? "destructive" : "default"}>
+        <Alert
+          variant={
+            brandGuideline.processingStatus === ProcessingStatus.FAILED ? "destructive" : "default"
+          }
+        >
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>
             {brandGuideline.processingStatus === ProcessingStatus.PROCESSING
               ? "Processing"
               : brandGuideline.processingStatus === ProcessingStatus.COMPLETED
-              ? "Completed"
-              : brandGuideline.processingStatus === ProcessingStatus.FAILED
-              ? "Failed"
-              : "Status"}
+                ? "Completed"
+                : brandGuideline.processingStatus === ProcessingStatus.FAILED
+                  ? "Failed"
+                  : "Status"}
           </AlertTitle>
           <AlertDescription>{brandGuideline.processingMessage}</AlertDescription>
         </Alert>
@@ -285,68 +301,60 @@ export function BrandGuidelineDetails({ id }: BrandGuidelineDetailsProps) {
         </CardContent>
       </Card>
 
-      {brandGuideline.status === BrandGuidelineStatus.COMPLETED && brandGuideline.brandRules && brandGuideline.brandRules.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Brand Rules</CardTitle>
-            <CardDescription>
-              AI-generated rules based on your brand guidelines.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="COLOR" className="space-y-4">
-              <TabsList className="flex flex-wrap">
-                {Object.keys(rulesByCategory).map((category) => (
-                  <TabsTrigger key={category} value={category}>
-                    {category.charAt(0) + category.slice(1).toLowerCase()}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-
-              {Object.entries(rulesByCategory).map(([category, rules]) => (
-                <TabsContent key={category} value={category} className="space-y-4">
-                  {rules.map((rule) => (
-                    <div key={rule.id} className="border rounded-md p-4">
-                      <div className="flex justify-between items-start">
-                        <h3 className="font-medium">{rule.name}</h3>
-                        <Badge variant="outline">{category}</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {rule.value}
-                      </p>
-                      {rule.description && (
-                        <p className="text-sm mt-2 border-t pt-2">
-                          {rule.description}
-                        </p>
-                      )}
-                    </div>
+      {brandGuideline.status === BrandGuidelineStatus.COMPLETED &&
+        brandGuideline.brandRules &&
+        brandGuideline.brandRules.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Brand Rules</CardTitle>
+              <CardDescription>AI-generated rules based on your brand guidelines.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="COLOR" className="space-y-4">
+                <TabsList className="flex flex-wrap">
+                  {Object.keys(rulesByCategory).map(category => (
+                    <TabsTrigger key={category} value={category}>
+                      {category.charAt(0) + category.slice(1).toLowerCase()}
+                    </TabsTrigger>
                   ))}
-                </TabsContent>
-              ))}
-            </Tabs>
-          </CardContent>
-        </Card>
-      )}
+                </TabsList>
+
+                {Object.entries(rulesByCategory).map(([category, rules]) => (
+                  <TabsContent key={category} value={category} className="space-y-4">
+                    {rules.map(rule => (
+                      <div key={rule.id} className="border rounded-md p-4">
+                        <div className="flex justify-between items-start">
+                          <h3 className="font-medium">{rule.name}</h3>
+                          <Badge variant="outline">{category}</Badge>
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1">{rule.value}</p>
+                        {rule.description && (
+                          <p className="text-sm mt-2 border-t pt-2">{rule.description}</p>
+                        )}
+                      </div>
+                    ))}
+                  </TabsContent>
+                ))}
+              </Tabs>
+            </CardContent>
+          </Card>
+        )}
 
       {brandGuideline.customRules && brandGuideline.customRules.length > 0 && (
         <Card>
           <CardHeader>
             <CardTitle>Custom Rules</CardTitle>
-            <CardDescription>
-              Custom rules you provided for your brand.
-            </CardDescription>
+            <CardDescription>Custom rules you provided for your brand.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {brandGuideline.customRules.map((rule) => (
+              {brandGuideline.customRules.map(rule => (
                 <div key={rule.id} className="border rounded-md p-4">
                   <div className="flex justify-between items-start">
                     <h3 className="font-medium">{rule.name}</h3>
                     <Badge variant="outline">{rule.category}</Badge>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {rule.description}
-                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">{rule.description}</p>
                 </div>
               ))}
             </div>
@@ -358,13 +366,11 @@ export function BrandGuidelineDetails({ id }: BrandGuidelineDetailsProps) {
         <Card>
           <CardHeader>
             <CardTitle>Design Examples</CardTitle>
-            <CardDescription>
-              Design examples you provided for your brand.
-            </CardDescription>
+            <CardDescription>Design examples you provided for your brand.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {brandGuideline.designImages.map((image) => (
+              {brandGuideline.designImages.map(image => (
                 <div key={image.id} className="border rounded-md overflow-hidden">
                   <img
                     src={image.url}
@@ -375,9 +381,7 @@ export function BrandGuidelineDetails({ id }: BrandGuidelineDetailsProps) {
                     <div className="p-2">
                       <h3 className="font-medium text-sm">{image.name}</h3>
                       {image.description && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {image.description}
-                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">{image.description}</p>
                       )}
                     </div>
                   )}

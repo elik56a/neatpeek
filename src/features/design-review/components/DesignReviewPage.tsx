@@ -1,8 +1,15 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { CustomLoader } from "@/components/ui/custom-loader";
-import { useBrandGuidelines } from "@/hooks/useBrandGuidelines";
+import { useBrandGuidelines } from "@/features/brand-setup/hooks/useBrandGuidelines";
 import { useAppDataContext } from "@/providers/AppDataProvider";
 import { AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -13,17 +20,15 @@ import { DesignReview } from "./DesignReview";
  */
 export function DesignReviewPage() {
   const { company } = useAppDataContext();
-  const { guidelines, isLoading } = useBrandGuidelines({
-    companyId: company?.id
-  });
+  const { brandGuidelines, isLoading } = useBrandGuidelines();
   const [selectedGuidelineId, setSelectedGuidelineId] = useState<string>("");
 
   // Set the first guideline as selected when guidelines are loaded
   useEffect(() => {
-    if (guidelines && guidelines.length > 0 && !selectedGuidelineId) {
-      setSelectedGuidelineId(guidelines[0].id);
+    if (brandGuidelines && brandGuidelines.length > 0 && !selectedGuidelineId) {
+      setSelectedGuidelineId(brandGuidelines[0].id);
     }
-  }, [guidelines, selectedGuidelineId]);
+  }, [brandGuidelines, selectedGuidelineId]);
 
   // Handle guideline selection
   const handleGuidelineChange = (value: string) => {
@@ -41,15 +46,13 @@ export function DesignReviewPage() {
   }
 
   // No guidelines state
-  if (!guidelines || guidelines.length === 0) {
+  if (!brandGuidelines || brandGuidelines.length === 0) {
     return (
       <div className="container mx-auto py-8">
         <Card>
           <CardHeader>
             <CardTitle>Design Review</CardTitle>
-            <CardDescription>
-              Check your designs against your brand guidelines
-            </CardDescription>
+            <CardDescription>Check your designs against your brand guidelines</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-center p-8">
@@ -61,10 +64,7 @@ export function DesignReviewPage() {
             </div>
           </CardContent>
           <CardFooter className="flex justify-center">
-            <a
-              href="/brand-setup"
-              className="text-primary hover:underline"
-            >
+            <a href="/brand-setup" className="text-primary hover:underline">
               Create Brand Guidelines
             </a>
           </CardFooter>
@@ -80,13 +80,15 @@ export function DesignReviewPage() {
         {selectedGuidelineId ? (
           <DesignReview
             brandId={selectedGuidelineId}
-            allGuidelines={guidelines}
+            allGuidelines={brandGuidelines}
             onGuidelineChange={handleGuidelineChange}
           />
         ) : (
           <Card>
             <CardContent className="p-8 text-center">
-              <p className="text-muted-foreground">Please wait while we load your brand guidelines...</p>
+              <p className="text-muted-foreground">
+                Please wait while we load your brand guidelines...
+              </p>
             </CardContent>
           </Card>
         )}

@@ -7,28 +7,28 @@
  * Enum for issue status
  */
 export enum IssueStatus {
-  NEW = 'new',
-  FIXED = 'fixed',
-  NOT_FIXED = 'not_fixed',
-  PARTIALLY_FIXED = 'partially_fixed',
+  NEW = "new",
+  FIXED = "fixed",
+  NOT_FIXED = "not_fixed",
+  PARTIALLY_FIXED = "partially_fixed",
 }
 
 /**
  * Enum for issue severity
  */
 export enum IssueSeverity {
-  LOW = 'low',
-  MEDIUM = 'medium',
-  HIGH = 'high',
-  OPTIONAL = 'optional',
+  LOW = "low",
+  MEDIUM = "medium",
+  HIGH = "high",
+  OPTIONAL = "optional",
 }
 
 /**
  * Enum for issue type
  */
 export enum IssueType {
-  BRAND_ISSUE = 'brand_issue',
-  GENERAL_ISSUE = 'general_issue',
+  BRAND_ISSUE = "brand_issue",
+  GENERAL_ISSUE = "general_issue",
 }
 
 /**

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -10,13 +9,16 @@ const AboutPage = () => {
   const statsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          setCountVisible(true);
-        }
-      });
-    }, { threshold: 0.5 });
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            setCountVisible(true);
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
 
     if (statsRef.current) {
       observer.observe(statsRef.current);
@@ -29,7 +31,15 @@ const AboutPage = () => {
     };
   }, []);
 
-  const CountUp = ({ end, duration = 2, suffix = "" }: { end: number, duration?: number, suffix?: string }) => {
+  const CountUp = ({
+    end,
+    duration = 2,
+    suffix = "",
+  }: {
+    end: number;
+    duration?: number;
+    suffix?: string;
+  }) => {
     const [count, setCount] = useState(0);
 
     useEffect(() => {
@@ -54,7 +64,12 @@ const AboutPage = () => {
       return () => cancelAnimationFrame(animationFrame);
     }, [countVisible, end, duration]);
 
-    return <span>{count}{suffix}</span>;
+    return (
+      <span>
+        {count}
+        {suffix}
+      </span>
+    );
   };
 
   return (
@@ -62,7 +77,8 @@ const AboutPage = () => {
       <div className="space-y-6 text-center max-w-3xl mx-auto">
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight">About {appConfig.name}</h1>
         <p className="text-lg text-muted-foreground">
-          We're on a mission to help designers create pixel-perfect designs that match brand guidelines every time.
+          We're on a mission to help designers create pixel-perfect designs that match brand
+          guidelines every time.
         </p>
       </div>
 
@@ -70,13 +86,17 @@ const AboutPage = () => {
         <div className="space-y-6">
           <h2 className="text-3xl font-bold">Our Story</h2>
           <p className="text-muted-foreground">
-            {appConfig.name} was founded in 2022 by a team of designers and developers who were frustrated with the inconsistency in brand implementation across design teams.
+            {appConfig.name} was founded in 2022 by a team of designers and developers who were
+            frustrated with the inconsistency in brand implementation across design teams.
           </p>
           <p className="text-muted-foreground">
-            We saw that even with detailed brand guidelines, designs often strayed from the established standards. This created confusion, delays, and extra work for everyone involved.
+            We saw that even with detailed brand guidelines, designs often strayed from the
+            established standards. This created confusion, delays, and extra work for everyone
+            involved.
           </p>
           <p className="text-muted-foreground">
-            That's why we built {appConfig.name} — to provide an automated way to ensure design consistency and save everyone time and frustration.
+            That's why we built {appConfig.name} — to provide an automated way to ensure design
+            consistency and save everyone time and frustration.
           </p>
         </div>
         <div className="bg-muted aspect-square rounded-2xl overflow-hidden">
@@ -138,13 +158,17 @@ const AboutPage = () => {
         <div className="order-1 md:order-2 space-y-6">
           <h2 className="text-3xl font-bold">Our Mission</h2>
           <p className="text-muted-foreground">
-            We believe that great design requires consistency, and consistency shouldn't be a manual process.
+            We believe that great design requires consistency, and consistency shouldn't be a manual
+            process.
           </p>
           <p className="text-muted-foreground">
-            Our mission is to empower design teams with tools that make brand consistency automatic, allowing designers to focus on what they do best — creating beautiful, functional designs.
+            Our mission is to empower design teams with tools that make brand consistency automatic,
+            allowing designers to focus on what they do best — creating beautiful, functional
+            designs.
           </p>
           <p className="text-muted-foreground">
-            By combining AI technology with design expertise, we're creating a future where brand inconsistencies are caught before they ever make it to production.
+            By combining AI technology with design expertise, we're creating a future where brand
+            inconsistencies are caught before they ever make it to production.
           </p>
         </div>
       </div>
@@ -153,10 +177,26 @@ const AboutPage = () => {
         <h2 className="text-3xl font-bold text-center">Our Team</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {[
-            { name: "Alex Morgan", role: "CEO & Co-founder", image: "https://randomuser.me/api/portraits/women/62.jpg" },
-            { name: "Jamie Chen", role: "CTO & Co-founder", image: "https://randomuser.me/api/portraits/men/32.jpg" },
-            { name: "Sam Taylor", role: "Lead Designer", image: "https://randomuser.me/api/portraits/women/44.jpg" },
-            { name: "Raj Patel", role: "AI Engineer", image: "https://randomuser.me/api/portraits/men/68.jpg" }
+            {
+              name: "Alex Morgan",
+              role: "CEO & Co-founder",
+              image: "https://randomuser.me/api/portraits/women/62.jpg",
+            },
+            {
+              name: "Jamie Chen",
+              role: "CTO & Co-founder",
+              image: "https://randomuser.me/api/portraits/men/32.jpg",
+            },
+            {
+              name: "Sam Taylor",
+              role: "Lead Designer",
+              image: "https://randomuser.me/api/portraits/women/44.jpg",
+            },
+            {
+              name: "Raj Patel",
+              role: "AI Engineer",
+              image: "https://randomuser.me/api/portraits/men/68.jpg",
+            },
           ].map((person, index) => (
             <motion.div
               key={index}
@@ -167,11 +207,7 @@ const AboutPage = () => {
               viewport={{ once: true }}
             >
               <div className="aspect-square w-full max-w-[250px] mx-auto overflow-hidden rounded-full">
-                <img
-                  src={person.image}
-                  alt={person.name}
-                  className="w-full h-full object-cover"
-                />
+                <img src={person.image} alt={person.name} className="w-full h-full object-cover" />
               </div>
               <h3 className="font-semibold text-xl">{person.name}</h3>
               <p className="text-muted-foreground">{person.role}</p>

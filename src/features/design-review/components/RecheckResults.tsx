@@ -2,7 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
@@ -28,9 +35,7 @@ export function RecheckResults({ result, onRecheck }: RecheckResultsProps) {
   const [showToast, setShowToast] = useState(true); // Control when to show the toast
 
   // Get the active frame result
-  const currentFrame = result.recheck_results.find(
-    (frame) => frame.frame_id === activeFrame
-  );
+  const currentFrame = result.recheck_results.find(frame => frame.frame_id === activeFrame);
 
   // Show toast notification when component mounts
   useEffect(() => {
@@ -42,7 +47,7 @@ export function RecheckResults({ result, onRecheck }: RecheckResultsProps) {
       partially_fixed: 0,
       not_fixed: 0,
       new_issues: 0,
-      total: 0
+      total: 0,
     };
 
     result.recheck_results.forEach(frame => {
@@ -62,7 +67,11 @@ export function RecheckResults({ result, onRecheck }: RecheckResultsProps) {
       // All issues fixed, no new issues
       variant = "default";
       title = "All Issues Fixed!";
-    } else if (totalCounts.fixed > 0 && totalCounts.fixed + totalCounts.partially_fixed === totalCounts.total && totalCounts.new_issues === 0) {
+    } else if (
+      totalCounts.fixed > 0 &&
+      totalCounts.fixed + totalCounts.partially_fixed === totalCounts.total &&
+      totalCounts.new_issues === 0
+    ) {
       // Some issues fixed or partially fixed, no new issues
       variant = "default";
       title = "Issues Improved";
@@ -111,7 +120,7 @@ export function RecheckResults({ result, onRecheck }: RecheckResultsProps) {
     toast({
       title,
       description,
-      variant
+      variant,
     });
 
     // Don't show the toast again until component is remounted
@@ -135,7 +144,7 @@ export function RecheckResults({ result, onRecheck }: RecheckResultsProps) {
       fixed: 0,
       partially_fixed: 0,
       not_fixed: 0,
-      new_issues: frameResult.new_issues.length
+      new_issues: frameResult.new_issues.length,
     };
 
     frameResult.comment_checks.forEach(check => {
@@ -197,13 +206,9 @@ export function RecheckResults({ result, onRecheck }: RecheckResultsProps) {
       </div>
 
       {/* Frame selector tabs */}
-      <Tabs
-        value={activeFrame || ""}
-        onValueChange={setActiveFrame}
-        className="w-full"
-      >
+      <Tabs value={activeFrame || ""} onValueChange={setActiveFrame} className="w-full">
         <TabsList className="mb-4 flex flex-nowrap overflow-x-auto pb-1 scrollbar-thin">
-          {result.recheck_results.map((frame) => {
+          {result.recheck_results.map(frame => {
             const counts = getStatusCounts(frame);
             return (
               <TabsTrigger
@@ -212,7 +217,7 @@ export function RecheckResults({ result, onRecheck }: RecheckResultsProps) {
                 className="relative z-10 overflow-hidden group"
               >
                 <span className="relative z-10 flex items-center">
-                  Frame {frame.frame_id.split(':')[1] || frame.frame_id}
+                  Frame {frame.frame_id.split(":")[1] || frame.frame_id}
                   {counts.fixed > 0 && (
                     <Badge variant="default" className="bg-green-100 text-green-800 ml-2">
                       {counts.fixed} Fixed
@@ -224,7 +229,7 @@ export function RecheckResults({ result, onRecheck }: RecheckResultsProps) {
           })}
         </TabsList>
 
-        {result.recheck_results.map((frame) => {
+        {result.recheck_results.map(frame => {
           const counts = getStatusCounts(frame);
 
           return (
@@ -232,9 +237,7 @@ export function RecheckResults({ result, onRecheck }: RecheckResultsProps) {
               <Card>
                 <CardHeader>
                   <CardTitle>Frame Summary</CardTitle>
-                  <CardDescription>
-                    Overview of issue status for this frame
-                  </CardDescription>
+                  <CardDescription>Overview of issue status for this frame</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -290,7 +293,7 @@ export function RecheckResults({ result, onRecheck }: RecheckResultsProps) {
                               showAnimation={true}
                             />
                             <span className="text-xs text-muted-foreground">
-                              Comment ID: {check.comment_id.split(':')[1] || check.comment_id}
+                              Comment ID: {check.comment_id.split(":")[1] || check.comment_id}
                             </span>
                           </div>
                         </CardHeader>
@@ -329,9 +332,11 @@ export function RecheckResults({ result, onRecheck }: RecheckResultsProps) {
                           <div className="flex items-center justify-between">
                             <Badge
                               variant={
-                                issue.severity === "high" ? "destructive" :
-                                issue.severity === "medium" ? "default" :
-                                "outline"
+                                issue.severity === "high"
+                                  ? "destructive"
+                                  : issue.severity === "medium"
+                                    ? "default"
+                                    : "outline"
                               }
                             >
                               {issue.severity.toUpperCase()}
@@ -360,9 +365,7 @@ export function RecheckResults({ result, onRecheck }: RecheckResultsProps) {
               <Card className="mt-6">
                 <CardHeader>
                   <CardTitle>Recheck Summary</CardTitle>
-                  <CardDescription>
-                    Here's a summary of the recheck results
-                  </CardDescription>
+                  <CardDescription>Here's a summary of the recheck results</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="rounded-lg border p-4 bg-muted/50">
@@ -370,22 +373,20 @@ export function RecheckResults({ result, onRecheck }: RecheckResultsProps) {
                       {counts.fixed === frame.comment_checks.length
                         ? "All issues have been fixed! Great job!"
                         : counts.fixed > 0
-                        ? `You've fixed ${counts.fixed} out of ${frame.comment_checks.length} issues. Keep going!`
-                        : "None of the issues have been fixed yet. Please address the feedback and try again."}
+                          ? `You've fixed ${counts.fixed} out of ${frame.comment_checks.length} issues. Keep going!`
+                          : "None of the issues have been fixed yet. Please address the feedback and try again."}
                     </p>
 
                     {counts.new_issues > 0 && (
                       <p className="text-sm mt-2">
-                        {counts.new_issues} new issue{counts.new_issues > 1 ? 's were' : ' was'} found during this recheck.
+                        {counts.new_issues} new issue{counts.new_issues > 1 ? "s were" : " was"}{" "}
+                        found during this recheck.
                       </p>
                     )}
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button
-                    onClick={onRecheck}
-                    className="w-full"
-                  >
+                  <Button onClick={onRecheck} className="w-full">
                     <FileText className="mr-2 h-4 w-4" />
                     Run New Analysis
                   </Button>

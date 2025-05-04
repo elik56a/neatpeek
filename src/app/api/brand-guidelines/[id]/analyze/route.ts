@@ -6,10 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 /**
  * Start the analysis process for a brand guideline
  */
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   // Extract the ID from params to avoid Next.js warnings
   const { id } = await Promise.resolve(params);
   try {
@@ -30,20 +27,14 @@ export async function POST(
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Get the brand guideline
     const brandGuideline = await brandSetupService.getBrandGuideline(id);
 
     if (!brandGuideline) {
-      return NextResponse.json(
-        { error: "Brand guideline not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Brand guideline not found" }, { status: 404 });
     }
 
     // Check if the user owns the brand guideline
@@ -73,9 +64,6 @@ export async function POST(
   } catch (error) {
     console.error("Error starting analysis:", error);
 
-    return NextResponse.json(
-      { error: "Failed to start analysis" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to start analysis" }, { status: 500 });
   }
 }

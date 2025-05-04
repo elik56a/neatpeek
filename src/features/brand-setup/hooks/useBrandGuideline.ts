@@ -25,19 +25,19 @@ export function useBrandGuideline(id: string) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch brand guideline');
+        throw new Error(errorData.error || "Failed to fetch brand guideline");
       }
 
       const data = await response.json();
       setBrandGuideline(data);
     } catch (error) {
-      console.error('Error fetching brand guideline:', error);
-      setError(error instanceof Error ? error.message : 'Failed to fetch brand guideline');
+      console.error("Error fetching brand guideline:", error);
+      setError(error instanceof Error ? error.message : "Failed to fetch brand guideline");
 
       toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to fetch brand guideline',
-        variant: 'destructive',
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to fetch brand guideline",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -50,30 +50,30 @@ export function useBrandGuideline(id: string) {
 
     try {
       const response = await fetch(`/api/brand-guidelines/${id}/analyze`, {
-        method: 'POST',
+        method: "POST",
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to start analysis');
+        throw new Error(errorData.error || "Failed to start analysis");
       }
 
       const data = await response.json();
       setBrandGuideline(data);
 
       toast({
-        title: 'Analysis Started',
-        description: 'The brand guideline analysis has started. This may take a few minutes.',
+        title: "Analysis Started",
+        description: "The brand guideline analysis has started. This may take a few minutes.",
       });
 
       return data;
     } catch (error) {
-      console.error('Error starting analysis:', error);
+      console.error("Error starting analysis:", error);
 
       toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to start analysis',
-        variant: 'destructive',
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to start analysis",
+        variant: "destructive",
       });
 
       throw error;
@@ -86,27 +86,27 @@ export function useBrandGuideline(id: string) {
 
     try {
       const response = await fetch(`/api/brand-guidelines/${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to delete brand guideline');
+        throw new Error(errorData.error || "Failed to delete brand guideline");
       }
 
       toast({
-        title: 'Brand Guideline Deleted',
-        description: 'The brand guideline has been successfully deleted.',
+        title: "Brand Guideline Deleted",
+        description: "The brand guideline has been successfully deleted.",
       });
 
       return true;
     } catch (error) {
-      console.error('Error deleting brand guideline:', error);
+      console.error("Error deleting brand guideline:", error);
 
       toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to delete brand guideline',
-        variant: 'destructive',
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete brand guideline",
+        variant: "destructive",
       });
 
       throw error;

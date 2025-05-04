@@ -2,10 +2,6 @@
 
 import { MarketingLayout } from "@/features/marketing";
 
-export default function MarketingRootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function MarketingRootLayout({ children }: { children: React.ReactNode }) {
   return <MarketingLayout>{children}</MarketingLayout>;
 }

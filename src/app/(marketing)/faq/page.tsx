@@ -1,4 +1,3 @@
-
 "use client";
 
 import { FaqPage } from "@/features/marketing";

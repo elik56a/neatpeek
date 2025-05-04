@@ -9,10 +9,7 @@ export async function POST(request: NextRequest) {
     const { email, password } = await request.json();
 
     if (!email || !password) {
-      return NextResponse.json(
-        { message: "Missing required fields" },
-        { status: 400 }
-      );
+      return NextResponse.json({ message: "Missing required fields" }, { status: 400 });
     }
 
     const user = await prisma.user.findUnique({
@@ -20,22 +17,13 @@ export async function POST(request: NextRequest) {
     });
 
     if (!user || !user.password) {
-      return NextResponse.json(
-        { message: "Invalid credentials" },
-        { status: 401 }
-      );
+      return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
     }
 
-    const isPasswordValid = await comparePasswords(
-      password,
-      user.password
-    );
+    const isPasswordValid = await comparePasswords(password, user.password);
 
     if (!isPasswordValid) {
-      return NextResponse.json(
-        { message: "Invalid credentials" },
-        { status: 401 }
-      );
+      return NextResponse.json({ message: "Invalid credentials" }, { status: 401 });
     }
 
     // Update lastLogin time

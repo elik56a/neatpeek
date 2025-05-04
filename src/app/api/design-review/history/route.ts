@@ -4,9 +4,9 @@
  * This is a server-side only route that handles design review history requests.
  */
 
-import { prisma } from '@/services/db/prisma';
-import { getServerSession } from 'next-auth';
-import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from "@/services/db/prisma";
+import { getServerSession } from "next-auth";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   try {
@@ -27,21 +27,15 @@ export async function GET(req: NextRequest) {
     });
 
     if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
     // Get query parameters
     const url = new URL(req.url);
-    const reviewId = url.searchParams.get('reviewId');
-    
+    const reviewId = url.searchParams.get("reviewId");
+
     if (!reviewId) {
-      return NextResponse.json(
-        { error: "Review ID is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Review ID is required" }, { status: 400 });
     }
 
     // Check if the review belongs to the user
@@ -51,10 +45,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (!review) {
-      return NextResponse.json(
-        { error: "Review not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Review not found" }, { status: 404 });
     }
 
     if (review.userId !== user.id) {
@@ -67,7 +58,7 @@ export async function GET(req: NextRequest) {
     // Fetch review history
     const history = await prisma.reviewHistory.findMany({
       where: { designReviewId: reviewId },
-      orderBy: { timestamp: 'desc' },
+      orderBy: { timestamp: "desc" },
     });
 
     return NextResponse.json(history);

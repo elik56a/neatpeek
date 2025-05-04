@@ -88,7 +88,7 @@ export function FrameSelector({
           size="lg"
           onClick={onAnalyze}
           disabled={selectedCount === 0 || isLoading}
-          className={`w-full max-w-md py-6 text-base font-medium shadow-sm transition-all duration-300 ${isLoading ? 'bg-primary/80' : ''} ${selectedCount > 0 && !isLoading ? 'animate-pulse-subtle' : ''}`}
+          className={`w-full max-w-md py-6 text-base font-medium shadow-sm transition-all duration-300 ${isLoading ? "bg-primary/80" : ""} ${selectedCount > 0 && !isLoading ? "animate-pulse-subtle" : ""}`}
         >
           {isLoading ? (
             <>
@@ -105,7 +105,7 @@ export function FrameSelector({
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {frames.map((frame) => (
+        {frames.map(frame => (
           <Card
             key={frame.frameId}
             className={`overflow-hidden transition-all duration-200 ${
@@ -118,11 +118,7 @@ export function FrameSelector({
               {isLoading ? (
                 <Skeleton className="w-full h-full" />
               ) : (
-                <img
-                  src={frame.imageUrl}
-                  alt={frame.name}
-                  className="w-full h-full object-cover"
-                />
+                <img src={frame.imageUrl} alt={frame.name} className="w-full h-full object-cover" />
               )}
               {!isLoading && (hoveredFrame === frame.frameId || frame.selected) && (
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center">

@@ -22,5 +22,5 @@ export const appConfig = {
    */
   storage: {
     theme: "neatpeek-theme",
-  }
+  },
 };

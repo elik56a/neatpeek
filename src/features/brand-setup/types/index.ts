@@ -36,20 +36,20 @@ export interface BrandGuideline {
 }
 
 export enum BrandGuidelineStatus {
-  DRAFT = 'DRAFT',
-  PROCESSING = 'PROCESSING',
-  COMPLETED = 'COMPLETED',
-  FAILED = 'FAILED'
+  DRAFT = "DRAFT",
+  PROCESSING = "PROCESSING",
+  COMPLETED = "COMPLETED",
+  FAILED = "FAILED",
 }
 
 export enum ProcessingStatus {
-  PENDING = 'PENDING',
-  FETCHING_FILES = 'FETCHING_FILES',
-  ANALYZING_PDF = 'ANALYZING_PDF',
-  ANALYZING_IMAGES = 'ANALYZING_IMAGES',
-  GENERATING_RULES = 'GENERATING_RULES',
-  COMPLETED = 'COMPLETED',
-  FAILED = 'FAILED'
+  PENDING = "PENDING",
+  FETCHING_FILES = "FETCHING_FILES",
+  ANALYZING_PDF = "ANALYZING_PDF",
+  ANALYZING_IMAGES = "ANALYZING_IMAGES",
+  GENERATING_RULES = "GENERATING_RULES",
+  COMPLETED = "COMPLETED",
+  FAILED = "FAILED",
 }
 
 export interface DesignImage {
@@ -84,20 +84,20 @@ export interface BrandRule {
 }
 
 export enum RuleCategory {
-  COLOR = 'COLOR',
-  TYPOGRAPHY = 'TYPOGRAPHY',
-  SPACING = 'SPACING',
-  LOGO = 'LOGO',
-  ICON = 'ICON',
-  LAYOUT = 'LAYOUT',
-  GENERAL = 'GENERAL'
+  COLOR = "COLOR",
+  TYPOGRAPHY = "TYPOGRAPHY",
+  SPACING = "SPACING",
+  LOGO = "LOGO",
+  ICON = "ICON",
+  LAYOUT = "LAYOUT",
+  GENERAL = "GENERAL",
 }
 
 export enum RuleSource {
-  PDF = 'PDF',
-  IMAGE = 'IMAGE',
-  CUSTOM = 'CUSTOM',
-  AI = 'AI'
+  PDF = "PDF",
+  IMAGE = "IMAGE",
+  CUSTOM = "CUSTOM",
+  AI = "AI",
 }
 
 export interface BrandSetupFormData {

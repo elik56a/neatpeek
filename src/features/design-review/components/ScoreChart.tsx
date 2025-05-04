@@ -1,15 +1,15 @@
 "use client";
 
-import React from 'react';
-import { 
-  ResponsiveContainer, 
-  RadarChart, 
-  PolarGrid, 
-  PolarAngleAxis, 
-  PolarRadiusAxis, 
-  Radar, 
-  Tooltip 
-} from 'recharts';
+import React from "react";
+import {
+  ResponsiveContainer,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+  Tooltip,
+} from "recharts";
 
 interface ScoreChartProps {
   data: {
@@ -27,13 +27,7 @@ export default function ScoreChart({ data, color }: ScoreChartProps) {
         <PolarGrid />
         <PolarAngleAxis dataKey="name" />
         <PolarRadiusAxis angle={30} domain={[0, 100]} />
-        <Radar
-          name="Score"
-          dataKey="score"
-          stroke={color}
-          fill={color}
-          fillOpacity={0.6}
-        />
+        <Radar name="Score" dataKey="score" stroke={color} fill={color} fillOpacity={0.6} />
         <Tooltip />
       </RadarChart>
     </ResponsiveContainer>

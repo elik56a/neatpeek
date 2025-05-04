@@ -8,7 +8,7 @@
  */
 
 // This service is server-side only and should not be imported on the client
-import { prisma } from '@/services/db/prisma';
+import { prisma } from "@/services/db/prisma";
 import {
   DesignAnalysisInput,
   DesignAnalysisResult,
@@ -19,10 +19,10 @@ import {
   HistoryChanges,
   BrandIssue,
   GeneralIssue,
-  ReviewStatus
-} from '../types';
-import { FigmaService } from './figma-service';
-import { DesignRecheckService } from './design-recheck-service';
+  ReviewStatus,
+} from "../types";
+import { FigmaService } from "./figma-service";
+import { DesignRecheckService } from "./design-recheck-service";
 
 /**
  * Design Review Service
@@ -46,7 +46,7 @@ export class DesignReviewService {
    */
   private async initAIService() {
     if (!this.aiService) {
-      const { getAIService } = await import('@/services/ai');
+      const { getAIService } = await import("@/services/ai");
       this.aiService = await getAIService();
     }
     return this.aiService;
@@ -57,16 +57,18 @@ export class DesignReviewService {
    * @param input Review input with optional selectedFrameIds and userId
    * @returns Review result
    */
-  async analyzeDesign(input: DesignAnalysisInput & { selectedFrameIds?: string[], userId: string }): Promise<DesignAnalysisResult> {
+  async analyzeDesign(
+    input: DesignAnalysisInput & { selectedFrameIds?: string[]; userId: string }
+  ): Promise<DesignAnalysisResult> {
     try {
       const { figmaUrl, brandId, userId } = input;
 
       if (!figmaUrl) {
-        throw new Error('Figma URL is required');
+        throw new Error("Figma URL is required");
       }
 
       if (!userId) {
-        throw new Error('User ID is required');
+        throw new Error("User ID is required");
       }
 
       // Get brand rules
@@ -78,7 +80,7 @@ export class DesignReviewService {
       });
 
       if (!brandGuideline) {
-        throw new Error('brandGuideline not found');
+        throw new Error("brandGuideline not found");
       }
 
       // Extract designs from Figma
@@ -102,11 +104,15 @@ export class DesignReviewService {
           .map(frameId => frameIdToImageUrl[frameId])
           .filter(Boolean) as string[];
 
-        console.log(`Filtered ${imageUrls.length} frames down to ${filteredImageUrls.length} selected frames`);
+        console.log(
+          `Filtered ${imageUrls.length} frames down to ${filteredImageUrls.length} selected frames`
+        );
       }
 
       // Process images for AI - use filtered URLs if available
-      const imageParts = await Promise.all(filteredImageUrls.map(url => this.figmaService.urlToInlineData(url)));
+      const imageParts = await Promise.all(
+        filteredImageUrls.map(url => this.figmaService.urlToInlineData(url))
+      );
 
       // Initialize AI service
       const aiService = await this.initAIService();
@@ -115,11 +121,17 @@ export class DesignReviewService {
       const analysisResult = await aiService.analyzeDesign({
         imageParts,
         metadata,
-        brandRules: brandGuideline.brandRules
+        brandRules: brandGuideline.brandRules,
       });
 
       // Save results to database and get review IDs
-      const reviewIds = await this.saveAnalysisResults(brandId, userId, metadata, analysisResult, figmaUrl);
+      const reviewIds = await this.saveAnalysisResults(
+        brandId,
+        userId,
+        metadata,
+        analysisResult,
+        figmaUrl
+      );
 
       // Add the first review ID to the result
       if (reviewIds.length > 0) {
@@ -131,7 +143,7 @@ export class DesignReviewService {
 
       return analysisResult;
     } catch (error) {
-      console.error('Error analyzing design:', error);
+      console.error("Error analyzing design:", error);
       throw error;
     }
   }
@@ -146,7 +158,7 @@ export class DesignReviewService {
       const { figmaUrl, brandId, userId, frameId, frameIds } = input;
 
       if (!userId) {
-        throw new Error('User ID is required');
+        throw new Error("User ID is required");
       }
 
       // Get brand guideline
@@ -158,7 +170,7 @@ export class DesignReviewService {
       });
 
       if (!brandGuideline) {
-        throw new Error('Brand guideline not found');
+        throw new Error("Brand guideline not found");
       }
 
       // Extract designs from Figma
@@ -187,14 +199,14 @@ export class DesignReviewService {
       let figmaUrlToUse = figmaUrl;
 
       // Log the frames to debug
-      console.log('Frames found:', frames.length);
+      console.log("Frames found:", frames.length);
       if (frames.length > 0) {
-        console.log('First frame designReviews:', frames[0].designReviews?.length || 0);
+        console.log("First frame designReviews:", frames[0].designReviews?.length || 0);
       }
 
       if (frames.length > 0 && frames[0].designReviews && frames[0].designReviews.length > 0) {
         // Log the review to debug
-        console.log('First review:', JSON.stringify(frames[0].designReviews[0], null, 2));
+        console.log("First review:", JSON.stringify(frames[0].designReviews[0], null, 2));
 
         const originalUrl = frames[0].designReviews[0].originalFigmaUrl;
         if (originalUrl) {
@@ -208,26 +220,31 @@ export class DesignReviewService {
             metadata = extractionResult.metadata;
           }
         } else {
-          console.log('No originalFigmaUrl found in the database, using provided URL');
+          console.log("No originalFigmaUrl found in the database, using provided URL");
         }
       }
 
       // Process images for AI
-      const imageParts = await Promise.all(imageUrls.map(url => this.figmaService.urlToInlineData(url)));
+      const imageParts = await Promise.all(
+        imageUrls.map(url => this.figmaService.urlToInlineData(url))
+      );
 
       // Initialize AI service
       const aiService = await this.initAIService();
 
       // Create comment maps and prepare data for AI
       const { commentIdToIssue } = this.recheckService.createCommentMaps(frames);
-      const commentsByFrame = await this.recheckService.prepareCommentsByFrame(metadata.fileKey, commentIdToIssue);
+      const commentsByFrame = await this.recheckService.prepareCommentsByFrame(
+        metadata.fileKey,
+        commentIdToIssue
+      );
 
       // Recheck designs
       const recheckResult = await aiService.recheckDesign({
         imageParts,
         metadata,
         brandRules: brandGuideline.brandRules,
-        commentsByFrame
+        commentsByFrame,
       });
 
       // Process recheck results and update the database
@@ -250,7 +267,7 @@ export class DesignReviewService {
 
       return recheckResult;
     } catch (error) {
-      console.error('Error rechecking design:', error);
+      console.error("Error rechecking design:", error);
       throw error;
     }
   }
@@ -282,7 +299,7 @@ export class DesignReviewService {
       // Initialize other fields with default values
       fixed_count: 0,
       partially_fixed_count: 0,
-      not_fixed_count: 0
+      not_fixed_count: 0,
     };
   }
 
@@ -297,33 +314,36 @@ export class DesignReviewService {
     const reviewIds: string[] = [];
     try {
       // Import utility functions
-      const { formatBrandIssueComment, formatGeneralIssueComment } = await import('../utils');
-      const { generateInitialReviewSummary } = await import('../utils/history-formatters');
-      const { validateDesignReviewResult } = await import('../utils/validation');
+      const { formatBrandIssueComment, formatGeneralIssueComment } = await import("../utils");
+      const { generateInitialReviewSummary } = await import("../utils/history-formatters");
+      const { validateDesignReviewResult } = await import("../utils/validation");
 
       // Create URL to frame data mapping
-      const urlToFrameData = metadata.frames.reduce<Record<string, { id: string; position: any }>>((map, frame) => {
-        if (frame.url && frame.id && frame.position) {
-          map[frame.url] = {
-            id: frame.id,
-            position: frame.position
-          };
-        }
-        return map;
-      }, {});
+      const urlToFrameData = metadata.frames.reduce<Record<string, { id: string; position: any }>>(
+        (map, frame) => {
+          if (frame.url && frame.id && frame.position) {
+            map[frame.url] = {
+              id: frame.id,
+              position: frame.position,
+            };
+          }
+          return map;
+        },
+        {}
+      );
 
       // Save frames and reviews
       for (const review of analysisResult.reviews) {
         // Validate the review result
         if (!validateDesignReviewResult(review)) {
-          console.error('Invalid review result:', review);
+          console.error("Invalid review result:", review);
           continue;
         }
 
         // Add timestamp to the review
         const reviewWithTimestamp = {
           ...review,
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
         };
 
         // Find or create frame
@@ -331,8 +351,8 @@ export class DesignReviewService {
           where: {
             figmaFileKey_frameId: {
               figmaFileKey: metadata.fileKey,
-              frameId: review.image.frame_id
-            }
+              frameId: review.image.frame_id,
+            },
           },
           update: {
             name: review.image.name,
@@ -431,8 +451,8 @@ export class DesignReviewService {
               review.general_issues,
               review.design_score.total
             ) as any, // Cast to any for Prisma JSON field compatibility
-            timestamp: new Date()
-          }
+            timestamp: new Date(),
+          },
         });
 
         // Add the review ID to the array
@@ -441,7 +461,7 @@ export class DesignReviewService {
 
       return reviewIds;
     } catch (error) {
-      console.error('Error saving analysis results:', error);
+      console.error("Error saving analysis results:", error);
       throw error;
     }
   }

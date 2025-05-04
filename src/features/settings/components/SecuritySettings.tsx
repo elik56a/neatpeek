@@ -1,6 +1,13 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -14,9 +21,7 @@ export function SecuritySettings() {
     <Card>
       <CardHeader>
         <CardTitle>Security</CardTitle>
-        <CardDescription>
-          Manage your account security and authentication settings.
-        </CardDescription>
+        <CardDescription>Manage your account security and authentication settings.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">
@@ -71,20 +76,18 @@ export function SecuritySettings() {
               id="twoFactorEnabled"
               name="twoFactorEnabled"
               checked={formData.twoFactorEnabled}
-              onCheckedChange={(checked) => handleChange({
-                target: { name: "twoFactorEnabled", checked, type: "checkbox" }
-              } as any)}
+              onCheckedChange={checked =>
+                handleChange({
+                  target: { name: "twoFactorEnabled", checked, type: "checkbox" },
+                } as any)
+              }
               disabled={isLoading}
             />
           </div>
         </div>
       </CardContent>
       <CardFooter className="flex justify-end">
-        <SaveButton
-          isLoading={isLoading}
-          saveSuccess={saveSuccess}
-          onClick={handleSubmit}
-        />
+        <SaveButton isLoading={isLoading} saveSuccess={saveSuccess} onClick={handleSubmit} />
       </CardFooter>
     </Card>
   );

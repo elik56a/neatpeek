@@ -345,8 +345,6 @@ model DesignReview {
   @@index([brandGuidelineId])
 }
 
-
-
 model FeatureFlag {
   id              String     @id @default(cuid())
   key             String     @unique
@@ -582,4 +580,14 @@ model ReviewHistory {
 
   @@index([designReviewId])
   @@index([timestamp])
+}
+
+model RateLimit {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  count     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
 }

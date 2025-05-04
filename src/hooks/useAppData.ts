@@ -30,58 +30,60 @@ export function useAppData() {
   // Derived state
   const hasCompany = !!company;
   const isCompanyOwner = company ? user?.companyRole === CompanyRole.OWNER : false;
-  const isCompanyAdmin = company ? (user?.companyRole === CompanyRole.ADMIN || isCompanyOwner) : false;
+  const isCompanyAdmin = company
+    ? user?.companyRole === CompanyRole.ADMIN || isCompanyOwner
+    : false;
 
   /**
    * Fetch user data including company information
    */
   const fetchUserData = async () => {
-    console.log('Fetching user data...');
+    console.log("Fetching user data...");
     setIsLoading(true);
     setError(null);
 
     try {
       // Fetch user data with company information
-      const response = await fetch('/api/users/me', {
+      const response = await fetch("/api/users/me", {
         // Add cache control headers to prevent browser caching
         headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0'
-        }
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          Pragma: "no-cache",
+          Expires: "0",
+        },
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch user data');
+        throw new Error("Failed to fetch user data");
       }
 
       const userData = await response.json();
-      console.log('User data fetched:', userData);
+      console.log("User data fetched:", userData);
 
       // Set user data
       setUser(userData);
 
       // If user has company data, set it
       if (userData.company) {
-        console.log('User has company:', userData.company.name);
+        console.log("User has company:", userData.company.name);
         setCompany(userData.company);
       } else {
         // User has no company
-        console.log('User has no company');
+        console.log("User has no company");
         setCompany(null);
       }
 
       // If user has brands, set them
       if (userData.brands && Array.isArray(userData.brands)) {
-        console.log('User has brands:', userData.brands.length);
+        console.log("User has brands:", userData.brands.length);
         setBrands(userData.brands);
       } else {
-        console.log('User has no brands');
+        console.log("User has no brands");
         setBrands([]);
       }
     } catch (error) {
-      console.error('Error fetching user data:', error);
-      setError(error instanceof Error ? error : new Error('Failed to fetch user data'));
+      console.error("Error fetching user data:", error);
+      setError(error instanceof Error ? error : new Error("Failed to fetch user data"));
     } finally {
       setIsLoading(false);
     }
@@ -93,16 +95,16 @@ export function useAppData() {
       // Skip if not authenticated or already initialized
       if (status !== "authenticated" || initializationRef.current) return;
 
-      console.log('Initializing app data...');
+      console.log("Initializing app data...");
 
       // Set initialization flag immediately to prevent multiple fetches
       initializationRef.current = true;
 
       try {
         await fetchUserData();
-        console.log('App data initialization complete');
+        console.log("App data initialization complete");
       } catch (error) {
-        console.error('Error during app data initialization:', error);
+        console.error("Error during app data initialization:", error);
       }
     };
 

@@ -25,17 +25,21 @@ export default function FigmaProvider<P extends FigmaProfile>(
       async request(context) {
         const tokenUrl = "https://api.figma.com/v1/oauth/token";
         const response = await fetch(tokenUrl, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
             // Add basic auth header as an alternative way to authenticate
-            'Authorization': 'Basic ' + Buffer.from(`${context.provider.clientId}:${context.provider.clientSecret}`).toString('base64'),
+            Authorization:
+              "Basic " +
+              Buffer.from(`${context.provider.clientId}:${context.provider.clientSecret}`).toString(
+                "base64"
+              ),
           },
           body: JSON.stringify({
             client_id: context.provider.clientId,
             client_secret: context.provider.clientSecret,
             code: context.params.code,
-            grant_type: 'authorization_code',
+            grant_type: "authorization_code",
             redirect_uri: context.provider.callbackUrl,
           }),
         });
@@ -44,13 +48,13 @@ export default function FigmaProvider<P extends FigmaProfile>(
         try {
           tokens = await response.json();
         } catch (error) {
-          console.error('Failed to parse Figma token response:', error);
-          throw new Error('Failed to parse Figma token response');
+          console.error("Failed to parse Figma token response:", error);
+          throw new Error("Failed to parse Figma token response");
         }
 
         if (!response.ok) {
-          console.error('Figma token error:', tokens);
-          console.error('Figma token request details:', {
+          console.error("Figma token error:", tokens);
+          console.error("Figma token request details:", {
             url: tokenUrl,
             status: response.status,
             statusText: response.statusText,
@@ -58,18 +62,20 @@ export default function FigmaProvider<P extends FigmaProfile>(
               client_id: context.provider.clientId,
               // client_secret: '[REDACTED]',
               code: context.params.code,
-              grant_type: 'authorization_code',
+              grant_type: "authorization_code",
               redirect_uri: context.provider.callbackUrl,
-            }
+            },
           });
 
           // Log additional information for debugging
-          console.error('Figma OAuth environment variables:', {
-            FIGMA_CLIENT_ID: process.env.FIGMA_CLIENT_ID ? 'Set' : 'Not set',
-            FIGMA_CLIENT_SECRET: process.env.FIGMA_CLIENT_SECRET ? 'Set' : 'Not set',
+          console.error("Figma OAuth environment variables:", {
+            FIGMA_CLIENT_ID: process.env.FIGMA_CLIENT_ID ? "Set" : "Not set",
+            FIGMA_CLIENT_SECRET: process.env.FIGMA_CLIENT_SECRET ? "Set" : "Not set",
             NEXTAUTH_URL: process.env.NEXTAUTH_URL,
           });
-          throw new Error(tokens.message || tokens.error_description || 'Failed to get access token');
+          throw new Error(
+            tokens.message || tokens.error_description || "Failed to get access token"
+          );
         }
 
         return { tokens };

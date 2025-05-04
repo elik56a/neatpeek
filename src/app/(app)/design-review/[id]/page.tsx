@@ -10,7 +10,10 @@ import Link from "next/link";
 
 // Import components dynamically with SSR disabled to avoid useLayoutEffect warnings
 const DesignReviewWithId = dynamic(
-  () => import("@/features/design-review/components/DesignReviewWithId").then(mod => ({ default: mod.DesignReviewWithId })),
+  () =>
+    import("@/features/design-review/components/DesignReviewWithId").then(mod => ({
+      default: mod.DesignReviewWithId,
+    })),
   { ssr: false, loading: () => <LoadingState /> }
 );
 
@@ -22,20 +25,24 @@ const LoadingState = () => (
 );
 
 const ErrorState = dynamic(
-  () => import("@/components/ui/error-state").then(mod => mod.ErrorState || {
-    default: ({ error, action }: { error: Error, action: React.ReactNode }) => (
-      <div className="container mx-auto py-8">
-        <div className="border-destructive p-8 rounded-lg border">
-          <div className="flex flex-col items-center text-center">
-            <div className="h-12 w-12 text-destructive mb-4">⚠️</div>
-            <h2 className="text-xl font-semibold mb-2">Error Loading Design Review</h2>
-            <p className="text-muted-foreground mb-6">{error.message}</p>
-            {action}
-          </div>
-        </div>
-      </div>
-    )
-  }),
+  () =>
+    import("@/components/ui/error-state").then(
+      mod =>
+        mod.ErrorState || {
+          default: ({ error, action }: { error: Error; action: React.ReactNode }) => (
+            <div className="container mx-auto py-8">
+              <div className="border-destructive p-8 rounded-lg border">
+                <div className="flex flex-col items-center text-center">
+                  <div className="h-12 w-12 text-destructive mb-4">⚠️</div>
+                  <h2 className="text-xl font-semibold mb-2">Error Loading Design Review</h2>
+                  <p className="text-muted-foreground mb-6">{error.message}</p>
+                  {action}
+                </div>
+              </div>
+            </div>
+          ),
+        }
+    ),
   { ssr: false }
 );
 

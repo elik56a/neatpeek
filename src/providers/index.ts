@@ -1,1 +1,1 @@
-export * from './AppDataProvider';
+export * from "./AppDataProvider";

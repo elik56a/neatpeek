@@ -14,7 +14,7 @@ interface EditBrandGuidelinePageProps {
 export default function EditBrandGuidelinePage({ params }: EditBrandGuidelinePageProps) {
   // Extract the ID from params to avoid Next.js warnings
   const id = params.id;
-  
+
   return (
     <div className="container py-6 space-y-6">
       <div className="flex items-center space-x-2">
@@ -25,7 +25,7 @@ export default function EditBrandGuidelinePage({ params }: EditBrandGuidelinePag
         </Button>
         <h1 className="text-2xl font-bold">Edit Brand Guideline</h1>
       </div>
-      
+
       <BrandSetupForm brandId={id} mode="edit" />
     </div>
   );

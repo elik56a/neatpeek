@@ -1,7 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { User } from "@/types";
 import { signIn } from "next-auth/react";
@@ -27,7 +34,7 @@ export function FigmaConnectPrompt({ user, onConnect }: FigmaConnectPromptProps)
     try {
       await signIn("figma", {
         callbackUrl: window.location.href,
-        redirect: true
+        redirect: true,
       });
 
       if (onConnect) {
@@ -69,11 +76,7 @@ export function FigmaConnectPrompt({ user, onConnect }: FigmaConnectPromptProps)
         </ul>
       </CardContent>
       <CardFooter>
-        <Button
-          onClick={handleConnectFigma}
-          disabled={isConnecting}
-          className="w-full"
-        >
+        <Button onClick={handleConnectFigma} disabled={isConnecting} className="w-full">
           {isConnecting ? "Connecting..." : "Connect Figma Account"}
         </Button>
       </CardFooter>

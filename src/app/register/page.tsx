@@ -1,4 +1,3 @@
-
 "use client";
 
 import { RegisterPage } from "@/features/auth/components/pages";

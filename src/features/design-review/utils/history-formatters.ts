@@ -3,7 +3,7 @@
  * These functions generate human-readable summaries for the timeline
  */
 
-import { BrandIssue, GeneralIssue, IssueStatus } from '../types';
+import { BrandIssue, GeneralIssue, IssueStatus } from "../types";
 
 /**
  * Interface for issue counts by status
@@ -28,7 +28,7 @@ export function countIssuesByStatus(
     partially_fixed: 0,
     not_fixed: 0,
     new: 0,
-    total: brandIssues.length + generalIssues.length
+    total: brandIssues.length + generalIssues.length,
   };
 
   // Count brand issues
@@ -72,17 +72,17 @@ export function generateInitialReviewSummary(
   const generalCount = generalIssues.length;
 
   if (totalIssues === 0) {
-    return 'Initial review completed. No issues found.';
+    return "Initial review completed. No issues found.";
   }
 
-  let summary = `Initial review completed. Found ${totalIssues} issue${totalIssues !== 1 ? 's' : ''}.`;
-  
+  let summary = `Initial review completed. Found ${totalIssues} issue${totalIssues !== 1 ? "s" : ""}.`;
+
   if (brandCount > 0) {
-    summary += ` ${brandCount} brand issue${brandCount !== 1 ? 's' : ''}.`;
+    summary += ` ${brandCount} brand issue${brandCount !== 1 ? "s" : ""}.`;
   }
-  
+
   if (generalCount > 0) {
-    summary += ` ${generalCount} general issue${generalCount !== 1 ? 's' : ''}.`;
+    summary += ` ${generalCount} general issue${generalCount !== 1 ? "s" : ""}.`;
   }
 
   return summary;
@@ -95,7 +95,7 @@ export function generateRecheckSummary(counts: IssueCounts): string {
   const parts: string[] = [];
 
   if (counts.fixed > 0) {
-    parts.push(`${counts.fixed} issue${counts.fixed !== 1 ? 's' : ''} fixed`);
+    parts.push(`${counts.fixed} issue${counts.fixed !== 1 ? "s" : ""} fixed`);
   }
 
   if (counts.partially_fixed > 0) {
@@ -107,14 +107,14 @@ export function generateRecheckSummary(counts: IssueCounts): string {
   }
 
   if (counts.new > 0) {
-    parts.push(`${counts.new} new issue${counts.new !== 1 ? 's' : ''} found`);
+    parts.push(`${counts.new} new issue${counts.new !== 1 ? "s" : ""} found`);
   }
 
   if (parts.length === 0) {
-    return 'Recheck completed. No changes detected.';
+    return "Recheck completed. No changes detected.";
   }
 
-  return `Recheck completed. ${parts.join(', ')}.`;
+  return `Recheck completed. ${parts.join(", ")}.`;
 }
 
 /**
@@ -122,21 +122,21 @@ export function generateRecheckSummary(counts: IssueCounts): string {
  */
 export function generateNewIssuesSummary(newIssues: (BrandIssue | GeneralIssue)[]): string {
   if (newIssues.length === 0) {
-    return 'No new issues found during recheck.';
+    return "No new issues found during recheck.";
   }
 
   // Count brand vs general issues
-  const brandIssues = newIssues.filter(issue => 'brand_rule_violation' in issue);
-  const generalIssues = newIssues.filter(issue => !('brand_rule_violation' in issue));
+  const brandIssues = newIssues.filter(issue => "brand_rule_violation" in issue);
+  const generalIssues = newIssues.filter(issue => !("brand_rule_violation" in issue));
 
-  let summary = `Found ${newIssues.length} new issue${newIssues.length !== 1 ? 's' : ''} during recheck.`;
-  
+  let summary = `Found ${newIssues.length} new issue${newIssues.length !== 1 ? "s" : ""} during recheck.`;
+
   if (brandIssues.length > 0) {
-    summary += ` ${brandIssues.length} brand issue${brandIssues.length !== 1 ? 's' : ''}.`;
+    summary += ` ${brandIssues.length} brand issue${brandIssues.length !== 1 ? "s" : ""}.`;
   }
-  
+
   if (generalIssues.length > 0) {
-    summary += ` ${generalIssues.length} general issue${generalIssues.length !== 1 ? 's' : ''}.`;
+    summary += ` ${generalIssues.length} general issue${generalIssues.length !== 1 ? "s" : ""}.`;
   }
 
   return summary;
@@ -158,9 +158,9 @@ export function generateHistoryChanges(
   if (newIssues && newIssues.length > 0) {
     changes.new_issues_count = newIssues.length;
     changes.issues_summary = newIssues.map(issue => ({
-      type: 'brand_rule_violation' in issue ? 'brand_issue' : 'general_issue',
+      type: "brand_rule_violation" in issue ? "brand_issue" : "general_issue",
       description: issue.description,
-      severity: issue.severity
+      severity: issue.severity,
     }));
   }
 

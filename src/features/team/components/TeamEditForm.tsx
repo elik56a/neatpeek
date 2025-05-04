@@ -1,8 +1,23 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,7 +35,10 @@ interface TeamEditFormProps {
 }
 
 const editTeamSchema = z.object({
-  name: z.string().min(2, "Team name must be at least 2 characters").max(50, "Team name must be less than 50 characters"),
+  name: z
+    .string()
+    .min(2, "Team name must be at least 2 characters")
+    .max(50, "Team name must be less than 50 characters"),
   description: z.string().optional(),
 });
 
@@ -75,7 +93,7 @@ export function TeamEditForm({ teamId }: TeamEditFormProps) {
         }
 
         const data = await response.json();
-        
+
         // Update form values
         form.reset({
           name: data.name,
@@ -203,9 +221,7 @@ export function TeamEditForm({ teamId }: TeamEditFormProps) {
       <Card>
         <CardHeader>
           <CardTitle>Team Information</CardTitle>
-          <CardDescription>
-            Edit the team's basic information.
-          </CardDescription>
+          <CardDescription>Edit the team's basic information.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -219,9 +235,7 @@ export function TeamEditForm({ teamId }: TeamEditFormProps) {
                     <FormControl>
                       <Input placeholder="Marketing Team" {...field} />
                     </FormControl>
-                    <FormDescription>
-                      The name of your team.
-                    </FormDescription>
+                    <FormDescription>The name of your team.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -239,9 +253,7 @@ export function TeamEditForm({ teamId }: TeamEditFormProps) {
                         value={field.value || ""}
                       />
                     </FormControl>
-                    <FormDescription>
-                      A brief description of the team's purpose.
-                    </FormDescription>
+                    <FormDescription>A brief description of the team's purpose.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -259,9 +271,7 @@ export function TeamEditForm({ teamId }: TeamEditFormProps) {
       <Card className="border-destructive">
         <CardHeader>
           <CardTitle className="text-destructive">Danger Zone</CardTitle>
-          <CardDescription>
-            Permanently delete this team and all associated data.
-          </CardDescription>
+          <CardDescription>Permanently delete this team and all associated data.</CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">

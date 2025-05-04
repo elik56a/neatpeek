@@ -75,9 +75,8 @@ function DesignReviewWithId({ reviewId }: DesignReviewWithIdProps) {
       const figmaUrl = reviewData.figmaUrl;
 
       // Use provided frameIds or default to the first frame
-      const selectedFrameIds = frameIds && frameIds.length > 0
-        ? frameIds
-        : [reviewData.reviews[0]?.image?.frame_id];
+      const selectedFrameIds =
+        frameIds && frameIds.length > 0 ? frameIds : [reviewData.reviews[0]?.image?.frame_id];
 
       if (!brandId || !figmaUrl || !selectedFrameIds.length) {
         throw new Error("Missing required data for recheck");
@@ -90,10 +89,10 @@ function DesignReviewWithId({ reviewId }: DesignReviewWithIdProps) {
       const userId = user.id;
 
       // Call the recheck API directly
-      const response = await fetch('/api/design-review/recheck', {
-        method: 'POST',
+      const response = await fetch("/api/design-review/recheck", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           figmaUrl,
@@ -177,7 +176,9 @@ function DesignReviewWithId({ reviewId }: DesignReviewWithIdProps) {
             <div className="flex flex-col items-center text-center">
               <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
               <h2 className="text-xl font-semibold mb-2">Design Review Not Found</h2>
-              <p className="text-muted-foreground mb-6">The requested design review could not be found.</p>
+              <p className="text-muted-foreground mb-6">
+                The requested design review could not be found.
+              </p>
               <Button asChild>
                 <Link href="/design-review">Go to Design Review</Link>
               </Button>
@@ -193,21 +194,14 @@ function DesignReviewWithId({ reviewId }: DesignReviewWithIdProps) {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <Button
-              variant="ghost"
-              size="icon"
-              asChild
-              className="mr-2"
-            >
+            <Button variant="ghost" size="icon" asChild className="mr-2">
               <Link href="/design-review">
                 <AlertCircle className="h-4 w-4" />
               </Link>
             </Button>
             <h1 className="text-3xl font-bold">Review Results</h1>
           </div>
-          <p className="text-muted-foreground">
-            {reviewData.fileName || "Design Review"}
-          </p>
+          <p className="text-muted-foreground">{reviewData.fileName || "Design Review"}</p>
         </div>
 
         <AnalysisResults

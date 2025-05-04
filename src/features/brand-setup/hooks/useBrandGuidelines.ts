@@ -27,25 +27,25 @@ export function useBrandGuidelines() {
       // Add company filter if available
       const url = companyId
         ? `/api/brand-guidelines?companyId=${companyId}`
-        : '/api/brand-guidelines';
+        : "/api/brand-guidelines";
 
       const response = await fetch(url);
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch brand guidelines');
+        throw new Error(errorData.error || "Failed to fetch brand guidelines");
       }
 
       const data = await response.json();
       setBrandGuidelines(data);
     } catch (error) {
-      console.error('Error fetching brand guidelines:', error);
-      setError(error instanceof Error ? error.message : 'Failed to fetch brand guidelines');
+      console.error("Error fetching brand guidelines:", error);
+      setError(error instanceof Error ? error.message : "Failed to fetch brand guidelines");
 
       toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to fetch brand guidelines',
-        variant: 'destructive',
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to fetch brand guidelines",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -53,34 +53,37 @@ export function useBrandGuidelines() {
   }, [toast, companyId]);
 
   // Delete a brand guideline
-  const deleteBrandGuideline = useCallback(async (id: string) => {
-    try {
-      const response = await fetch(`/api/brand-guidelines/${id}`, {
-        method: 'DELETE',
-      });
+  const deleteBrandGuideline = useCallback(
+    async (id: string) => {
+      try {
+        const response = await fetch(`/api/brand-guidelines/${id}`, {
+          method: "DELETE",
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to delete brand guideline');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Failed to delete brand guideline");
+        }
+
+        // Remove the deleted brand guideline from the state
+        setBrandGuidelines(prev => prev.filter(bg => bg.id !== id));
+
+        toast({
+          title: "Success",
+          description: "Brand guideline deleted successfully",
+        });
+      } catch (error) {
+        console.error("Error deleting brand guideline:", error);
+
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to delete brand guideline",
+          variant: "destructive",
+        });
       }
-
-      // Remove the deleted brand guideline from the state
-      setBrandGuidelines((prev) => prev.filter((bg) => bg.id !== id));
-
-      toast({
-        title: 'Success',
-        description: 'Brand guideline deleted successfully',
-      });
-    } catch (error) {
-      console.error('Error deleting brand guideline:', error);
-
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to delete brand guideline',
-        variant: 'destructive',
-      });
-    }
-  }, [toast]);
+    },
+    [toast]
+  );
 
   // Fetch brand guidelines on mount
   useEffect(() => {

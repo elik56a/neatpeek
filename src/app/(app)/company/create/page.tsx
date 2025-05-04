@@ -1,8 +1,23 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -70,7 +85,7 @@ export default function CreateCompanyPage() {
       // Update the session with the new company data
       await updateSession({
         companyId: result.user.companyId,
-        companyRole: result.user.companyRole
+        companyRole: result.user.companyRole,
       });
 
       // Show success message
@@ -79,7 +94,6 @@ export default function CreateCompanyPage() {
         description: "Refreshing session with your new company data...",
         duration: 3000,
       });
-
     } catch (error) {
       console.error("Error creating company:", error);
       toast({
@@ -116,9 +130,7 @@ export default function CreateCompanyPage() {
                     <FormControl>
                       <Input placeholder="Acme Inc." {...field} />
                     </FormControl>
-                    <FormDescription>
-                      The name of your company or organization.
-                    </FormDescription>
+                    <FormDescription>The name of your company or organization.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -150,9 +162,7 @@ export default function CreateCompanyPage() {
                     <FormControl>
                       <Input placeholder="https://example.com/logo.png" {...field} />
                     </FormControl>
-                    <FormDescription>
-                      A URL to your company logo.
-                    </FormDescription>
+                    <FormDescription>A URL to your company logo.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

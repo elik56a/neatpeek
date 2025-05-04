@@ -15,19 +15,14 @@ interface AnimatedTabsProps {
   className?: string;
 }
 
-export function AnimatedTabs({ 
-  defaultValue, 
-  tabs, 
-  children, 
-  className 
-}: AnimatedTabsProps) {
+export function AnimatedTabs({ defaultValue, tabs, children, className }: AnimatedTabsProps) {
   const [activeTab, setActiveTab] = useState(defaultValue);
   const [isAnimating, setIsAnimating] = useState(false);
 
   // Handle tab change with animation
   const handleTabChange = (value: string) => {
     if (value === activeTab) return;
-    
+
     setIsAnimating(true);
     setTimeout(() => {
       setActiveTab(value);
@@ -36,16 +31,16 @@ export function AnimatedTabs({
   };
 
   return (
-    <Tabs 
-      defaultValue={defaultValue} 
+    <Tabs
+      defaultValue={defaultValue}
       value={activeTab}
       className={cn("space-y-4", className)}
       onValueChange={handleTabChange}
     >
       <TabsList className="flex flex-wrap bg-slate-50 p-1">
-        {tabs.map((tab) => (
-          <TabsTrigger 
-            key={tab.value} 
+        {tabs.map(tab => (
+          <TabsTrigger
+            key={tab.value}
             value={tab.value}
             className={cn(
               "flex items-center data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-300",
@@ -58,33 +53,29 @@ export function AnimatedTabs({
         ))}
       </TabsList>
 
-      <div className={cn(
-        "transition-opacity duration-300",
-        isAnimating ? "opacity-0" : "opacity-100"
-      )}>
+      <div
+        className={cn("transition-opacity duration-300", isAnimating ? "opacity-0" : "opacity-100")}
+      >
         {children}
       </div>
     </Tabs>
   );
 }
 
-export function AnimatedTabsContent({ 
-  value, 
+export function AnimatedTabsContent({
+  value,
   children,
-  className
-}: { 
-  value: string; 
+  className,
+}: {
+  value: string;
   children: React.ReactNode;
   className?: string;
 }) {
   return (
-    <TabsContent 
-      value={value} 
-      className={cn(
-        "animate-in fade-in-50 slide-in-from-bottom-3 duration-500",
-        className
-      )}
-      style={{ animationFillMode: 'both' }}
+    <TabsContent
+      value={value}
+      className={cn("animate-in fade-in-50 slide-in-from-bottom-3 duration-500", className)}
+      style={{ animationFillMode: "both" }}
     >
       {children}
     </TabsContent>

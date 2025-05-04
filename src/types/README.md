@@ -20,7 +20,7 @@ The `index.ts` file defines the following core entity types:
 Always import types from the central types directory:
 
 ```typescript
-import { User, Company } from '@/types';
+import { User, Company } from "@/types";
 ```
 
 ### Extending Types
@@ -28,12 +28,12 @@ import { User, Company } from '@/types';
 If you need to extend a type for a specific feature, use TypeScript's intersection types:
 
 ```typescript
-import { User } from '@/types';
+import { User } from "@/types";
 
 // Extend the User type with feature-specific properties
 type UserWithPreferences = User & {
   preferences: {
-    theme: 'light' | 'dark';
+    theme: "light" | "dark";
     notifications: boolean;
   };
 };
@@ -44,13 +44,13 @@ type UserWithPreferences = User & {
 If you only need a subset of a type's properties, use TypeScript's `Pick` or `Omit` utility types:
 
 ```typescript
-import { User } from '@/types';
+import { User } from "@/types";
 
 // Only use the id, name, and email properties
-type UserBasicInfo = Pick<User, 'id' | 'name' | 'email'>;
+type UserBasicInfo = Pick<User, "id" | "name" | "email">;
 
 // Use all properties except sensitive ones
-type PublicUser = Omit<User, 'password' | 'securityQuestions'>;
+type PublicUser = Omit<User, "password" | "securityQuestions">;
 ```
 
 ## Feature-Specific Types
@@ -61,7 +61,7 @@ For example, a feature might define form-specific types:
 
 ```typescript
 // src/features/user-management/types.ts
-import { User } from '@/types';
+import { User } from "@/types";
 
 export interface UserFormData {
   name: string;
