@@ -17,8 +17,8 @@ import { AnalysisResults } from "./AnalysisResults";
 import { FigmaConnectPrompt } from "./FigmaConnectPrompt";
 import { FrameSelector } from "./FrameSelector";
 import { RecheckResults } from "./RecheckResults";
+import { BrandGuideline } from "@/features/brand-setup/types";
 
-import { BrandGuideline } from "@/hooks/useBrandGuidelines";
 
 interface DesignReviewProps {
   brandId: string;

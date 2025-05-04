@@ -1,5 +1,5 @@
 import { prisma } from "@/services/db/prisma";
-import { BrandGuideline, BrandGuidelineStatus, CustomRule, ProcessingStatus } from "../types";
+import { BrandGuideline, BrandGuidelineStatus, CustomRule, ProcessingStatus, RuleCategory } from "../types";
 import { storageProvider } from "@/services/storage";
 
 /**
@@ -286,7 +286,7 @@ export class BrandSetupService {
       if (result.colors && Array.isArray(result.colors)) {
         for (const color of result.colors) {
           rules.push({
-            category: "COLOR",
+            category: RuleCategory.COLOR,
             name: color.name,
             value: color.value,
             description: color.description,
@@ -298,7 +298,7 @@ export class BrandSetupService {
       if (result.typography && Array.isArray(result.typography)) {
         for (const font of result.typography) {
           rules.push({
-            category: "TYPOGRAPHY",
+            category: RuleCategory.TYPOGRAPHY,
             name: font.name,
             value: font.value,
             description: font.description,
@@ -310,7 +310,7 @@ export class BrandSetupService {
       if (result.spacing && Array.isArray(result.spacing)) {
         for (const space of result.spacing) {
           rules.push({
-            category: "SPACING",
+            category: RuleCategory.SPACING,
             name: space.name,
             value: space.value,
             description: space.description,
@@ -322,7 +322,7 @@ export class BrandSetupService {
       if (result.logo && Array.isArray(result.logo)) {
         for (const logoRule of result.logo) {
           rules.push({
-            category: "LOGO",
+            category: RuleCategory.LOGO,
             name: logoRule.name,
             value: logoRule.value,
             description: logoRule.description,
@@ -334,7 +334,7 @@ export class BrandSetupService {
       if (result.icons && Array.isArray(result.icons)) {
         for (const icon of result.icons) {
           rules.push({
-            category: "ICON",
+            category: RuleCategory.ICON,
             name: icon.name,
             value: icon.value,
             description: icon.description,
@@ -346,7 +346,7 @@ export class BrandSetupService {
       if (result.layout && Array.isArray(result.layout)) {
         for (const layoutRule of result.layout) {
           rules.push({
-            category: "LAYOUT",
+            category: RuleCategory.LAYOUT,
             name: layoutRule.name,
             value: layoutRule.value,
             description: layoutRule.description,
@@ -358,7 +358,7 @@ export class BrandSetupService {
       if (result.general && Array.isArray(result.general)) {
         for (const generalRule of result.general) {
           rules.push({
-            category: "GENERAL",
+            category: RuleCategory.GENERAL,
             name: generalRule.name,
             value: generalRule.value,
             description: generalRule.description,
@@ -387,7 +387,7 @@ export class BrandSetupService {
         data: {
           status: BrandGuidelineStatus.FAILED,
           processingStatus: ProcessingStatus.FAILED,
-          processingMessage: `Analysis failed: ${error.message || "Unknown error"}`,
+          processingMessage: `Analysis failed, please try again.`,
         },
       });
     }

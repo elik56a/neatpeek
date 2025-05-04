@@ -20,17 +20,15 @@ import { DesignReview } from "./DesignReview";
  */
 export function DesignReviewPage() {
   const { company } = useAppDataContext();
-  const { guidelines, isLoading } = useBrandGuidelines({
-    companyId: company?.id,
-  });
+  const { brandGuidelines, isLoading } = useBrandGuidelines();
   const [selectedGuidelineId, setSelectedGuidelineId] = useState<string>("");
 
   // Set the first guideline as selected when guidelines are loaded
   useEffect(() => {
-    if (guidelines && guidelines.length > 0 && !selectedGuidelineId) {
-      setSelectedGuidelineId(guidelines[0].id);
+    if (brandGuidelines && brandGuidelines.length > 0 && !selectedGuidelineId) {
+      setSelectedGuidelineId(brandGuidelines[0].id);
     }
-  }, [guidelines, selectedGuidelineId]);
+  }, [brandGuidelines, selectedGuidelineId]);
 
   // Handle guideline selection
   const handleGuidelineChange = (value: string) => {
@@ -48,7 +46,7 @@ export function DesignReviewPage() {
   }
 
   // No guidelines state
-  if (!guidelines || guidelines.length === 0) {
+  if (!brandGuidelines || brandGuidelines.length === 0) {
     return (
       <div className="container mx-auto py-8">
         <Card>
@@ -82,7 +80,7 @@ export function DesignReviewPage() {
         {selectedGuidelineId ? (
           <DesignReview
             brandId={selectedGuidelineId}
-            allGuidelines={guidelines}
+            allGuidelines={brandGuidelines}
             onGuidelineChange={handleGuidelineChange}
           />
         ) : (
