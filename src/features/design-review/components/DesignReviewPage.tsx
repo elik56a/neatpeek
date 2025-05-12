@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/card";
 import { CustomLoader } from "@/components/ui/custom-loader";
 import { useBrandGuidelines } from "@/features/brand-setup/hooks/useBrandGuidelines";
-import { useAppDataContext } from "@/providers/AppDataProvider";
 import { AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { DesignReview } from "./DesignReview";
@@ -19,7 +18,6 @@ import { DesignReview } from "./DesignReview";
  * Design Review Page Component
  */
 export function DesignReviewPage() {
-  const { company } = useAppDataContext();
   const { brandGuidelines, isLoading } = useBrandGuidelines();
   const [selectedGuidelineId, setSelectedGuidelineId] = useState<string>("");
 
@@ -37,12 +35,7 @@ export function DesignReviewPage() {
 
   // Loading state
   if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <CustomLoader size="lg" />
-        <p className="mt-4 text-lg font-medium">Loading brand guidelines...</p>
-      </div>
-    );
+    return <CustomLoader size="lg" text="Loading brand guidelines..." />;
   }
 
   // No guidelines state

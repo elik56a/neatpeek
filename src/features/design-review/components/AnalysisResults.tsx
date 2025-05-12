@@ -1,17 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { DesignAnalysisResult } from "../types";
 import { History } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
-// Drawer imports removed as we're using a custom drawer
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ExportButton, AnalysisDetails } from "./analysis-results";
 import { TimelineDrawer } from "./timeline";
 import { FrameRecheckSelector } from "./recheck-results";
+import { DesignsReview } from "../types";
 
 interface AnalysisResultsProps {
-  result: DesignAnalysisResult;
+  designsReview: DesignsReview;
   onRecheck: (frameIds?: string[]) => void;
   figmaFileName?: string;
   showTimeline?: boolean;
@@ -23,7 +22,7 @@ interface AnalysisResultsProps {
  * This component is split into smaller, focused components
  */
 export function AnalysisResults({
-  result,
+  designsReview,
   onRecheck,
   figmaFileName,
   showTimeline = false,
@@ -31,50 +30,50 @@ export function AnalysisResults({
 }: AnalysisResultsProps) {
   const [isTimelineVisible, setIsTimelineVisible] = useState(false);
   const [activeFrameId, setActiveFrameId] = useState<string | null>(
-    result.reviews.length > 0 ? result.reviews[0].image.frame_id : null
+    designsReview?.designs?.length > 0 ? designsReview.designs[0].frameId : null
   );
-
-  // Timeline visibility is now controlled by the Dialog component
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Design Review Results</h2>
         <div className="flex gap-2 items-center">
-          {result.reviewId && showTimeline && (
+          {designsReview.id && showTimeline && (
             <>
               <TooltipProvider>
                 <Tooltip>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className={isTimelineVisible ? "bg-muted" : ""}
-                    onClick={() => setIsTimelineVisible(true)}
-                  >
-                    <History className="h-4 w-4" />
-                  </Button>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={isTimelineVisible ? "bg-muted" : ""}
+                      onClick={() => setIsTimelineVisible(true)}
+                    >
+                      <History className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
                   <TooltipContent>
-                    <p>View Timeline</p>
+                    <p>View design review history and changes over time</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
 
               {/* Custom timeline drawer that slides in from the right */}
               <TimelineDrawer
-                reviewId={result.reviewId}
+                designsReviewId={designsReview.id}
                 isOpen={isTimelineVisible}
                 onClose={() => setIsTimelineVisible(false)}
               />
             </>
           )}
-          <ExportButton result={result} figmaFileName={figmaFileName} />
+          <ExportButton designsReview={designsReview} figmaFileName={figmaFileName} />
         </div>
       </div>
 
       {/* Frame navigation and selection */}
       <div className="mb-6">
         <FrameRecheckSelector
-          result={result}
+          designsReview={designsReview}
           activeFrameId={activeFrameId}
           onFrameSelect={setActiveFrameId}
           onRecheck={onRecheck}
@@ -85,7 +84,7 @@ export function AnalysisResults({
       {/* Main content with all the UI elements */}
       <div>
         <AnalysisDetails
-          result={result}
+          designsReview={designsReview}
           figmaFileName={figmaFileName}
           activeFrameId={activeFrameId}
         />

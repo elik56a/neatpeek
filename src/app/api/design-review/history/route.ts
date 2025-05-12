@@ -32,23 +32,23 @@ export async function GET(req: NextRequest) {
 
     // Get query parameters
     const url = new URL(req.url);
-    const reviewId = url.searchParams.get("reviewId");
+    const designsReviewId = url.searchParams.get("designsReviewId");
 
-    if (!reviewId) {
-      return NextResponse.json({ error: "Review ID is required" }, { status: 400 });
+    if (!designsReviewId) {
+      return NextResponse.json({ error: "Designs Review ID is required" }, { status: 400 });
     }
 
-    // Check if the review belongs to the user
-    const review = await prisma.designReview.findUnique({
-      where: { id: reviewId },
+    // Check if the designs review belongs to the user
+    const designsReview = await prisma.designsReview.findUnique({
+      where: { id: designsReviewId },
       select: { userId: true },
     });
 
-    if (!review) {
-      return NextResponse.json({ error: "Review not found" }, { status: 404 });
+    if (!designsReview) {
+      return NextResponse.json({ error: "Designs Review not found" }, { status: 404 });
     }
 
-    if (review.userId !== user.id) {
+    if (designsReview.userId !== user.id) {
       return NextResponse.json(
         { error: "You don't have permission to view this review history" },
         { status: 403 }
@@ -57,16 +57,13 @@ export async function GET(req: NextRequest) {
 
     // Fetch review history
     const history = await prisma.reviewHistory.findMany({
-      where: { designReviewId: reviewId },
+      where: { designsReviewId },
       orderBy: { timestamp: "desc" },
     });
 
     return NextResponse.json(history);
   } catch (error: any) {
     console.error("Error fetching review history:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to fetch review history" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch review history" }, { status: 500 });
   }
 }

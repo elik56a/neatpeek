@@ -8,10 +8,10 @@ import {
   getDesignReviewExportHeaders,
   generateExportFilename,
 } from "../../utils/export-utils";
-import { DesignAnalysisResult, DesignReviewExportOptions } from "../../types";
+import { DesignReviewExportOptions, ExportFileType, DesignsReview } from "../../types";
 
 interface ExportButtonProps {
-  result: DesignAnalysisResult;
+  designsReview: DesignsReview;
   figmaFileName?: string;
   className?: string;
 }
@@ -19,18 +19,18 @@ interface ExportButtonProps {
 /**
  * Button component for exporting design review results
  */
-export function ExportButton({ result, figmaFileName, className }: ExportButtonProps) {
+export function ExportButton({ designsReview, figmaFileName, className }: ExportButtonProps) {
   const { exportToCsv } = useFileExport();
 
   const handleExport = () => {
     // Prepare data for export
-    const exportData = prepareDesignReviewExportData(result);
+    const exportData = prepareDesignReviewExportData(designsReview);
     const headers = getDesignReviewExportHeaders();
 
     // Configure export options
     const exportOptions: DesignReviewExportOptions = {
       fileName: "design_review_report",
-      fileType: "csv",
+      fileType: ExportFileType.CSV,
       includeTimestamp: true,
       includeFigmaFileName: !!figmaFileName,
     };

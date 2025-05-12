@@ -1,1 +1,1 @@
-export * from './HealthCheck'; 
+export * from "./HealthCheck";

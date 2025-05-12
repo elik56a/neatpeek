@@ -32,14 +32,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Use user's Figma token if available, otherwise try to use the fallback token from env
-    const figmaToken = user.figmaAccessToken || process.env.FIGMA_PERSONAL_ACCESS_TOKEN;
+    const figmaToken = user.figmaAccessToken;
 
     if (!figmaToken) {
       return NextResponse.json(
         {
-          error:
-            "Figma access token not found. Please connect your Figma account or set FIGMA_PERSONAL_ACCESS_TOKEN in environment variables.",
+          error: "Figma access token not found. Please connect your Figma account  .",
         },
         { status: 400 }
       );
@@ -62,24 +60,21 @@ export async function POST(req: NextRequest) {
       "@/features/design-review/services/design-review-service"
     );
 
-    // Create design review service
-    const designReviewService = new DesignReviewService(figmaToken);
+    const designReviewService = DesignReviewService.getInstance(figmaToken);
 
-    // Review design with selected frames
-    const reviewResult = await designReviewService.analyzeDesign({
+    const designsReviewId = await designReviewService.analyzeDesigns({
       figmaUrl,
       brandId,
       designType,
-      selectedFrameIds, // Pass the selected frame IDs to the service
-      userId: user.id, // Pass the user ID to the service
+      selectedFrameIds,
+      userId: user.id,
     });
 
-    return NextResponse.json(reviewResult);
+    const review = await designReviewService.getDesignsReview(designsReviewId);
+
+    return NextResponse.json(review);
   } catch (error: any) {
     console.error("Error reviewing design:", error);
-    return NextResponse.json(
-      { error: error.message || "Failed to review design" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to review design" }, { status: 500 });
   }
 }

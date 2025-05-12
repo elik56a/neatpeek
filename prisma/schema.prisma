@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
@@ -82,7 +82,8 @@ model User {
   accounts             Account[]
   brands               Brand[]
   brandGuidelines      BrandGuideline[]
-  designReviews        DesignReview[]        // Added relation to DesignReview
+  designs              Design[]
+  designsReviews       DesignsReview[]
   notificationSettings NotificationSettings?
   sessions             Session[]
   subscriptions        Subscription[]
@@ -282,67 +283,15 @@ model DesignExample {
 }
 
 model Project {
-  id          String      @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
   description String?
   brandId     String
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  brand       Brand       @relation(fields: [brandId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  brand       Brand    @relation(fields: [brandId], references: [id])
 
   @@index([brandId])
-}
-
-model FigmaFrame {
-  id               String         @id @default(cuid())
-  brandGuidelineId String         // Added direct link to brand guideline
-  figmaFileKey     String         // Added from FigmaFile
-  figmaFileName    String         // Added from FigmaFile
-  frameId          String
-  name             String
-  imageUrl         String
-  screenType       String?
-  platform         String?
-  positionX        Float?
-  positionY        Float?
-  width            Float?
-  height           Float?
-  lastSynced       DateTime?      // Added from FigmaFile
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-  designReviews    DesignReview[]
-  brandGuideline   BrandGuideline @relation(fields: [brandGuidelineId], references: [id])
-
-  @@index([brandGuidelineId])
-  @@index([figmaFileKey])
-  @@index([frameId])
-  @@unique([figmaFileKey, frameId]) // Added unique constraint
-}
-
-model DesignReview {
-  id                   String          @id @default(cuid())
-  userId               String          // Added user association
-  brandGuidelineId     String          // Added direct link to brand guideline
-  frameId              String
-  reviewJson           Json
-  designScore          Int
-  designScoreMax       Int             @default(100)
-  brandComplianceScore Int?
-  visualHarmonyScore   Int?
-  usabilityScore       Int?
-  accessibilityScore   Int?
-  status               ReviewStatus    @default(PENDING)
-  originalFigmaUrl     String?         // Store the original Figma URL provided by the user
-  createdAt            DateTime        @default(now())
-  updatedAt            DateTime        @updatedAt
-  frame                FigmaFrame      @relation(fields: [frameId], references: [id], onDelete: Cascade)
-  user                 User            @relation(fields: [userId], references: [id])
-  brandGuideline       BrandGuideline  @relation(fields: [brandGuidelineId], references: [id])
-  history              ReviewHistory[] // Added relation to ReviewHistory
-
-  @@index([frameId])
-  @@index([userId])
-  @@index([brandGuidelineId])
 }
 
 model FeatureFlag {
@@ -407,27 +356,26 @@ model NotificationSettings {
 }
 
 model BrandGuideline {
-  id                String        @id @default(cuid())
+  id                String          @id @default(cuid())
   userId            String
   name              String
   description       String?
-  status            String        @default("DRAFT")
+  status            String          @default("DRAFT")
   pdfUrl            String?
   pdfPath           String?
-  processingStatus  String        @default("PENDING")
+  processingStatus  String          @default("PENDING")
   processingMessage String?
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
   companyId         String?
   teamId            String?
-  company           Company?      @relation(fields: [companyId], references: [id])
-  team              Team?         @relation(fields: [teamId], references: [id])
-  user              User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company           Company?        @relation(fields: [companyId], references: [id])
+  team              Team?           @relation(fields: [teamId], references: [id])
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   brandRules        BrandRule[]
   customRules       CustomRule[]
   designImages      DesignImage[]
-  figmaFrames       FigmaFrame[]  // Added relation to FigmaFrame
-  designReviews     DesignReview[] // Added relation to DesignReview
+  designsReviews    DesignsReview[]
 
   @@index([userId])
   @@index([companyId])
@@ -475,6 +423,70 @@ model BrandRule {
 
   @@index([brandGuidelineId])
   @@index([category])
+}
+
+model ReviewHistory {
+  id              String              @id @default(cuid())
+  action          ReviewHistoryAction
+  summary         String
+  changes         Json?
+  timestamp       DateTime            @default(now())
+  designsReviewId String
+  designsReview   DesignsReview       @relation(fields: [designsReviewId], references: [id])
+
+  @@index([designsReviewId])
+  @@index([timestamp])
+}
+
+model RateLimit {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  count     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+}
+
+model DesignsReview {
+  id               String          @id @default(cuid())
+  userId           String
+  brandGuidelineId String
+  name             String
+  description      String?
+  status           ReviewStatus    @default(PENDING)
+  figmaUrl         String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  figmaFileId      String?
+  reviewType       ReviewType      @default(FIGMA)
+  designs          Design[]
+  brandGuideline   BrandGuideline  @relation(fields: [brandGuidelineId], references: [id])
+  user             User            @relation(fields: [userId], references: [id])
+  reviewHistory    ReviewHistory[]
+
+  @@index([userId])
+  @@index([brandGuidelineId])
+  @@index([figmaFileId])
+}
+
+model Design {
+  id                   String        @id @default(cuid())
+  userId               String
+  designsReviewId      String
+  frameId              String?       // Nullable for manual uploads
+  reviewJson           Json
+  status               ReviewStatus  @default(PENDING)
+  originalFigmaUrl     String?       // Nullable for manual uploads
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+  fileName             String?
+  designsReview        DesignsReview  @relation(fields: [designsReviewId], references: [id])
+  user                 User          @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([designsReviewId])
+  @@index([frameId])
 }
 
 enum CompanyRole {
@@ -569,25 +581,7 @@ enum ReviewHistoryAction {
   ISSUES_PARTIALLY_FIXED
 }
 
-model ReviewHistory {
-  id             String             @id @default(cuid())
-  designReviewId String
-  action         ReviewHistoryAction
-  summary        String
-  changes        Json?
-  timestamp      DateTime           @default(now())
-  designReview   DesignReview       @relation(fields: [designReviewId], references: [id], onDelete: Cascade)
-
-  @@index([designReviewId])
-  @@index([timestamp])
-}
-
-model RateLimit {
-  id        String   @id @default(cuid())
-  key       String   @unique
-  count     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([key])
+enum ReviewType {
+  FIGMA
+  MANUAL
 }

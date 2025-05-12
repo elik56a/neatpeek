@@ -188,11 +188,25 @@ export class FigmaService {
     }
   }
 
+  async getSelectedFrames(
+    fileKey: string,
+    nodeId: string,
+    framesIds: string[]
+  ): Promise<FrameInfo[]> {
+    try {
+      const frames = await this.getChildFrames(fileKey, nodeId);
+      return frames.filter(frame => framesIds.includes(frame.id));
+    } catch (error) {
+      console.error("Error retrieving selected frames:", error);
+      throw error;
+    }
+  }
+
   /**
    * Get frame images from a Figma file
    * @param fileKey Figma file key
    * @param frames Array of frame information
-   * @returns Record of frame name to image data
+   * @returns Record of frame id to image data
    */
   async getFrameImages(
     fileKey: string,
@@ -206,7 +220,7 @@ export class FigmaService {
 
       frames.forEach(frame => {
         if (imageUrls[frame.id]) {
-          frameImages[frame.name] = {
+          frameImages[frame.id] = {
             id: frame.id,
             url: imageUrls[frame.id],
             type: frame.type,
@@ -218,6 +232,72 @@ export class FigmaService {
       return frameImages;
     } catch (error) {
       console.error("Error retrieving image URLs:", error);
+      throw error;
+    }
+  }
+
+  async getChildSelectedFrames(
+    fileKey: string,
+    nodeId: string,
+    selectedFrameIds: string[]
+  ): Promise<FrameInfo[]> {
+    try {
+      const frames = await this.getChildFrames(fileKey, nodeId);
+      return frames.filter(frame => selectedFrameIds.includes(frame.id));
+    } catch (error) {
+      console.error("Error retrieving selected frames:", error);
+      throw error;
+    }
+  }
+
+  async extractFramesDesignsFromFigma(
+    figmaUrl: string,
+    frameIds: string[]
+  ): Promise<FigmaMetadata> {
+    try {
+      // Extract file key and node ID from URL
+      const { fileKey, nodeId } = this.extractFigmaInfo(figmaUrl);
+
+      if (!fileKey) {
+        throw new Error("Invalid Figma URL");
+      }
+
+      // Get the starting node ID (either the one from the URL or the root)
+      const startNodeId = nodeId || "0:1";
+      // Get child frames directly without fetching the entire file
+      const frames = await this.getSelectedFrames(fileKey, startNodeId, frameIds);
+      if (frames.length === 0) {
+        throw new Error("No frames found in Figma file");
+      }
+      // Get frame images
+      const frameImages = await this.getFrameImages(fileKey, frames);
+      // Map image URLs to frames
+      const frameMetadata: FrameMetadata[] = [];
+      const imageUrls: string[] = [];
+      for (const frame of frames) {
+        const imageData = frameImages[frame.id];
+        if (imageData && imageData.url) {
+          frameMetadata.push({
+            id: frame.id,
+            name: frame.name,
+            position: frame.absoluteBoundingBox,
+            url: imageData.url,
+          });
+          imageUrls.push(imageData.url);
+        }
+      }
+      // Get file name from Figma API
+      const fileInfo = await this.getFileInfo(fileKey);
+      // Create metadata
+      const metadata: FigmaMetadata = {
+        fileKey,
+        fileName: fileInfo.name,
+        extractionDate: new Date().toISOString(),
+        frames: frameMetadata,
+      };
+      return metadata;
+    } catch (error) {
+      console.error("Error extracting frames designs from Figma:", error);
       throw error;
     }
   }
@@ -257,7 +337,7 @@ export class FigmaService {
       const imageUrls: string[] = [];
 
       for (const frame of frames) {
-        const imageData = frameImages[frame.name];
+        const imageData = frameImages[frame.id];
         if (imageData && imageData.url) {
           frameMetadata.push({
             id: frame.id,

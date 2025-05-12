@@ -1,0 +1,44 @@
+[build]
+builder = "nixpacks"
+
+# Development environment configuration
+[deploy.env.development]
+NODE_ENV = "development"
+PORT = "4455"
+buildCommand = "yarn dev:build"
+startCommand = "yarn dev:start"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 100
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 10
+DATABASE_URL = "{{ .RAILWAY_DATABASE_URL }}"
+NEXTAUTH_URL = "https://app.dev-neatpeek.up.railway.app"
+NEXTAUTH_SECRET = "{{ .RAILWAY_NEXTAUTH_SECRET }}"
+GOOGLE_CLIENT_ID = "{{ .RAILWAY_GOOGLE_CLIENT_ID }}"
+GOOGLE_CLIENT_SECRET = "{{ .RAILWAY_GOOGLE_CLIENT_SECRET }}"
+GOOGLE_PROJECT_ID = "{{ .RAILWAY_GOOGLE_PROJECT_ID }}"
+GOOGLE_PRIVATE_KEY_ID = "{{ .RAILWAY_GOOGLE_PRIVATE_KEY_ID }}"
+GOOGLE_PRIVATE_KEY = "{{ .RAILWAY_GOOGLE_PRIVATE_KEY }}"
+GOOGLE_CLIENT_EMAIL = "{{ .RAILWAY_GOOGLE_CLIENT_EMAIL }}"
+GOOGLE_CLIENT_CERT_URL = "{{ .RAILWAY_GOOGLE_CLIENT_CERT_URL }}"
+
+# Production environment configuration
+[deploy.env.production]
+NODE_ENV = "production"
+PORT = "4455"
+buildCommand = "yarn prod:build"
+startCommand = "yarn prod:start"
+healthcheckPath = "/api/health"
+healthcheckTimeout = 100
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 10
+DATABASE_URL = "{{ .RAILWAY_DATABASE_URL }}"
+NEXTAUTH_URL = "https://app.neatpeek.up.railway.app"
+NEXTAUTH_SECRET = "{{ .RAILWAY_NEXTAUTH_SECRET }}"
+GOOGLE_CLIENT_ID = "{{ .RAILWAY_GOOGLE_CLIENT_ID }}"
+GOOGLE_CLIENT_SECRET = "{{ .RAILWAY_GOOGLE_CLIENT_SECRET }}"
+GOOGLE_PROJECT_ID = "{{ .RAILWAY_GOOGLE_PROJECT_ID }}"
+GOOGLE_PRIVATE_KEY_ID = "{{ .RAILWAY_GOOGLE_PRIVATE_KEY_ID }}"
+GOOGLE_PRIVATE_KEY = "{{ .RAILWAY_GOOGLE_PRIVATE_KEY }}"
+GOOGLE_CLIENT_EMAIL = "{{ .RAILWAY_GOOGLE_CLIENT_EMAIL }}"
+GOOGLE_CLIENT_CERT_URL = "{{ .RAILWAY_GOOGLE_CLIENT_CERT_URL }}" 

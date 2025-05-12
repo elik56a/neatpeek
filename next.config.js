@@ -31,13 +31,45 @@ const nextConfig = {
   // Configure domain/subdomain routing
   async rewrites() {
     const isProduction = process.env.NODE_ENV === "production";
+    const isDevelopment = process.env.NODE_ENV === "development";
 
-    // In production, we'll use Netlify redirects for routing between app.domain.com and domain.com
-    if (isProduction) {
-      return [];
+    // In development, handle Railway subdomain
+    if (isDevelopment) {
+      return {
+        beforeFiles: [
+          {
+            source: "/:path*",
+            has: [
+              {
+                type: "host",
+                value: "app.dev-neatpeek.up.railway.app",
+              },
+            ],
+            destination: "/:path*",
+          },
+        ],
+      };
     }
 
-    // In development, we use rewrites to simulate the subdomain routing
+    // In production, we'll use Railway's domain routing
+    if (isProduction) {
+      return {
+        beforeFiles: [
+          {
+            source: "/:path*",
+            has: [
+              {
+                type: "host",
+                value: "app.neatpeek.up.railway.app",
+              },
+            ],
+            destination: "/:path*",
+          },
+        ],
+      };
+    }
+
+    // For local development
     return {
       beforeFiles: [
         {
@@ -45,15 +77,37 @@ const nextConfig = {
           has: [
             {
               type: "host",
-              value: "app.localhost:4456",
+              value: "app.localhost:4455",
             },
           ],
-          destination: "/app/:path*",
+          destination: "/:path*",
         },
       ],
     };
   },
   webpack: config => {
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      net: false,
+      tls: false,
+      dns: false,
+      child_process: false,
+      http2: false,
+      path: false,
+      os: false,
+      stream: false,
+      https: false,
+      http: false,
+      zlib: false,
+      querystring: false,
+      crypto: false,
+      url: false,
+      util: false,
+      bcrypt: false,
+      "@mapbox/node-pre-gyp": false,
+      "node:events": false,
+    };
     config.resolve.alias = {
       ...config.resolve.alias,
       "@": require("path").resolve(__dirname, "src"),

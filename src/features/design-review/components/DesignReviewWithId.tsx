@@ -8,9 +8,8 @@ import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { AnalysisResults } from "./AnalysisResults";
-import { DesignAnalysisResult } from "../types";
-import { useRouter } from "next/navigation";
 import { useAppDataContext } from "@/providers/AppDataProvider";
+import { useDesignReview } from "../hooks";
 
 interface DesignReviewWithIdProps {
   reviewId: string;
@@ -20,131 +19,45 @@ interface DesignReviewWithIdProps {
  * Component for displaying a design review by ID
  */
 function DesignReviewWithId({ reviewId }: DesignReviewWithIdProps) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRecheckLoading, setIsRecheckLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
-  const [reviewData, setReviewData] = useState<DesignAnalysisResult | null>(null);
-  const { toast } = useToast();
-  const router = useRouter();
   const { user } = useAppDataContext();
+  const { getDesignsReview, designsReview, recheckDesign, isLoading, error, isRecheckLoading } =
+    useDesignReview();
 
-  // Fetch the design review data
   useEffect(() => {
-    const fetchReview = async () => {
-      try {
-        // Fetch the review data
-        const response = await fetch(`/api/design-review/${reviewId}`);
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || "Failed to fetch design review");
-        }
-
-        const data = await response.json();
-        setReviewData(data);
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error fetching design review:", error);
-        setError(error instanceof Error ? error : new Error("Failed to fetch design review"));
-        setIsLoading(false);
-
-        toast({
-          title: "Error",
-          description: "Failed to load design review. Please try again.",
-          variant: "destructive",
-        });
-      }
-    };
-
-    if (reviewId) {
-      fetchReview();
-    }
-  }, [reviewId, toast]);
+    getDesignsReview(reviewId);
+  }, []);
 
   // Handle recheck
   const handleRecheck = async (frameIds?: string[]) => {
-    if (!reviewData) return;
+    if (!designsReview) return;
+    const brandId = designsReview.brandGuidelineId;
+    const selectedFrameIds =
+      frameIds && frameIds.length > 0 ? frameIds : [designsReview.designs[0]?.frameId];
 
-    try {
-      setIsRecheckLoading(true);
-
-      // Get the brand ID from the review data
-      const brandId = reviewData.brandId;
-
-      // Get the Figma URL from the review data
-      const figmaUrl = reviewData.figmaUrl;
-
-      // Use provided frameIds or default to the first frame
-      const selectedFrameIds =
-        frameIds && frameIds.length > 0 ? frameIds : [reviewData.reviews[0]?.image?.frame_id];
-
-      if (!brandId || !figmaUrl || !selectedFrameIds.length) {
-        throw new Error("Missing required data for recheck");
-      }
-
-      // Get the current user ID from context
-      if (!user?.id) {
-        throw new Error("User ID is required for recheck");
-      }
-      const userId = user.id;
-
-      // Call the recheck API directly
-      const response = await fetch("/api/design-review/recheck", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          figmaUrl,
-          brandId,
-          userId,
-          frameIds: selectedFrameIds, // Include the selected frame IDs
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to recheck design");
-      }
-
-      const data = await response.json();
-
-      // Update the URL to include the review ID if it's not already there
-      if (data.reviewId && data.reviewId !== reviewId) {
-        router.replace(`/design-review/${data.reviewId}`);
-      }
-
-      // Show success toast
-      toast({
-        title: "Recheck Complete",
-        description: "Your design has been rechecked successfully.",
-      });
-
-      // Refresh the review data
-      const refreshResponse = await fetch(`/api/design-review/${reviewId}`);
-      if (refreshResponse.ok) {
-        const refreshData = await refreshResponse.json();
-        setReviewData(refreshData);
-      }
-    } catch (error) {
-      console.error("Error rechecking design:", error);
-      setError(error instanceof Error ? error : new Error("Failed to recheck design"));
-
-      toast({
-        title: "Error",
-        description: "Failed to recheck design. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsRecheckLoading(false);
+    if (!brandId || !reviewId || !selectedFrameIds.length) {
+      throw new Error("Missing required data for recheck");
     }
+
+    // Get the current user ID from context
+    if (!user?.id) {
+      throw new Error("User ID is required for recheck");
+    }
+    const userId = user.id;
+
+    // Call the recheck API directly
+    await recheckDesign({
+      designsReviewId: reviewId,
+      brandId,
+      userId,
+      frameIds: selectedFrameIds,
+    });
   };
 
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
         <CustomLoader size="lg" />
-        <p className="mt-4 text-lg font-medium">Loading design review...</p>
+        <p className="mt-4 text-lg font-medium">Loading your design review...</p>
       </div>
     );
   }
@@ -168,7 +81,7 @@ function DesignReviewWithId({ reviewId }: DesignReviewWithIdProps) {
     );
   }
 
-  if (!reviewData) {
+  if (!designsReview?.id) {
     return (
       <div className="container mx-auto py-8">
         <Card>
@@ -201,11 +114,10 @@ function DesignReviewWithId({ reviewId }: DesignReviewWithIdProps) {
             </Button>
             <h1 className="text-3xl font-bold">Review Results</h1>
           </div>
-          <p className="text-muted-foreground">{reviewData.fileName || "Design Review"}</p>
         </div>
 
         <AnalysisResults
-          result={reviewData!}
+          designsReview={designsReview!}
           onRecheck={handleRecheck}
           showTimeline={true}
           isRecheckLoading={isRecheckLoading}

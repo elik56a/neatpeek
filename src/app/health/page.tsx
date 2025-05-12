@@ -1,4 +1,4 @@
-import { HealthCheck } from '@/features/health/components/HealthCheck';
+import { HealthCheck } from "@/features/health/components/HealthCheck";
 
 export default function HealthPage() {
   return (
@@ -7,4 +7,4 @@ export default function HealthPage() {
       <HealthCheck />
     </div>
   );
-} 
+}

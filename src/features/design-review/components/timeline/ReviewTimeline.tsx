@@ -8,7 +8,7 @@ import { ReviewHistoryEntry } from "../../types";
 import { TimelineEvent } from "../timeline";
 
 interface ReviewTimelineProps {
-  reviewId: string;
+  designsReviewId: string;
   isVisible: boolean;
   onToggle?: () => void;
 }
@@ -16,7 +16,7 @@ interface ReviewTimelineProps {
 /**
  * Component for displaying a review timeline
  */
-export function ReviewTimeline({ reviewId, isVisible }: ReviewTimelineProps) {
+export function ReviewTimeline({ designsReviewId, isVisible }: ReviewTimelineProps) {
   const [history, setHistory] = useState<ReviewHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -24,13 +24,15 @@ export function ReviewTimeline({ reviewId, isVisible }: ReviewTimelineProps) {
   // Fetch history when the component mounts or reviewId changes
   useEffect(() => {
     const fetchHistory = async () => {
-      if (!reviewId || !isVisible) return;
+      if (!designsReviewId || !isVisible) return;
 
       setIsLoading(true);
       setError(null);
 
       try {
-        const response = await fetch(`/api/design-review/history?reviewId=${reviewId}`);
+        const response = await fetch(
+          `/api/design-review/history?designsReviewId=${designsReviewId}`
+        );
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -48,7 +50,7 @@ export function ReviewTimeline({ reviewId, isVisible }: ReviewTimelineProps) {
     };
 
     fetchHistory();
-  }, [reviewId, isVisible]);
+  }, [designsReviewId, isVisible]);
 
   return (
     <div className="relative">

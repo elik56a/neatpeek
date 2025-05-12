@@ -6,7 +6,9 @@ import { AIAnalysisResult, BrandRule } from "@/features/brand-setup/types";
 import {
   DesignAnalysisResult,
   DesignRecheckResult,
+  DesignReviewResult,
   FigmaMetadata,
+  FrameRecheckResult,
 } from "@/features/design-review/types";
 
 /**
@@ -49,7 +51,7 @@ export interface AnalyzeDesignParams {
   /**
    * Image parts for the AI model
    */
-  imageParts: any[];
+  imageParts: string[];
 
   /**
    * Figma metadata
@@ -65,25 +67,7 @@ export interface AnalyzeDesignParams {
 /**
  * Parameters for rechecking a design
  */
-export interface RecheckDesignParams {
-  /**
-   * Image parts for the AI model
-   */
-  imageParts: any[];
-
-  /**
-   * Figma metadata
-   */
-  metadata: FigmaMetadata;
-
-  /**
-   * Brand rules
-   */
-  brandRules: any;
-
-  /**
-   * Comments grouped by frame
-   */
+export interface RecheckDesignParams extends AnalyzeDesignParams {
   commentsByFrame: Record<string, any[]>;
 }
 
@@ -99,10 +83,10 @@ export interface AIService {
   /**
    * Analyze designs against brand rules
    */
-  analyzeDesign(params: AnalyzeDesignParams): Promise<DesignAnalysisResult>;
+  analyzeDesigns(params: AnalyzeDesignParams): Promise<DesignReviewResult[]>;
 
   /**
    * Recheck designs against previous comments
    */
-  recheckDesign(params: RecheckDesignParams): Promise<DesignRecheckResult>;
+  recheckDesigns(params: RecheckDesignParams): Promise<FrameRecheckResult[]>;
 }

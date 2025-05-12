@@ -51,6 +51,7 @@ export interface BaseIssue {
   status?: IssueStatus; // Status of the issue (for rechecks)
   recheck_details?: string; // Additional details from recheck
   created_at?: string; // ISO timestamp when the issue was created
+  element_type?: string; // Type of element (e.g., "Button", "Text", "Image")
 }
 
 /**
@@ -68,6 +69,13 @@ export interface GeneralIssue extends BaseIssue {
 }
 
 /**
+ * Interface for positive aspects
+ */
+export interface PositiveAspect {
+  description: string; // Description of the positive aspect
+  element_type: string; // Type of element (e.g., "Button", "Text", "Image")
+}
+/**
  * Interface for score breakdown
  */
 export interface ScoreBreakdown {
@@ -84,6 +92,8 @@ export interface DesignScore {
   total: number;
   max_score: number;
   breakdown: ScoreBreakdown;
+  scoring_rationale: string;
+  areas_to_improve: string;
 }
 
 /**
@@ -111,7 +121,7 @@ export interface ReviewJson {
   brand_issues: BrandIssue[];
   general_issues: GeneralIssue[];
   design_score: DesignScore;
-  positive_aspects?: string[];
+  positive_aspects?: PositiveAspect[];
   summary?: string;
   created_at: string; // ISO timestamp
   updated_at?: string; // ISO timestamp for rechecks

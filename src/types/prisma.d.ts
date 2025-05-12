@@ -1,6 +1,20 @@
 import { PrismaClient } from "@prisma/client";
 
 declare module "@prisma/client" {
+  namespace Prisma {
+    interface $DesignsReviewExtensionScalar extends DesignsReview {
+      $designsReview: {
+        id: string;
+        designs: Design[];
+      };
+    }
+    interface $DesignExtensionScalar extends Design {
+      $design: {
+        id: string;
+        reviewJson: ReviewJson;
+      };
+    }
+  }
   interface PrismaClient {
     user: {
       findUnique: (args: {
@@ -22,6 +36,18 @@ declare module "@prisma/client" {
         };
       }) => Promise<{
         companyId: string | null;
+      } | null>;
+    };
+    designsReview: {
+      findUnique: (args: {
+        where: { id: string };
+        include: {
+          user: true;
+          brandGuideline: true;
+        };
+      }) => Promise<{
+        user: User;
+        brandGuideline: BrandGuideline;
       } | null>;
     };
   }

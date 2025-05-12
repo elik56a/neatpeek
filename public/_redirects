@@ -1,9 +1,0 @@
-# Netlify redirects file
-# This file is used by Netlify to handle redirects and rewrites
-
-# Handle app subdomain routing
-http://app.neatpeek.netlify.app/*  /app/:splat  200
-https://app.neatpeek.netlify.app/* /app/:splat  200
-
-# SPA fallback
-/*    /index.html   200

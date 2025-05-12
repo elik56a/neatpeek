@@ -10,14 +10,13 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { DesignAnalysisResult, IssueSeverity } from "../../types";
+import { IssueSeverity, Design, DesignsReview } from "../../types";
 import { AlertCircle, ExternalLink, ThumbsUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { extractHexColors, sortIssuesBySeverity } from "../../utils/export-utils";
@@ -27,9 +26,16 @@ import {
   getSeverityBadgeVariant,
   getSeverityBadgeClasses,
 } from "../../utils/enum-mappers";
+import { getSeverityEmoji } from "../../utils/comment-formatters";
+import { useMemo } from "react";
+import { PositiveAspect } from "../../types/review-json";
+import { appConfig } from "@/config/app";
+
+// Add this constant
+const FIX_SUGGESTION_ICON = "💡";
 
 interface AnalysisDetailsProps {
-  result: DesignAnalysisResult;
+  designsReview: DesignsReview;
   className?: string;
   figmaFileName?: string;
   activeFrameId?: string | null;
@@ -39,15 +45,18 @@ interface AnalysisDetailsProps {
  * Component for displaying detailed analysis results
  */
 export function AnalysisDetails({
-  result,
+  designsReview,
   className,
   figmaFileName,
   activeFrameId,
 }: AnalysisDetailsProps) {
   // Get the active review based on the activeFrameId prop
-  const currentReview =
-    result.reviews.find(review => review.image.frame_id === activeFrameId) ||
-    (result.reviews.length > 0 ? result.reviews[0] : null);
+  const currentDesign: Design = useMemo(() => {
+    return (
+      designsReview.designs.find(design => design.frameId === activeFrameId) ||
+      (designsReview.designs.length > 0 ? designsReview.designs[0] : null)
+    );
+  }, [activeFrameId]);
 
   // Render score card with animation
   const renderScoreCard = (score: number, label: string) => (
@@ -78,7 +87,7 @@ export function AnalysisDetails({
     </div>
   );
 
-  if (!currentReview) {
+  if (!currentDesign) {
     return (
       <div className="text-center p-8 border border-dashed rounded-lg">
         <p className="text-muted-foreground">No analysis results available.</p>
@@ -86,37 +95,36 @@ export function AnalysisDetails({
     );
   }
 
+  const { design_score, image, brand_issues, general_issues, positive_aspects } =
+    currentDesign.reviewJson;
+
   return (
     <div className={className}>
       {/* Display only the current review */}
-      {currentReview && (
+      {currentDesign && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Frame preview - takes up 2/3 of the space */}
             <Card className="overflow-hidden md:col-span-2">
-              <div className="aspect-video bg-muted">
-                <img
-                  src={`${currentReview.image.url}?t=${Date.now()}`} /* Add cache-busting parameter */
-                  alt={currentReview.image.name}
-                  className="w-full h-full object-cover"
-                />
+              <div className="relative h-[300px] bg-muted">
+                <img src={image.url} alt={image.name} className="w-full h-full object-contain" />
               </div>
               <CardHeader className="pb-2">
-                <CardTitle>{currentReview.image.name}</CardTitle>
+                <CardTitle>{currentDesign.fileName}</CardTitle>
                 <CardDescription>Frame from Figma design</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  <Badge variant="outline">{currentReview.image.screen_type || "Screen"}</Badge>
-                  <Badge variant="outline">{currentReview.image.platform || "Platform"}</Badge>
+                  <Badge variant="outline">{image.screen_type || "Screen"}</Badge>
+                  <Badge variant="outline">{image.platform || "Platform"}</Badge>
                   <Badge variant="outline">
-                    {currentReview.image.position.width}x{currentReview.image.position.height}
+                    {image.position.width}x{image.position.height}
                   </Badge>
                 </div>
               </CardContent>
               <CardFooter>
                 <Button variant="outline" className="w-full" asChild>
-                  <a href={result.figmaUrl} target="_blank" rel="noopener noreferrer">
+                  <a href={designsReview.figmaUrl} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="mr-2 h-4 w-4" />
                     Open in Figma
                   </a>
@@ -129,24 +137,12 @@ export function AnalysisDetails({
               <h3 className="text-xl font-bold mb-4">Design Scores</h3>
               <Card className="p-3">
                 <div className="space-y-2 animate-in fade-in-50 duration-500">
-                  {renderScoreCard(currentReview.design_score?.total || 0, "Overall Score")}
+                  {renderScoreCard(design_score.total || 0, "Overall Score")}
                   <Separator className="my-1" />
-                  {renderScoreCard(
-                    currentReview.design_score?.breakdown?.brand_compliance || 0,
-                    "Brand Compliance"
-                  )}
-                  {renderScoreCard(
-                    currentReview.design_score?.breakdown?.visual_harmony || 0,
-                    "Visual Harmony"
-                  )}
-                  {renderScoreCard(
-                    currentReview.design_score?.breakdown?.usability || 0,
-                    "Usability"
-                  )}
-                  {renderScoreCard(
-                    currentReview.design_score?.breakdown?.accessibility || 0,
-                    "Accessibility"
-                  )}
+                  {renderScoreCard(design_score.max_score || 0, "Brand Compliance")}
+                  {renderScoreCard(design_score.breakdown.visual_harmony || 0, "Visual Harmony")}
+                  {renderScoreCard(design_score.breakdown.usability || 0, "Usability")}
+                  {renderScoreCard(design_score.breakdown.accessibility || 0, "Accessibility")}
                 </div>
               </Card>
             </div>
@@ -160,12 +156,12 @@ export function AnalysisDetails({
             <div>
               <h3 className="text-xl font-bold mb-4 flex items-center">
                 <AlertCircle className="mr-2 h-5 w-5 text-red-500" />
-                Brand Consistency Issues ({currentReview.brand_issues.length})
+                Brand Consistency Issues ({brand_issues.length})
               </h3>
-              {currentReview.brand_issues.length > 0 ? (
+              {brand_issues.length > 0 ? (
                 <Accordion type="multiple" className="w-full">
                   {/* Sort issues by severity: high first, then medium, then low */}
-                  {sortIssuesBySeverity(currentReview.brand_issues).map((issue, index) => {
+                  {sortIssuesBySeverity(brand_issues).map((issue, index) => {
                     // Extract hex colors from the issue text
                     const colorHexCodes = extractHexColors(
                       issue.description + (issue.brand_rule_violation || "")
@@ -185,7 +181,7 @@ export function AnalysisDetails({
                               >
                                 {severity}
                               </Badge>
-                              <span className="font-medium truncate">Brand Issue</span>
+                              <span className="font-medium truncate">{issue.element_type}</span>
                             </div>
                             {issue.status &&
                               (() => {
@@ -203,17 +199,15 @@ export function AnalysisDetails({
                           </div>
                         </AccordionTrigger>
                         <AccordionContent className="space-y-2 px-2">
-                          <p className="font-medium">{issue.description}</p>
-                          {issue.brand_rule_violation && (
-                            <p className="text-sm text-muted-foreground">
-                              <span className="font-medium">Rule: </span>
-                              {issue.brand_rule_violation}
+                          <p className="font-medium">
+                            {getSeverityEmoji(issue.severity as IssueSeverity)} {issue.description}
+                          </p>
+                          {issue.fix_suggestion && (
+                            <p className="text-sm">
+                              <span className="font-medium">{FIX_SUGGESTION_ICON} Fix: </span>
+                              {issue.fix_suggestion}
                             </p>
                           )}
-                          <p className="text-sm">
-                            <span className="font-medium">Fix: </span>
-                            {issue.fix_suggestion}
-                          </p>
                           {colorHexCodes.length > 0 && (
                             <div className="flex gap-3 mt-2">
                               {colorHexCodes.map((hex, hexIndex) => (
@@ -241,12 +235,12 @@ export function AnalysisDetails({
             <div>
               <h3 className="text-xl font-bold mb-4 flex items-center">
                 <AlertCircle className="mr-2 h-5 w-5 text-amber-500" />
-                UX & Accessibility Issues ({currentReview.general_issues.length})
+                UX & Accessibility Issues ({general_issues.length})
               </h3>
-              {currentReview.general_issues.length > 0 ? (
+              {general_issues.length > 0 ? (
                 <Accordion type="multiple" className="w-full">
                   {/* Sort issues by severity: high first, then medium, then low */}
-                  {sortIssuesBySeverity(currentReview.general_issues).map((issue, index) => {
+                  {sortIssuesBySeverity(general_issues).map((issue, index) => {
                     const severity = issue.severity.toUpperCase();
                     return (
                       <AccordionItem key={index} value={`general-issue-${index}`}>
@@ -261,7 +255,7 @@ export function AnalysisDetails({
                               >
                                 {severity}
                               </Badge>
-                              <span className="font-medium truncate">UX Issue</span>
+                              <span className="font-medium truncate">{issue.element_type}</span>
                             </div>
                             {issue.status &&
                               (() => {
@@ -279,15 +273,15 @@ export function AnalysisDetails({
                           </div>
                         </AccordionTrigger>
                         <AccordionContent className="space-y-2 px-2">
-                          <p className="font-medium">{issue.description}</p>
-                          <p className="text-sm text-muted-foreground">
-                            <span className="font-medium">Issue: </span>
-                            {issue.description}
+                          <p className="font-medium">
+                            {getSeverityEmoji(issue.severity as IssueSeverity)} {issue.description}
                           </p>
-                          <p className="text-sm">
-                            <span className="font-medium">Fix: </span>
-                            {issue.fix_suggestion}
-                          </p>
+                          {issue.fix_suggestion && (
+                            <p className="text-sm">
+                              <span className="font-medium">{FIX_SUGGESTION_ICON} Fix: </span>
+                              {issue.fix_suggestion}
+                            </p>
+                          )}
                         </AccordionContent>
                       </AccordionItem>
                     );
@@ -303,11 +297,11 @@ export function AnalysisDetails({
           <div>
             <h3 className="text-xl font-bold mb-4 flex items-center">
               <ThumbsUp className="mr-2 h-5 w-5 text-green-500" />
-              Positive Aspects ({currentReview.positive_aspects.length})
+              Positive Aspects ({positive_aspects.length})
             </h3>
-            {currentReview.positive_aspects.length > 0 ? (
+            {positive_aspects.length > 0 ? (
               <Accordion type="multiple" className="w-full">
-                {currentReview.positive_aspects.map((aspect: any, index: number) => (
+                {positive_aspects.map((positiveAspect: PositiveAspect, index: number) => (
                   <AccordionItem key={index} value={`positive-aspect-${index}`}>
                     <AccordionTrigger className="hover:no-underline">
                       <div className="flex items-center justify-between w-full pr-4">
@@ -315,12 +309,14 @@ export function AnalysisDetails({
                           <Badge variant="outline" className="bg-green-50 text-green-700 mr-2">
                             Positive
                           </Badge>
-                          <span className="font-medium truncate">Positive Aspect</span>
+                          <span className="font-medium truncate">
+                            {positiveAspect.element_type}
+                          </span>
                         </div>
                       </div>
                     </AccordionTrigger>
                     <AccordionContent className="space-y-2 px-2">
-                      <p className="font-medium">{aspect}</p>
+                      <p className="font-medium">✅ {positiveAspect.description}</p>
                     </AccordionContent>
                   </AccordionItem>
                 ))}
@@ -333,85 +329,23 @@ export function AnalysisDetails({
           {/* Summary */}
           <Card className="mt-6">
             <CardHeader>
-              <CardTitle>Review Summary</CardTitle>
-              <CardDescription>Here's a summary of the brand consistency check</CardDescription>
+              <CardTitle>{appConfig.name} Review Summary</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="rounded-lg border p-4 bg-muted/50">
-                <p className="text-sm">
-                  {currentReview.design_score.total > 80
-                    ? "Your design shows strong brand consistency! There are just a few minor issues to address."
-                    : currentReview.design_score.total > 60
-                      ? "Your design has good brand consistency with some issues that should be addressed."
-                      : "Your design needs significant improvements to align with your brand guidelines."}
-                </p>
-
-                <div className="mt-4 text-sm">
-                  <p className="font-medium">Key areas to improve:</p>
-                  <ul className="list-disc pl-5 mt-2 space-y-1">
-                    {currentReview.design_score.breakdown.brand_compliance < 90 && (
-                      <li>Brand compliance</li>
-                    )}
-                    {currentReview.design_score.breakdown.visual_harmony < 85 && (
-                      <li>Visual harmony</li>
-                    )}
-                    {currentReview.design_score.breakdown.usability < 80 && <li>Usability</li>}
-                  </ul>
-                </div>
-              </div>
-
               <div>
-                <h4 className="font-medium mb-2">Score Breakdown</h4>
-                <div className="space-y-3">
-                  <div>
-                    <div className="flex justify-between mb-1">
-                      <span className="text-sm">Brand Compliance</span>
-                      <span className="text-sm font-medium">
-                        {currentReview.design_score.breakdown.brand_compliance}%
-                      </span>
-                    </div>
-                    <Progress
-                      value={currentReview.design_score.breakdown.brand_compliance}
-                      className="h-2"
-                    />
+                <p className="text-sm text-muted-foreground font-normal ">
+                  {design_score.scoring_rationale}
+                </p>
+              </div>
+              <div className="rounded-lg border p-4 bg-muted/50">
+                {design_score.areas_to_improve && (
+                  <div className="text-sm">
+                    <p className="font-medium">Key areas to improve:</p>
+                    <p className="text-sm text-muted-foreground font-normal ">
+                      {design_score.areas_to_improve}
+                    </p>
                   </div>
-                  <div>
-                    <div className="flex justify-between mb-1">
-                      <span className="text-sm">Visual Harmony</span>
-                      <span className="text-sm font-medium">
-                        {currentReview.design_score.breakdown.visual_harmony}%
-                      </span>
-                    </div>
-                    <Progress
-                      value={currentReview.design_score.breakdown.visual_harmony}
-                      className="h-2"
-                    />
-                  </div>
-                  <div>
-                    <div className="flex justify-between mb-1">
-                      <span className="text-sm">Usability</span>
-                      <span className="text-sm font-medium">
-                        {currentReview.design_score.breakdown.usability}%
-                      </span>
-                    </div>
-                    <Progress
-                      value={currentReview.design_score.breakdown.usability}
-                      className="h-2"
-                    />
-                  </div>
-                  <div>
-                    <div className="flex justify-between mb-1">
-                      <span className="text-sm">Accessibility</span>
-                      <span className="text-sm font-medium">
-                        {currentReview.design_score.breakdown.accessibility}%
-                      </span>
-                    </div>
-                    <Progress
-                      value={currentReview.design_score.breakdown.accessibility}
-                      className="h-2"
-                    />
-                  </div>
-                </div>
+                )}
               </div>
             </CardContent>
           </Card>
