@@ -316,7 +316,7 @@ export function AnalysisDetails({
                       </div>
                     </AccordionTrigger>
                     <AccordionContent className="space-y-2 px-2">
-                      <p className="font-medium">{positiveAspect.description}</p>
+                      <p className="font-medium">✅ {positiveAspect.description}</p>
                     </AccordionContent>
                   </AccordionItem>
                 ))}

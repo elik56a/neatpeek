@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { History } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Tooltip, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ExportButton, AnalysisDetails } from "./analysis-results";
 import { TimelineDrawer } from "./timeline";
 import { FrameRecheckSelector } from "./recheck-results";
@@ -42,16 +42,18 @@ export function AnalysisResults({
             <>
               <TooltipProvider>
                 <Tooltip>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className={isTimelineVisible ? "bg-muted" : ""}
-                    onClick={() => setIsTimelineVisible(true)}
-                  >
-                    <History className="h-4 w-4" />
-                  </Button>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={isTimelineVisible ? "bg-muted" : ""}
+                      onClick={() => setIsTimelineVisible(true)}
+                    >
+                      <History className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
                   <TooltipContent>
-                    <p>View Timeline</p>
+                    <p>View design review history and changes over time</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
