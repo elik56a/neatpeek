@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       fileKey: metadata.fileKey,
       fileName: metadata.fileName,
-      frames: metadata.frames.map((frame: any) => ({
+      frames: metadata.frames.map(frame => ({
         id: frame.id,
         name: frame.name,
         imageUrl: frame.url,
@@ -72,6 +72,6 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: any) {
     console.error("Error getting frames:", error);
-    return NextResponse.json({ error: error.message || "Failed to get frames" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to get frames" }, { status: 500 });
   }
 }

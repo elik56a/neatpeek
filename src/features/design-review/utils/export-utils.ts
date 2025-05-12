@@ -1,5 +1,5 @@
 import {
-  DesignAnalysisResult,
+  DesignsReview,
   DesignReviewExportRow,
   DesignReviewExportOptions,
   IssueSeverity,
@@ -11,55 +11,66 @@ import {
  * @returns Array of export data rows
  */
 export function prepareDesignReviewExportData(
-  result: DesignAnalysisResult
+  designsReview: DesignsReview
 ): DesignReviewExportRow[] {
   const exportData: DesignReviewExportRow[] = [];
 
   // Process each review
-  result.reviews.forEach(review => {
-    const frameName = review.image?.name || "Unknown";
+  designsReview.designs.forEach(design => {
+    const frameName = design.fileName || "Unknown";
+    const frameId = design.frameId || "Unknown";
 
     // Add brand issues
-    if (review.brand_issues && review.brand_issues.length > 0) {
-      review.brand_issues.forEach(issue => {
+    if (design.reviewJson.brand_issues && design.reviewJson.brand_issues.length > 0) {
+      design.reviewJson.brand_issues.forEach(issue => {
         exportData.push({
           frame: frameName,
+          frameId,
           issueType: "Brand Issue",
-          category: issue.element_type || "",
+          category: issue.brand_rule_violation || "",
           severity: issue.severity || "",
           description: issue.description || "",
           recommendation: issue.fix_suggestion || "",
+          status: issue.status || "PENDING",
         });
       });
     }
 
     // Add general issues
-    if (review.general_issues && review.general_issues.length > 0) {
-      review.general_issues.forEach(issue => {
+    if (design.reviewJson.general_issues && design.reviewJson.general_issues.length > 0) {
+      design.reviewJson.general_issues.forEach(issue => {
         exportData.push({
           frame: frameName,
+          frameId,
           issueType: "General Issue",
-          category: issue.element_type || "",
+          category: issue.issue_type || "",
           severity: issue.severity || "",
           description: issue.description || "",
           recommendation: issue.fix_suggestion || "",
+          status: issue.status || "PENDING",
         });
       });
     }
 
     // Add positive aspects
-    if (review.positive_aspects && review.positive_aspects.length > 0) {
-      review.positive_aspects.forEach(aspect => {
+    if (design.reviewJson.positive_aspects && design.reviewJson.positive_aspects.length > 0) {
+      design.reviewJson.positive_aspects.forEach(aspect => {
         exportData.push({
           frame: frameName,
+          frameId,
           issueType: "Positive Aspect",
           category: aspect.element_type || "",
-          severity: aspect.impact || "",
+          severity: "High",
           description: aspect.description || "",
           recommendation: "",
+          status: "N/A",
         });
       });
     }
+  });
+
+  console.log({
+    exportData,
   });
 
   return exportData;
@@ -72,11 +83,13 @@ export function prepareDesignReviewExportData(
 export function getDesignReviewExportHeaders() {
   return {
     frame: "Frame",
+    frameId: "Frame ID",
     issueType: "Issue Type",
     category: "Category",
     severity: "Severity",
     description: "Description",
     recommendation: "Recommendation",
+    status: "Status",
   };
 }
 
@@ -102,17 +115,20 @@ export function generateExportFilename(
   // Add timestamp if requested
   if (options.includeTimestamp) {
     const now = new Date();
-    const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}_${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}`;
+    const timestamp = now.toISOString().replace(/[:.]/g, "-").slice(0, 19);
     filename = `${filename}_${timestamp}`;
   }
+
+  // Add file extension
+  filename = `${filename}.${options.fileType || "csv"}`;
 
   return filename;
 }
 
 /**
- * Sort design issues by severity
- * @param issues Array of design issues
- * @returns Sorted array with high severity first, optional last
+ * Sort issues by severity
+ * @param issues Array of issues with severity
+ * @returns Sorted array of issues
  */
 export function sortIssuesBySeverity<T extends { severity: string }>(issues: T[]): T[] {
   const severityOrder = {
@@ -123,30 +139,19 @@ export function sortIssuesBySeverity<T extends { severity: string }>(issues: T[]
   };
 
   return [...issues].sort((a, b) => {
-    const aSeverity = (a.severity || IssueSeverity.LOW).toLowerCase();
-    const bSeverity = (b.severity || IssueSeverity.LOW).toLowerCase();
-
-    // Default to lowest priority (OPTIONAL) if severity is not in the order map
-    const aOrder =
-      severityOrder[aSeverity as keyof typeof severityOrder] ??
-      severityOrder[IssueSeverity.OPTIONAL];
-    const bOrder =
-      severityOrder[bSeverity as keyof typeof severityOrder] ??
-      severityOrder[IssueSeverity.OPTIONAL];
-
-    return aOrder - bOrder;
+    const severityA = severityOrder[a.severity] ?? 4;
+    const severityB = severityOrder[b.severity] ?? 4;
+    return severityA - severityB;
   });
 }
 
 /**
- * Extract hex color codes from text
- * @param text Text to search for hex codes
- * @returns Array of hex color codes
+ * Extract hex colors from text
+ * @param text Text to extract colors from
+ * @returns Array of hex colors
  */
 export function extractHexColors(text: string): string[] {
-  if (!text) return [];
-
-  const hexRegex = /#([0-9A-F]{6})/gi;
-  const matches = text.match(hexRegex);
-  return matches ? matches : [];
+  const hexColorRegex = /#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})/g;
+  const matches = text.match(hexColorRegex);
+  return matches || [];
 }

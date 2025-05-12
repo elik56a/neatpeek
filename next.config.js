@@ -86,6 +86,28 @@ const nextConfig = {
     };
   },
   webpack: config => {
+     config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      net: false,
+      tls: false,
+      dns: false,
+      child_process: false,
+      http2: false,
+        path: false,
+        os: false,
+        stream: false,
+        https: false,
+        http: false,
+        zlib: false,
+        querystring: false,
+        crypto: false,
+        url: false,
+        util: false,
+        bcrypt: false,
+       "@mapbox/node-pre-gyp": false,
+        "node:events": false,
+    };
     config.resolve.alias = {
       ...config.resolve.alias,
       "@": require("path").resolve(__dirname, "src"),

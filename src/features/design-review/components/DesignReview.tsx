@@ -5,18 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CustomLoader } from "@/components/ui/custom-loader";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAppDataContext } from "@/providers";
 import { AlertCircle, ArrowLeft, Image as ImageIcon, Link2 } from "lucide-react";
 import { GuidelineSelector } from "./GuidelineSelector";
 import { useState, useEffect } from "react";
 import { useDesignReview } from "../hooks";
 import { useRouter } from "next/navigation";
-import { AnalysisResults } from "./AnalysisResults";
 import { FigmaConnectPrompt } from "./FigmaConnectPrompt";
 import { FrameSelector } from "./FrameSelector";
-import { RecheckResults } from "./RecheckResults";
 import { BrandGuideline } from "@/features/brand-setup/types";
 
 
@@ -35,7 +31,6 @@ export function DesignReview({
   onGuidelineChange,
 }: DesignReviewProps) {
   const { company, user, brands } = useAppDataContext();
-  const router = useRouter();
   const [brandId, setBrandId] = useState(initialBrandId);
   const [inputMode, setInputMode] = useState<"figma" | "image">("figma");
   // Use either provided guidelines or brands from context
@@ -43,22 +38,18 @@ export function DesignReview({
   const [figmaUrl, setFigmaUrl] = useState("");
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
-  const [step, setStep] = useState<"input" | "frames" | "results" | "recheck">("input");
+  const [step, setStep] = useState<"input" | "frames" >("input");
 
   const {
     isLoading,
     error,
     frames,
-    // fileKey not used directly
     fileName,
-    analysisResult,
-    recheckResult,
     getFrames,
     toggleFrameSelection,
     selectAllFrames,
     deselectAllFrames,
     reviewDesign,
-    recheckDesign,
     reset,
   } = useDesignReview();
 
@@ -84,21 +75,22 @@ export function DesignReview({
 
   // Handle image review
   const handleImageReview = async () => {
-    if (uploadedImages.length === 0) return;
+    //@todo in future add manully uploaded images designs review
+    // if (uploadedImages.length === 0) return;
 
-    const input = {
-      images: uploadedImages,
-      brandId, // Use the current selected brandId
-    };
+    // const input = {
+    //   images: uploadedImages,
+    //   brandId, // Use the current selected brandId
+    // };
 
-    const result = await reviewDesign(input);
-    if (result) {
-      setStep("results");
-    }
+    // const result = await reviewDesign(input);
+    // if (result) {
+    //   setStep("results");
+    // }
   };
 
   // Handle frame review
-  const handleFrameReview = async () => {
+  const handleFramesReview = async () => {
     const selectedFrames = frames.filter(frame => frame.selected);
     if (selectedFrames.length === 0) return;
 
@@ -111,34 +103,9 @@ export function DesignReview({
       selectedFrameIds, // Pass the selected frame IDs to the API
     };
 
-    const result = await reviewDesign(input);
-    if (result && result.reviewId) {
-      // Update the URL to include the review ID
-      router.replace(`/design-review/${result.reviewId}`);
-      setStep("results");
-    }
+    await reviewDesign(input);
   };
 
-  // Handle recheck
-  const handleRecheck = async () => {
-    if (!user?.id) {
-      console.error("User ID is required for recheck");
-      return;
-    }
-
-    const input = {
-      figmaUrl,
-      brandId, // Use the current selected brandId
-      userId: user.id, // Add the user ID
-    };
-
-    const result = await recheckDesign(input);
-    if (result && result.reviewId) {
-      // Update the URL to include the review ID
-      router.replace(`/design-review/${result.reviewId}`);
-      setStep("recheck");
-    }
-  };
 
   // Handle reset
   const handleReset = () => {
@@ -158,11 +125,7 @@ export function DesignReview({
   // For other steps, we'll show skeletons in place
   if (isLoading && step === "input") {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <CustomLoader size="lg" />
-        <p className="mt-4 text-lg font-medium">Loading Figma frames...</p>
-        <p className="text-sm text-muted-foreground mt-2">This may take a moment...</p>
-      </div>
+        <CustomLoader size="lg" text="Loading Figma frames..." />
     );
   }
 
@@ -194,13 +157,13 @@ export function DesignReview({
 
         <Card className="border-primary/20 shadow-sm">
           <CardContent className="pt-6">
-            <Tabs
+            {/* <Tabs
               defaultValue="figma"
               value={inputMode}
               onValueChange={value => setInputMode(value as "figma" | "image")}
               className="w-full"
-            >
-              <TabsList className="relative w-full mb-6 grid grid-cols-2">
+            > */}
+              {/* <TabsList className="relative w-full mb-6 grid grid-cols-2">
                 <TabsTrigger
                   value="figma"
                   className="relative z-10 overflow-hidden group data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
@@ -219,15 +182,15 @@ export function DesignReview({
                     Review Design Images
                   </span>
                 </TabsTrigger>
-              </TabsList>
+              </TabsList> */}
 
-              <TabsContent value="figma" className="space-y-4">
+              {/* <TabsContent value="figma" className="space-y-4"> */}
                 <div className="grid gap-2">
                   <Label htmlFor="figmaUrl">Figma Design URL</Label>
                   <div className="relative">
                     <Input
                       id="figmaUrl"
-                      placeholder="https://www.figma.com/file/..."
+                      placeholder="https://www.figma.com/design/..."
                       type="url"
                       value={figmaUrl}
                       onChange={e => setFigmaUrl(e.target.value)}
@@ -239,7 +202,7 @@ export function DesignReview({
                     Paste a link to your Figma design file to review it for brand consistency
                   </p>
                 </div>
-                <div className="flex justify-end">
+                <div className="flex justify-center mt-4">
                   <Button
                     onClick={handleFigmaUrlSubmit}
                     disabled={isLoading || !figmaUrl}
@@ -251,13 +214,13 @@ export function DesignReview({
                         Loading Figma Frames...
                       </>
                     ) : (
-                      "Continue"
+                      'Let\'s NeatPeek'
                     )}
                   </Button>
                 </div>
-              </TabsContent>
+              {/* </TabsContent> */}
 
-              <TabsContent value="image" className="space-y-4">
+              {/* <TabsContent value="image" className="space-y-4">
                 <div className="grid gap-4">
                   <Label htmlFor="imageUpload">Upload Design Images</Label>
                   <div
@@ -364,8 +327,8 @@ export function DesignReview({
                     )}
                   </Button>
                 </div>
-              </TabsContent>
-            </Tabs>
+              </TabsContent> */}
+            {/* </Tabs> */}
           </CardContent>
         </Card>
 
@@ -397,8 +360,10 @@ export function DesignReview({
             </Button>
             <h1 className="text-3xl font-bold">Select Frames</h1>
           </div>
-          <p className="text-muted-foreground">{fileName || "Figma Design"}</p>
         </div>
+
+          <h2 className="text-xl font-bold">Figma File: {fileName}</h2>
+
 
         <FrameSelector
           frames={frames}
@@ -406,7 +371,7 @@ export function DesignReview({
           onToggleFrame={toggleFrameSelection}
           onSelectAll={selectAllFrames}
           onDeselectAll={deselectAllFrames}
-          onAnalyze={handleFrameReview}
+          onAnalyze={handleFramesReview}
         />
 
         {error && (
@@ -426,116 +391,8 @@ export function DesignReview({
     );
   }
 
-  // Results step - Show the analysis results
-  if (step === "results") {
-    return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <Button variant="ghost" size="icon" onClick={handleReset} className="mr-2">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <h1 className="text-3xl font-bold">Review Results</h1>
-          </div>
-          <p className="text-muted-foreground">{fileName || "Design Review"}</p>
-        </div>
-
-        <Separator />
-
-        {isLoading ? (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <div className="h-8 w-48 bg-muted rounded animate-pulse" />
-              <div className="h-8 w-24 bg-muted rounded animate-pulse" />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="h-6 w-32 bg-muted rounded animate-pulse" />
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="border rounded-md p-4 space-y-3">
-                    <div className="h-5 w-full bg-muted rounded animate-pulse" />
-                    <div className="h-4 w-3/4 bg-muted rounded animate-pulse" />
-                    <div className="h-4 w-1/2 bg-muted rounded animate-pulse" />
-                  </div>
-                ))}
-              </div>
-
-              <div className="space-y-4">
-                <div className="h-6 w-32 bg-muted rounded animate-pulse" />
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="border rounded-md p-4 space-y-3">
-                    <div className="h-5 w-full bg-muted rounded animate-pulse" />
-                    <div className="h-4 w-3/4 bg-muted rounded animate-pulse" />
-                    <div className="h-4 w-1/2 bg-muted rounded animate-pulse" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        ) : analysisResult ? (
-          <AnalysisResults result={analysisResult} onRecheck={handleRecheck} />
-        ) : (
-          <div className="text-center p-8 border border-dashed rounded-lg">
-            <p className="text-muted-foreground">No analysis results available.</p>
-          </div>
-        )}
-
-        {error && (
-          <Card className="border-destructive">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-destructive flex items-center">
-                <AlertCircle className="h-4 w-4 mr-2" />
-                Error
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>{error.message}</p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    );
-  }
-
-  // Recheck step - Show the recheck results
-  if (step === "recheck") {
-    return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center">
-            <Button variant="ghost" size="icon" onClick={handleReset} className="mr-2">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <h1 className="text-3xl font-bold">Recheck Results</h1>
-          </div>
-          <p className="text-muted-foreground">{fileName || "Design Recheck"}</p>
-        </div>
-
-        <Separator />
-
-        {recheckResult && <RecheckResults result={recheckResult} onRecheck={handleReset} />}
-
-        {error && (
-          <Card className="border-destructive">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-destructive flex items-center">
-                <AlertCircle className="h-4 w-4 mr-2" />
-                Error
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>{error.message}</p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-    );
-  }
-
-  // Default fallback
   return (
-    <div className="flex flex-col items-center justify-center py-12">
+    <div className="flex flex-col items-center justify-center min-h-screen py-12">
       <p>Something went wrong. Please try again.</p>
       <Button onClick={handleReset} className="mt-4">
         Start Over

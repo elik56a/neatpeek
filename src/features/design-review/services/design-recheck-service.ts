@@ -23,6 +23,7 @@ import {
   ReviewHistoryAction,
   IssueType,
   HistoryChanges,
+  Design,
 } from "../types";
 import { FigmaService } from "./figma-service";
 import {
@@ -32,14 +33,6 @@ import {
   generateRecheckSummary,
 } from "../utils/history-formatters";
 import { formatNewIssueComment, formatRecheckComment } from "../utils/comment-formatters";
-import { FigmaFrame, DesignReview } from "@/types";
-
-/**
- * Interface for frame with design reviews
- */
-interface FrameWithReviews extends FigmaFrame {
-  designReviews: DesignReview[];
-}
 
 /**
  * Interface for issue information
@@ -47,7 +40,7 @@ interface FrameWithReviews extends FigmaFrame {
 interface IssueInfo {
   issue: BrandIssue | GeneralIssue;
   type: IssueType;
-  reviewId: string;
+  designId: string;
   frameId: string;
 }
 
@@ -63,7 +56,7 @@ interface CommentMaps {
  * Interface for processed recheck result
  */
 interface ProcessedRecheckResult {
-  reviewId: string;
+  designId: string;
   updatedReviewJson: ReviewJson;
   historyAction: ReviewHistoryAction;
   historySummary: string;
@@ -87,76 +80,65 @@ export class DesignRecheckService {
   /**
    * Find frames in the database for a Figma file
    * @param fileKey Figma file key
-   * @returns Array of frames with their most recent design reviews
+   * @returns Array of frames with their most recent designs
    */
-  async findFramesForFile(fileKey: string): Promise<FrameWithReviews[]> {
-    const frames = await prisma.figmaFrame.findMany({
+  async findDesignsForFile(fileKey: string): Promise<Design[]> {
+    const designs = await prisma.design.findMany({
       where: {
-        figmaFileKey: fileKey,
+        designsReview: {
+          figmaFileId: fileKey,
+        },
       },
       include: {
-        designReviews: {
-          orderBy: {
-            createdAt: "desc",
-          },
-          take: 1,
-          // We need all fields for the DesignReview type
-          // but we're particularly interested in originalFigmaUrl
-        },
+        user: true,
+        designsReview: true,
       },
     });
 
-    if (frames.length === 0) {
-      throw new Error("No frames found for this Figma file. Please run an initial review first.");
+    if (designs.length === 0) {
+      throw new Error("No designs found for this Figma file. Please run an initial review first.");
     }
 
-    return frames as FrameWithReviews[];
+    return designs;
   }
 
   /**
-   * Find specific frames in the database by their IDs
+   * Find specific Designs in the database by their IDs
    * @param fileKey Figma file key
    * @param frameIds Array of frame IDs to find
-   * @returns Array of frames with their most recent design reviews
+   * @returns Array of frames with their most recent designs
    */
-  async findFramesByIds(fileKey: string, frameIds: string[]): Promise<FrameWithReviews[]> {
-    const frames = await prisma.figmaFrame.findMany({
+  async findDesignsByIds(fileKey: string, designIds: string[]): Promise<Design[]> {
+    const designs = await prisma.design.findMany({
       where: {
-        figmaFileKey: fileKey,
-        frameId: {
-          in: frameIds,
+        id: {
+          in: designIds,
         },
       },
       include: {
-        designReviews: {
-          orderBy: {
-            createdAt: "desc",
-          },
-          take: 1,
-          // We need all fields for the DesignReview type
-          // but we're particularly interested in originalFigmaUrl
-        },
+        user: true,
+        designsReview: true,
       },
     });
 
-    if (frames.length === 0) {
+    if (designs.length === 0) {
       throw new Error(
-        "No frames found for the specified frame IDs. Please run an initial review first."
+        "No designs found for the specified design IDs. Please run an initial review first."
       );
     }
 
-    return frames as FrameWithReviews[];
+    return designs;
   }
 
   /**
-   * Create a map of frame IDs to their most recent design reviews
-   * @param frames Array of frames with design reviews
-   * @returns Map of frame IDs to reviews
+   * Create a map of frame IDs to their most recent designs
+   * @param frames Array of frames with designs
+   * @returns Map of frame IDs to designs
    */
-  createFrameToReviewMap(frames: FrameWithReviews[]): Record<string, DesignReview> {
-    return frames.reduce<Record<string, DesignReview>>((map, frame) => {
-      if (frame.designReviews && frame.designReviews.length > 0) {
-        map[frame.frameId] = frame.designReviews[0];
+  createFrameToDesignMap(designs: Design[]): Record<string, Design> {
+    return designs.reduce<Record<string, Design>>((map, design) => {
+      if (design?.frameId) {
+        map[design?.frameId] = design;
       }
       return map;
     }, {});
@@ -164,44 +146,41 @@ export class DesignRecheckService {
 
   /**
    * Create maps for comment IDs to issues and frame IDs to review JSON
-   * @param frames Array of frames with design reviews
+   * @param frames Array of frames with designs
    * @returns Maps for comment IDs and review JSON
    */
-  createCommentMaps(frames: FrameWithReviews[]): CommentMaps {
+  createCommentMaps(designs: Design[]): CommentMaps {
     const commentIdToIssue = new Map<string, IssueInfo>();
     const frameIdToReviewJson = new Map<string, ReviewJson>();
 
-    for (const frame of frames) {
-      if (frame.designReviews && frame.designReviews.length > 0) {
-        const review = frame.designReviews[0];
-        const reviewJson = review.reviewJson as ReviewJson;
-        frameIdToReviewJson.set(frame.frameId, reviewJson);
+    for (const design of designs) {
+      const reviewJson = design.reviewJson as ReviewJson;
+      frameIdToReviewJson.set(design.frameId, reviewJson);
 
-        // Process brand issues
-        if (reviewJson.brand_issues) {
-          for (const issue of reviewJson.brand_issues) {
-            if (issue.figma_comment_id) {
-              commentIdToIssue.set(issue.figma_comment_id, {
-                issue,
-                type: IssueType.BRAND_ISSUE,
-                reviewId: review.id,
-                frameId: frame.id,
-              });
-            }
+      // Process brand issues
+      if (reviewJson.brand_issues) {
+        for (const issue of reviewJson.brand_issues) {
+          if (issue.figma_comment_id) {
+            commentIdToIssue.set(issue.figma_comment_id, {
+              issue,
+              type: IssueType.BRAND_ISSUE,
+              designId: design.id,
+              frameId: design.frameId,
+            });
           }
         }
+      }
 
-        // Process general issues
-        if (reviewJson.general_issues) {
-          for (const issue of reviewJson.general_issues) {
-            if (issue.figma_comment_id) {
-              commentIdToIssue.set(issue.figma_comment_id, {
-                issue,
-                type: IssueType.GENERAL_ISSUE,
-                reviewId: review.id,
-                frameId: frame.id,
-              });
-            }
+      // Process general issues
+      if (reviewJson.general_issues) {
+        for (const issue of reviewJson.general_issues) {
+          if (issue.figma_comment_id) {
+            commentIdToIssue.set(issue.figma_comment_id, {
+              issue,
+              type: IssueType.GENERAL_ISSUE,
+              designId: design.id,
+              frameId: design.frameId,
+            });
           }
         }
       }
@@ -245,45 +224,26 @@ export class DesignRecheckService {
    * @param metadata Figma metadata
    * @param commentIdToIssue Map of comment IDs to issues
    * @param frameIdToReviewJson Map of frame IDs to review JSON
-   * @param frameIdToReview Map of frame IDs to reviews
+   * @param frameIdToDesign Map of frame IDs to designs
    * @returns Processed result with updated review and history entry
    */
-  async processFrameRecheckResult(
+  private async processFrameRecheckResult(
     frameResult: FrameRecheckResult,
     metadata: FigmaMetadata,
     commentIdToIssue: Map<string, IssueInfo>,
     frameIdToReviewJson: Map<string, ReviewJson>,
-    frameIdToReview: Record<string, DesignReview>
+    frameIdToDesign: Record<string, Design>
   ): Promise<ProcessedRecheckResult | null> {
     const frameId = frameResult.frame_id;
+    const reviewJson = frameIdToReviewJson.get(frameId);
+    const design = frameIdToDesign[frameId];
 
-    if (!frameIdToReviewJson.has(frameId)) {
-      console.warn(`No review found for frame ID: ${frameId}`);
+    if (!reviewJson || !design) {
+      console.warn(`No review found for frame ${frameId}`);
       return null;
     }
 
-    const review = frameIdToReview[frameId];
-    const reviewJson = JSON.parse(JSON.stringify(frameIdToReviewJson.get(frameId))) as ReviewJson;
-
-    // Add updated_at timestamp
-    reviewJson.updated_at = new Date().toISOString();
-
-    // Update the image URL with the latest one from metadata
-    const frameMetadata = metadata.frames.find(frame => frame.id === frameId);
-    if (frameMetadata && frameMetadata.url && reviewJson.image) {
-      console.log(
-        `Updating image URL for frame ${frameId} from ${reviewJson.image.url} to ${frameMetadata.url}`
-      );
-      reviewJson.image.url = frameMetadata.url;
-    }
-
-    // Update design scores if provided by AI
-    if (frameResult.updated_scores) {
-      console.log(`Updating design scores for frame ${frameId}`);
-      reviewJson.design_score = frameResult.updated_scores;
-    }
-
-    // Update existing issues with recheck results
+    // Update existing issues
     await this.updateExistingIssues(
       frameResult.comment_checks,
       commentIdToIssue,
@@ -291,9 +251,21 @@ export class DesignRecheckService {
       metadata.fileKey
     );
 
-    // Add new issues if any
-    if (frameResult.new_issues && frameResult.new_issues.length > 0) {
-      await this.addNewIssues(frameResult.new_issues, frameId, reviewJson, metadata);
+    // Add new issues
+    await this.addNewIssues(frameResult.new_issues, frameId, reviewJson, metadata);
+
+    // Update scores
+    if (frameResult.updated_scores) {
+      reviewJson.design_score = frameResult.updated_scores;
+    }
+    reviewJson.updated_at = new Date().toISOString();
+
+    // Update image properties
+    const frameMetadata = metadata.frames.find(f => f.id === frameId);
+    if (frameMetadata) {
+      reviewJson.image.url = frameMetadata.url;
+      reviewJson.image.position = frameMetadata.position;
+      reviewJson.image.name = frameMetadata.name;
     }
 
     // Count issues by status for history entry
@@ -313,7 +285,7 @@ export class DesignRecheckService {
     }
 
     return {
-      reviewId: review.id,
+      designId: design.id,
       updatedReviewJson: reviewJson,
       historyAction: action,
       historySummary: summary,
@@ -322,7 +294,7 @@ export class DesignRecheckService {
   }
 
   /**
-   * Update existing issues with recheck results
+   * Update existing issues based on comment checks
    * @param commentChecks Array of comment check results
    * @param commentIdToIssue Map of comment IDs to issues
    * @param reviewJson Review JSON to update
@@ -335,45 +307,25 @@ export class DesignRecheckService {
     fileKey: string
   ): Promise<void> {
     for (const check of commentChecks) {
-      const commentId = check.comment_id;
-      const issueInfo = commentIdToIssue.get(commentId);
+      const issueInfo = commentIdToIssue.get(check.comment_id);
+      if (!issueInfo) continue;
 
-      if (!issueInfo) {
-        console.warn(`No issue found for comment ID: ${commentId}`);
-        continue;
-      }
+      // update issue status
+      const issue = issueInfo.issue;
+      issue.status = check.check_result.status;
+      issue.recheck_details = check.check_result.details;
 
-      const { type } = issueInfo;
-      const issueArray =
-        type === IssueType.BRAND_ISSUE ? reviewJson.brand_issues : reviewJson.general_issues;
-      const issueIndex = issueArray.findIndex(
-        (i: BrandIssue | GeneralIssue) => i.figma_comment_id === commentId
-      );
-
-      if (issueIndex === -1) {
-        console.warn(`Issue not found in ${type} array for comment ID: ${commentId}`);
-        continue;
-      }
-
-      // Update the issue status
-      issueArray[issueIndex].status = check.check_result.status;
-      issueArray[issueIndex].recheck_details = check.check_result.details;
-
-      // Add thread comment to Figma
+      // Update Figma comment if status changed
       const commentText = formatRecheckComment(
-        check.check_result.status as IssueStatus,
+        check.check_result.status,
         check.check_result.details
       );
-      try {
-        await this.figmaService.addThreadComment(fileKey, commentId, commentText);
-      } catch (error) {
-        console.warn(`Error adding thread comment to comment ${commentId}:`, error);
-      }
+      await this.figmaService.addThreadComment(fileKey, check.comment_id, commentText);
     }
   }
 
   /**
-   * Add new issues to the review JSON
+   * Add new issues to the review
    * @param newIssues Array of new issues
    * @param frameId Frame ID
    * @param reviewJson Review JSON to update
@@ -385,115 +337,108 @@ export class DesignRecheckService {
     reviewJson: ReviewJson,
     metadata: FigmaMetadata
   ): Promise<void> {
-    const frameData = metadata.frames.find(f => f.id === frameId);
+    for (const issue of newIssues) {
+      // Add comment to Figma
+      const commentText = formatNewIssueComment(issue);
+      const comment = await this.figmaService.addFigmaComment(
+        metadata.fileKey,
+        frameId,
+        commentText,
+        issue.coordinates,
+        metadata.frames.find(f => f.id === frameId)?.position
+      );
 
-    if (frameData) {
-      // Process each new issue
-      for (const newIssue of newIssues) {
-        // Add timestamp to the new issue
-        newIssue.created_at = new Date().toISOString();
-        newIssue.status = IssueStatus.NEW;
+      // Update issue with comment ID
+      issue.figma_comment_id = comment;
 
-        // Create Figma comment for the new issue
-        const commentText = formatNewIssueComment(newIssue);
-        const commentId = await this.figmaService.addFigmaComment(
-          metadata.fileKey,
-          frameId,
-          commentText,
-          newIssue.coordinates,
-          frameData.position
-        );
-
-        // Store the comment ID in the issue
-        newIssue.figma_comment_id = commentId;
-
-        // Add the issue to the appropriate array in reviewJson
-        if ("brand_rule_violation" in newIssue) {
-          reviewJson.brand_issues.push(newIssue as BrandIssue);
-        } else {
-          reviewJson.general_issues.push(newIssue as GeneralIssue);
-        }
+      // Add to appropriate issues array
+      if ("brand_rule_violation" in issue) {
+        if (!reviewJson.brand_issues) reviewJson.brand_issues = [];
+        reviewJson.brand_issues.push(issue as BrandIssue);
+      } else {
+        if (!reviewJson.general_issues) reviewJson.general_issues = [];
+        reviewJson.general_issues.push(issue as GeneralIssue);
       }
     }
   }
 
   /**
-   * Save updated reviews and create history entries
+   * Save recheck results to the database
    * @param processedResults Array of processed recheck results
-   * @returns Map of review IDs to updated review JSON
+   * @returns Map of frame IDs to updated review JSON
    */
   async saveRecheckResults(
     processedResults: (ProcessedRecheckResult | null)[]
   ): Promise<Map<string, ReviewJson>> {
-    const updatedReviews = new Map<string, ReviewJson>();
+    const frameIdToReviewJson = new Map<string, ReviewJson>();
 
     for (const result of processedResults) {
       if (!result) continue;
 
-      const { reviewId, updatedReviewJson, historyAction, historySummary, historyChanges } = result;
+      const { designId, updatedReviewJson, historyAction, historySummary, historyChanges } = result;
 
-      // Update the review in the database
-      await prisma.designReview.update({
-        where: { id: reviewId },
+      // Update design record
+      const design = await prisma.design.update({
+        where: { id: designId },
         data: {
           reviewJson: updatedReviewJson as any,
-          // Also update the design scores in the database
-          designScore: updatedReviewJson.design_score.total,
-          designScoreMax: updatedReviewJson.design_score.max_score,
-          brandComplianceScore: updatedReviewJson.design_score.breakdown.brand_compliance,
-          visualHarmonyScore: updatedReviewJson.design_score.breakdown.visual_harmony,
-          usabilityScore: updatedReviewJson.design_score.breakdown.usability,
-          accessibilityScore: updatedReviewJson.design_score.breakdown.accessibility,
         },
       });
 
       // Create history entry
       await prisma.reviewHistory.create({
         data: {
-          designReviewId: reviewId,
+          designsReviewId: design.designsReviewId,
           action: historyAction,
           summary: historySummary,
-          changes: historyChanges as any, // Cast to any for Prisma JSON field compatibility
-          timestamp: new Date(),
+          changes: historyChanges as any,
         },
       });
 
-      updatedReviews.set(reviewId, updatedReviewJson);
+      // Add to map
+      frameIdToReviewJson.set(design.frameId, updatedReviewJson);
     }
 
-    return updatedReviews;
+    return frameIdToReviewJson;
   }
 
   /**
-   * Process a complete recheck operation
-   * @param recheckResult Recheck result from AI
+   * Process a recheck result
+   * @param recheckResult Recheck result to process
    * @param metadata Figma metadata
-   * @param frames Frames with design reviews
-   * @returns Map of review IDs to updated review JSON
+   * @param frames Array of frames with designs
+   * @returns Map of frame IDs to updated review JSON
    */
   async processRecheckResult(
-    recheckResult: DesignRecheckResult,
+    recheckResult: FrameRecheckResult[],
     metadata: FigmaMetadata,
-    frames: FrameWithReviews[]
+    designs: Design[]
   ): Promise<Map<string, ReviewJson>> {
-    // Create maps for frame IDs to reviews and comment IDs to issues
-    const frameIdToReview = this.createFrameToReviewMap(frames);
-    const { commentIdToIssue, frameIdToReviewJson } = this.createCommentMaps(frames);
+    // Create maps for comment IDs and review JSON
+    const { commentIdToIssue, frameIdToReviewJson } = this.createCommentMaps(designs);
 
-    // Process each frame recheck result
+    // Create map of frame IDs to designs
+    const frameIdToDesign = this.createFrameToDesignMap(designs);
+
+    if (!recheckResult || recheckResult.length === 0) {
+      console.warn("No recheck results to process.");
+      return new Map();
+    }
+
+    // Process each frame result
     const processedResults = await Promise.all(
-      recheckResult.recheck_results.map(frameResult =>
+      recheckResult?.map(frameResult =>
         this.processFrameRecheckResult(
           frameResult,
           metadata,
           commentIdToIssue,
           frameIdToReviewJson,
-          frameIdToReview
+          frameIdToDesign
         )
       )
     );
 
-    // Save results to database and create history entries
+    // Save results to database
     return this.saveRecheckResults(processedResults);
   }
 }

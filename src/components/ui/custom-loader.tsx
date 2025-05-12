@@ -5,9 +5,10 @@ import { cn } from "@/utils/cn";
 interface CustomLoaderProps {
   size?: "sm" | "md" | "lg" | "xl";
   className?: string;
+  text?: string;
 }
 
-export function CustomLoader({ size = "md", className }: CustomLoaderProps) {
+export function CustomLoader({ size = "md", className, text = "Loading..." }: CustomLoaderProps) {
   const sizeClasses = {
     sm: "w-6 h-6",
     md: "w-10 h-10",
@@ -16,7 +17,7 @@ export function CustomLoader({ size = "md", className }: CustomLoaderProps) {
   };
 
   return (
-    <div className="flex items-center justify-center">
+      <div className="flex flex-col items-center justify-center min-h-screen py-12">
       <div className={cn("relative", sizeClasses[size], className)}>
         <div className="absolute w-full h-full border-4 border-muted rounded-full"></div>
         <div className="absolute w-full h-full border-4 border-t-primary rounded-full animate-spin"></div>
@@ -29,6 +30,7 @@ export function CustomLoader({ size = "md", className }: CustomLoaderProps) {
           ></div>
         </div>
       </div>
+      <p className="mt-4 text-muted-foreground animate-pulse">{text}</p>
     </div>
   );
 }

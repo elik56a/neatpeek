@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DesignAnalysisResult } from "../../types";
 import { CheckCheck, X, RefreshCw } from "lucide-react";
 import dynamic from "next/dynamic";
 import { cn } from "@/utils/cn";
+import { DesignsReview } from "../../types";
 
 // Import ScrollArea dynamically with SSR disabled
 const ScrollArea = dynamic(
@@ -15,7 +15,7 @@ const ScrollArea = dynamic(
 );
 
 interface FrameRecheckSelectorProps {
-  result: DesignAnalysisResult;
+  designsReview: DesignsReview;
   activeFrameId: string | null;
   onFrameSelect: (frameId: string) => void;
   onRecheck: (frameIds: string[]) => void;
@@ -26,7 +26,7 @@ interface FrameRecheckSelectorProps {
  * Component for navigating between frames and selecting which ones to recheck
  */
 export function FrameRecheckSelector({
-  result,
+  designsReview,
   activeFrameId,
   onFrameSelect,
   onRecheck,
@@ -35,11 +35,11 @@ export function FrameRecheckSelector({
   const [selectedFrames, setSelectedFrames] = useState<Set<string>>(new Set([activeFrameId || ""]));
 
   // Get all frames from the result
-  const frames = result.reviews.map(review => ({
-    frameId: review.image.frame_id,
-    name: review.image.name,
-    imageUrl: review.image.url,
-    selected: selectedFrames.has(review.image.frame_id),
+  const frames = designsReview.designs.map(design => ({
+    frameId: design.frameId,
+    name: design.fileName,
+    imageUrl: design.reviewJson.image.url,
+    selected: selectedFrames.has(design.frameId),
   }));
 
   // Toggle frame selection
@@ -104,7 +104,7 @@ export function FrameRecheckSelector({
 
       {/* Vertical scrolling frame list */}
       <div className="border rounded-md p-3">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-4 place-content-center">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-4 place-content-center">
           {frames.map(frame => (
             <div key={frame.frameId} className="relative w-[140px] flex flex-col">
               {/* Frame name at the top */}
@@ -120,11 +120,12 @@ export function FrameRecheckSelector({
                 )}
                 onClick={() => onFrameSelect(frame.frameId)}
               >
-                <div className="w-[140px] h-[100px] overflow-hidden">
+                <div className="relative w-[140px] h-[100px] bg-muted">
                   <img
-                    src={`${frame.imageUrl}?t=${Date.now()}`} /* Add cache-busting parameter */
+                    src={frame.imageUrl}
                     alt={frame.name}
-                    className="w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-contain"
+                    loading="lazy"
                   />
                 </div>
               </div>

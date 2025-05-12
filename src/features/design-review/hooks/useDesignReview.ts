@@ -1,29 +1,46 @@
 /**
  * Hook for design review functionality
  */
-
 import { useState } from "react";
+import { useFetch } from "@/hooks/use-fetch";
 import { useToast } from "@/hooks/use-toast";
 import {
   DesignAnalysisInput,
-  DesignAnalysisResult,
   DesignRecheckInput,
   DesignRecheckResult,
   FrameSelectionState,
+  DesignsReview,
 } from "../types";
+import { useRouter } from "next/navigation";
 
 /**
  * Hook for design review functionality
  */
 export function useDesignReview() {
   const [isLoading, setIsLoading] = useState(false);
+  const [isRecheckLoading, setIsRecheckLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [frames, setFrames] = useState<FrameSelectionState[]>([]);
   const [fileKey, setFileKey] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
-  const [analysisResult, setAnalysisResult] = useState<DesignAnalysisResult | null>(null);
-  const [recheckResult, setRecheckResult] = useState<DesignRecheckResult | null>(null);
+  const [designsReview, setDesignsReview] = useState<DesignsReview | null>(null);
   const { toast } = useToast();
+  const api = useFetch();
+  const router = useRouter();
+
+  const getDesignsReview = async (designsReviewId: string) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`/api/design-review/${designsReviewId}`);
+      const data = await response.json();
+      setDesignsReview(data);
+    } catch (error) {
+      setError(error as Error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   /**
    * Get frames from a Figma file
@@ -104,10 +121,10 @@ export function useDesignReview() {
    * Review design
    * @param input Review input
    */
-  const reviewDesign = async (input: DesignAnalysisInput) => {
+  const reviewDesign = async (input: DesignAnalysisInput): Promise<DesignsReview> => {
     setIsLoading(true);
     setError(null);
-    setAnalysisResult(null);
+    setDesignsReview(null);
 
     try {
       const response = await fetch("/api/design-review/review", {
@@ -124,12 +141,15 @@ export function useDesignReview() {
       }
 
       const data = await response.json();
-      setAnalysisResult(data);
+      if (data.id) {
+        setDesignsReview(data);
+        router.replace(`/design-review/${data.id}`);
 
-      toast({
-        title: "Review Complete",
-        description: "Design review has been completed successfully.",
-      });
+        toast({
+          title: "Review Complete",
+          description: "Design review has been completed successfully.",
+        });
+      }
 
       return data;
     } catch (error: any) {
@@ -150,43 +170,31 @@ export function useDesignReview() {
    * @param input Recheck input
    */
   const recheckDesign = async (input: DesignRecheckInput) => {
-    setIsLoading(true);
-    setError(null);
-    setRecheckResult(null);
-
     try {
-      const response = await fetch("/api/design-review/recheck", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(input),
-      });
+      setIsRecheckLoading(true);
+      const { data } = await api.post<DesignRecheckInput, DesignRecheckResult>(
+        `design-review/${input.designsReviewId}/recheck`,
+        input
+      );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to recheck design");
+      if (data.designsReviewId) {
+        await getDesignsReview(data.designsReviewId);
       }
-
-      const data = await response.json();
-      setRecheckResult(data);
+      setIsRecheckLoading(false);
 
       toast({
         title: "Recheck Complete",
         description: "Design recheck has been completed successfully.",
       });
-
-      return data;
     } catch (error: any) {
-      setError(error);
       toast({
         title: "Error",
-        description: error.message || "Failed to recheck design",
+        description: "Failed to recheck design",
         variant: "destructive",
       });
       return null;
     } finally {
-      setIsLoading(false);
+      setIsRecheckLoading(false);
     }
   };
 
@@ -197,26 +205,25 @@ export function useDesignReview() {
     setFrames([]);
     setFileKey(null);
     setFileName(null);
-    setAnalysisResult(null);
-    setRecheckResult(null);
+    setDesignsReview(null);
     setError(null);
   };
 
   return {
     isLoading,
+    isRecheckLoading,
     error,
     frames,
     fileKey,
     fileName,
-    analysisResult,
-    recheckResult,
+    designsReview,
     getFrames,
     toggleFrameSelection,
     selectAllFrames,
     deselectAllFrames,
-    analyzeDesign: reviewDesign, // Keep old name for backward compatibility
     reviewDesign,
     recheckDesign,
     reset,
+    getDesignsReview,
   };
 }

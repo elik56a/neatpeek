@@ -6,95 +6,33 @@
  * Figma Frame entity
  */
 
+import { Prisma } from "@prisma/client";
+
 export enum CompanyRole {
   OWNER = "OWNER",
   ADMIN = "ADMIN",
   MEMBER = "MEMBER",
 }
 
-export interface FigmaFrame {
-  id: string;
-  brandGuidelineId: string;
-  figmaFileKey: string;
-  figmaFileName: string;
-  frameId: string;
-  name: string;
-  imageUrl: string;
-  screenType?: string;
-  platform?: string;
-  positionX: number;
-  positionY: number;
-  width: number;
-  height: number;
-  lastSynced?: Date;
-  createdAt?: Date;
-  updatedAt?: Date;
-  designReviews?: DesignReview[];
-  brandGuideline?: BrandGuideline;
-}
-
-/**
- * Design Review entity
- */
-export interface DesignReview {
-  id: string;
-  userId: string;
-  brandGuidelineId: string;
-  frameId: string;
-  frame?: FigmaFrame;
-  reviewJson: any; // This will be typed properly in the feature-specific code
-  designScore: number;
-  designScoreMax: number;
-  brandComplianceScore?: number;
-  visualHarmonyScore?: number;
-  usabilityScore?: number;
-  accessibilityScore?: number;
-  status: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-  user?: User;
-  brandGuideline?: BrandGuideline;
-  history?: ReviewHistory[];
-}
-
 /**
  * Review History entity
  */
-export interface ReviewHistory {
-  id: string;
-  designReviewId: string;
-  action: string;
-  summary: string;
-  changes?: any;
-  timestamp: Date;
-  designReview?: DesignReview;
-}
+export type ReviewHistory = Prisma.ReviewHistoryGetPayload<{
+  include: {
+    designsReview: true;
+  };
+}>;
 
 /**
  * User entity
  */
-export interface User {
-  id: string;
-  email: string;
-  name?: string;
-  image?: string;
-  emailVerified?: Date;
-  createdAt?: Date;
-  updatedAt?: Date;
-  isActive?: boolean;
-  lastLogin?: Date;
-  role?: string;
-  companyId?: string;
-  companyRole?: string;
-  figmaUserId?: string;
-  figmaAccessToken?: string;
-  figmaRefreshToken?: string;
-  figmaTokenExpiry?: Date;
-  company?: Company;
-  brands?: Brand[];
-  brandGuidelines?: BrandGuideline[];
-  designReviews?: DesignReview[];
-}
+export type User = Prisma.UserGetPayload<{
+  include: {
+    company: true;
+    brands: true;
+    brandGuidelines: true;
+  };
+}>;
 
 /**
  * Company entity
@@ -164,60 +102,32 @@ export interface TeamMember {
 /**
  * Brand Guideline entity
  */
-export interface BrandGuideline {
-  id: string;
-  userId: string;
-  name: string;
-  description?: string;
-  status: string;
-  pdfUrl?: string;
-  pdfPath?: string;
-  processingStatus: string;
-  processingMessage?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-  companyId?: string;
-  teamId?: string;
-  user?: User;
-  company?: Company;
-  team?: Team;
-  brandRules?: BrandRule[];
-  customRules?: CustomRule[];
-  designImages?: DesignImage[];
-  figmaFrames?: FigmaFrame[];
-  designReviews?: DesignReview[];
-}
+export type BrandGuideline = Prisma.BrandGuidelineGetPayload<{
+  include: {
+    brandRules: true;
+    customRules: true;
+    designImages: true;
+    designReviews: true;
+  };
+}>;
 
 /**
  * Brand Rule entity
  */
-export interface BrandRule {
-  id: string;
-  brandGuidelineId: string;
-  category: string;
-  name: string;
-  description: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-  confidence?: number;
-  source?: string;
-  value?: string;
-  brandGuideline?: BrandGuideline;
-}
+export type BrandRule = Prisma.BrandRuleGetPayload<{
+  include: {
+    brandGuideline: true;
+  };
+}>;
 
 /**
  * Custom Rule entity
  */
-export interface CustomRule {
-  id: string;
-  brandGuidelineId: string;
-  category: string;
-  name: string;
-  description: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-  brandGuideline?: BrandGuideline;
-}
+export type CustomRule = Prisma.CustomRuleGetPayload<{
+  include: {
+    brandGuideline: true;
+  };
+}>;
 
 /**
  * Design Image entity
@@ -232,3 +142,25 @@ export interface DesignImage {
   createdAt?: Date;
   brandGuideline?: BrandGuideline;
 }
+
+/**
+ * Designs Review entity - container for multiple designs
+ */
+export type DesignsReview = Prisma.DesignsReviewGetPayload<{
+  include: {
+    user: true;
+    brandGuideline: true;
+    designs: true;
+    reviewHistory: true;
+  };
+}>;
+
+/**
+ * Design entity (formerly DesignReview)
+ */
+export type Design = Prisma.DesignGetPayload<{
+  include: {
+    user: true;
+    designsReview: true;
+  };
+}>;

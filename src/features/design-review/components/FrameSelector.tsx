@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FrameSelectionState } from "../types";
 import { Check, CheckCheck, X } from "lucide-react";
+import { appConfig } from "@/config/app";
 
 interface FrameSelectorProps {
   frames: FrameSelectionState[];
@@ -93,7 +94,7 @@ export function FrameSelector({
           {isLoading ? (
             <>
               <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              AI Analyzing Your Frames...
+              {appConfig.name} Analyzing Your Frames...
             </>
           ) : (
             <>
@@ -104,7 +105,7 @@ export function FrameSelector({
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 pt-8">
         {frames.map(frame => (
           <Card
             key={frame.frameId}
@@ -118,7 +119,12 @@ export function FrameSelector({
               {isLoading ? (
                 <Skeleton className="w-full h-full" />
               ) : (
-                <img src={frame.imageUrl} alt={frame.name} className="w-full h-full object-cover" />
+                <img
+                  src={frame.imageUrl}
+                  alt={frame.name}
+                  className="absolute inset-0 w-full h-full object-contain"
+                  loading="lazy"
+                />
               )}
               {!isLoading && (hoveredFrame === frame.frameId || frame.selected) && (
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center">

@@ -4,103 +4,81 @@
  * This is a server-side only route that handles design review requests.
  */
 
-import { prisma } from "@/services/db/prisma";
-import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
+import { prisma } from "@/services/db/prisma";
+import { ReviewStatus } from "@/features/design-review/types";
 
-export async function GET(req: NextRequest, context: { params: { id: string } }) {
+export async function GET(
+  request: NextRequest,
+   { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    // Get the design review ID from the URL
-    const params = await Promise.resolve(context?.params);
-    const id = params?.id;
-
-    // Get the current user session
-    const session = await getServerSession();
-
-    if (!session?.user?.email) {
-      return NextResponse.json(
-        { error: "You must be logged in to view design reviews" },
-        { status: 401 }
-      );
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get the user
-    const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
-      select: { id: true },
-    });
+    // Dynamically import the DesignReviewService
+    const { DesignReviewService } = await import(
+      "@/features/design-review/services/design-review-service"
+    );
+    const designReviewService = DesignReviewService.getInstance();
+       const { id } = await params;
 
-    if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
-    }
-
-    if (!id) {
-      return NextResponse.json({ error: "Review ID is required" }, { status: 400 });
-    }
-
-    // Fetch the design review
-    const review = await prisma.designReview.findUnique({
-      where: { id },
-      include: {
-        frame: {
-          select: {
-            frameId: true,
-            name: true,
-            figmaFileKey: true,
-            figmaFileName: true,
-          },
-        },
-        brandGuideline: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-    });
-
-    // Now that we've regenerated the Prisma client, we can fetch the originalFigmaUrl
-    const reviewWithUrl = await prisma.designReview.findUnique({
-      where: { id },
-      select: {
-        originalFigmaUrl: true,
-      },
-    });
-
+    const review = await designReviewService.getDesignsReview(id);
     if (!review) {
       return NextResponse.json({ error: "Review not found" }, { status: 404 });
     }
 
-    // Check if the review belongs to the user
-    if (review.userId !== user.id) {
+    return NextResponse.json(review);
+  } catch (error) {
+    console.error("Error getting review:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { status } = body;
+
+    // Validate status
+    if (!Object.values(ReviewStatus).includes(status)) {
       return NextResponse.json(
-        { error: "You don't have permission to view this review" },
-        { status: 403 }
+        { error: "Invalid status" },
+        { status: 400 }
       );
     }
 
-    // Format the response to match the DesignAnalysisResult structure
-    const formattedReview = {
-      reviews: [
-        {
-          image: {
-            frame_id: review.frame.frameId,
-            name: review.frame.name,
-          },
-          ...(review.reviewJson as any),
-        },
-      ],
-      brandId: review.brandGuidelineId,
-      figmaUrl: reviewWithUrl?.originalFigmaUrl,
-      fileName: review.frame.figmaFileName,
-      reviewId: review.id,
-    };
+    // Update the review status
+    const review = await prisma.designsReview.update({
+      where: { id: params.id },
+      data: { status },
+      include: {
+        brandGuideline: true,
+        designs: true,
+        reviewHistory: true,
+      },
+    });
 
-    return NextResponse.json(formattedReview);
-  } catch (error: any) {
-    console.error("Error fetching design review:", error);
+    return NextResponse.json(review);
+  } catch (error) {
+    console.error("Error updating review:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to fetch design review" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

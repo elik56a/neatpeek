@@ -6,7 +6,7 @@ import { cn } from "@/utils/cn";
 import { ReviewTimeline } from "./ReviewTimeline";
 
 interface TimelineDrawerProps {
-  reviewId: string;
+  designsReviewId: string;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -15,7 +15,7 @@ interface TimelineDrawerProps {
  * A custom drawer component for the timeline that slides in from the right
  * without a background overlay
  */
-export function TimelineDrawer({ reviewId, isOpen, onClose }: TimelineDrawerProps) {
+export function TimelineDrawer({ designsReviewId, isOpen, onClose }: TimelineDrawerProps) {
   // Handle ESC key
   React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -50,7 +50,7 @@ export function TimelineDrawer({ reviewId, isOpen, onClose }: TimelineDrawerProp
           </button>
         </div>
         <div className="p-4 overflow-y-auto max-h-[calc(80vh-60px)]">
-          <ReviewTimeline reviewId={reviewId} isVisible={true} />
+          <ReviewTimeline designsReviewId={designsReviewId} isVisible={true} />
         </div>
       </div>
     </div>

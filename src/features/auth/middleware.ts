@@ -39,7 +39,7 @@ export async function middleware(request: NextRequest) {
   if (
     path.startsWith("/login") ||
     path.startsWith("/register") ||
-    path.startsWith("/api") ||
+    path.startsWith("/api/auth") ||
     path.startsWith("/_next") ||
     path.includes("favicon.ico") ||
     path.includes("/images/")
@@ -62,6 +62,27 @@ export async function middleware(request: NextRequest) {
   if (isAppSubdomain && !token) {
     const loginUrl = new URL("/login", request.url);
     return NextResponse.redirect(loginUrl);
+  }
+
+  // For API routes, check if user exists in database
+  if (path.startsWith("/api") && token) {
+    try {
+      const response = await fetch(new URL("/api/users/me", request.url), {
+        headers: {
+          cookie: request.headers.get("cookie") || "",
+        },
+      });
+
+      if (!response.ok) {
+        // If user doesn't exist in DB, redirect to login
+        const loginUrl = new URL("/login", request.url);
+        return NextResponse.redirect(loginUrl);
+      }
+    } catch (error) {
+      console.error("Error checking user:", error);
+      const loginUrl = new URL("/login", request.url);
+      return NextResponse.redirect(loginUrl);
+    }
   }
 
   // For all other requests, proceed normally

@@ -1,7 +1,8 @@
-// Export only client-safe services
-// Note: AI and DesignReview services should only be used on the server
-export * from "./figma-service";
+// Export types only - the service should not be imported on the client
+export * from "../types";
 
-// Export types from server-only services
-export type { AIService } from "./ai";
+// Export client-safe services
+export * from "./figma-service";
+export * from "./design-recheck-service";
+
 export type { DesignReviewService } from "./design-review-service";

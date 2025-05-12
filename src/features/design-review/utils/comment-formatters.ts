@@ -28,7 +28,7 @@ export function getSeverityEmoji(severity: IssueSeverity): string {
  *
  * Example output:
  * 🚨 HIGH Brand Issue: Poor contrast between text and background
- * 📋 Rule: Brand colors must maintain proper contrast
+ * 📋 Rule: Brand colors must maintain proper contrast - removed .
  * 💡 Fix: Use primary colors with higher contrast
  */
 export function formatBrandIssueComment(issue: BrandIssue): string {
@@ -38,7 +38,7 @@ export function formatBrandIssueComment(issue: BrandIssue): string {
   // Only include the fix suggestion if it exists
   const fixPart = issue.fix_suggestion ? `\n💡 Fix: ${issue.fix_suggestion}` : "";
 
-  return `${severityEmoji} ${severityText} Brand Issue: ${issue.description}\n📋 Rule: ${issue.brand_rule_violation}${fixPart}`;
+  return `${severityEmoji} ${severityText} Brand Issue: ${issue.description}\n📋 ${fixPart}`;
 }
 
 /**
@@ -56,7 +56,7 @@ export function formatGeneralIssueComment(issue: GeneralIssue): string {
   // Only include the fix suggestion if it exists
   const fixPart = issue.fix_suggestion ? `\n💡 Fix: ${issue.fix_suggestion}` : "";
 
-  return `${severityEmoji} ${severityText} ${issueType} Issue: ${issue.description}${fixPart}`;
+  return `${severityEmoji} ${severityText} ${issueType} Issue: \n ${issue.description}${fixPart}`;
 }
 
 /**

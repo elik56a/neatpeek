@@ -2,6 +2,8 @@
  * Types for the Design Review feature
  */
 
+import { DesignsReview as DesignsReviewType, Design as DesignType } from "@/types";
+
 // Core types are imported in specific files where needed
 import {
   ReviewJson,
@@ -32,6 +34,17 @@ export type {
   FrameImage,
   IssueCoordinates,
 };
+
+// extend the Design type
+//@ts-ignore
+export interface Design extends DesignType {
+  reviewJson: ReviewJson;
+}
+
+//@ts-ignore
+export interface DesignsReview extends DesignsReviewType {
+  designs: Design[];
+}
 
 // Re-export the review-history types
 export type { HistoryChanges, IssueSummary };
@@ -104,11 +117,13 @@ export interface DesignReviewExportOptions {
  */
 export interface DesignReviewExportRow {
   frame: string;
+  frameId: string;
   issueType: string;
   category: string;
   severity: string;
   description: string;
   recommendation: string;
+  status: string;
 }
 
 /**
@@ -127,7 +142,7 @@ export interface DesignReviewResult {
  */
 export interface DesignAnalysisResult {
   reviews: DesignReviewResult[];
-  reviewId?: string;
+  designsReviewId?: string;
   brandId?: string;
   figmaUrl?: string;
   fileName?: string;
@@ -165,7 +180,7 @@ export interface FrameRecheckResult {
 export interface DesignRecheckResult {
   recheck_results: FrameRecheckResult[];
   updatedReview?: ReviewJson;
-  reviewId?: string;
+  designsReviewId?: string;
   brandId?: string;
   figmaUrl?: string;
   fileName?: string;
@@ -185,10 +200,9 @@ export interface DesignAnalysisInput {
  * Input for design recheck
  */
 export interface DesignRecheckInput {
-  figmaUrl: string;
+  designsReviewId: string;
   brandId: string;
   userId: string;
-  frameId?: string;
   frameIds?: string[];
 }
 
@@ -218,6 +232,13 @@ export interface FrameInfo {
   name: string;
   type: string;
   absoluteBoundingBox: FramePosition;
+}
+
+export interface FrameImageData {
+  id: string;
+  url: string;
+  type: string;
+  position: FramePosition;
 }
 
 /**
