@@ -35,9 +35,7 @@ export function DesignReviewPage() {
 
   // Loading state
   if (isLoading) {
-    return (
-        <CustomLoader size="lg" text="Loading brand guidelines..." />
-    );
+    return <CustomLoader size="lg" text="Loading brand guidelines..." />;
   }
 
   // No guidelines state

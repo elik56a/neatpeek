@@ -1,21 +1,14 @@
 /**
  * Next.js requires the middleware file to be at the root of the src directory
  */
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
-import { apiLogger } from '@/services/logger';
-import { v4 as uuidv4 } from 'uuid';
-import { getToken } from 'next-auth/jwt';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { apiLogger } from "@/services/logger";
+import { v4 as uuidv4 } from "uuid";
+import { getToken } from "next-auth/jwt";
 
 // List of public paths that don't require authentication
-const publicPaths = [
-  "/api/auth",
-  "/api/health",
-  "/_next",
-  "/favicon.ico",
-  "/images",
-  "/fonts",
-];
+const publicPaths = ["/api/auth", "/api/health", "/_next", "/favicon.ico", "/images", "/fonts"];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -23,7 +16,7 @@ export async function middleware(request: NextRequest) {
   const isAppSubdomain = hostname.startsWith("app.");
 
   // Check if the path is public
-  const isPublicPath = publicPaths.some((path) => pathname.startsWith(path));
+  const isPublicPath = publicPaths.some(path => pathname.startsWith(path));
 
   // If it's a public path, allow access
   if (isPublicPath) {
@@ -33,7 +26,7 @@ export async function middleware(request: NextRequest) {
   // If we're on the app subdomain, ensure we're authenticated
   if (isAppSubdomain) {
     const token = await getToken({ req: request });
-    
+
     if (!token) {
       // Redirect to login if not authenticated
       const loginUrl = new URL("/login", request.url);

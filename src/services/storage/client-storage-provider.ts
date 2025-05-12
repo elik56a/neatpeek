@@ -33,4 +33,4 @@ export class ClientStorageProvider implements StorageProvider {
     });
     if (!response.ok) throw new Error("Failed to delete file");
   }
-} 
+}

@@ -15,7 +15,6 @@ import { FigmaConnectPrompt } from "./FigmaConnectPrompt";
 import { FrameSelector } from "./FrameSelector";
 import { BrandGuideline } from "@/features/brand-setup/types";
 
-
 interface DesignReviewProps {
   brandId: string;
   allGuidelines?: BrandGuideline[];
@@ -38,7 +37,7 @@ export function DesignReview({
   const [figmaUrl, setFigmaUrl] = useState("");
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
-  const [step, setStep] = useState<"input" | "frames" >("input");
+  const [step, setStep] = useState<"input" | "frames">("input");
 
   const {
     isLoading,
@@ -77,12 +76,10 @@ export function DesignReview({
   const handleImageReview = async () => {
     //@todo in future add manully uploaded images designs review
     // if (uploadedImages.length === 0) return;
-
     // const input = {
     //   images: uploadedImages,
     //   brandId, // Use the current selected brandId
     // };
-
     // const result = await reviewDesign(input);
     // if (result) {
     //   setStep("results");
@@ -106,7 +103,6 @@ export function DesignReview({
     await reviewDesign(input);
   };
 
-
   // Handle reset
   const handleReset = () => {
     reset();
@@ -124,9 +120,7 @@ export function DesignReview({
   // Loading state - only show full-page loader for initial loading (input step)
   // For other steps, we'll show skeletons in place
   if (isLoading && step === "input") {
-    return (
-        <CustomLoader size="lg" text="Loading Figma frames..." />
-    );
+    return <CustomLoader size="lg" text="Loading Figma frames..." />;
   }
 
   // Input step - Show the design input options
@@ -163,7 +157,7 @@ export function DesignReview({
               onValueChange={value => setInputMode(value as "figma" | "image")}
               className="w-full"
             > */}
-              {/* <TabsList className="relative w-full mb-6 grid grid-cols-2">
+            {/* <TabsList className="relative w-full mb-6 grid grid-cols-2">
                 <TabsTrigger
                   value="figma"
                   className="relative z-10 overflow-hidden group data-[state=active]:bg-primary/10 data-[state=active]:text-primary"
@@ -184,43 +178,43 @@ export function DesignReview({
                 </TabsTrigger>
               </TabsList> */}
 
-              {/* <TabsContent value="figma" className="space-y-4"> */}
-                <div className="grid gap-2">
-                  <Label htmlFor="figmaUrl">Figma Design URL</Label>
-                  <div className="relative">
-                    <Input
-                      id="figmaUrl"
-                      placeholder="https://www.figma.com/design/..."
-                      type="url"
-                      value={figmaUrl}
-                      onChange={e => setFigmaUrl(e.target.value)}
-                      className="pl-10 hover:border-primary/50 transition-colors duration-200 focus-visible:ring-primary/20"
-                    />
-                    <Link2 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Paste a link to your Figma design file to review it for brand consistency
-                  </p>
-                </div>
-                <div className="flex justify-center mt-4">
-                  <Button
-                    onClick={handleFigmaUrlSubmit}
-                    disabled={isLoading || !figmaUrl}
-                    className="mt-4 hover:shadow-md transition-all duration-200 px-6"
-                  >
-                    {isLoading ? (
-                      <>
-                        <CustomLoader size="sm" className="mr-2" />
-                        Loading Figma Frames...
-                      </>
-                    ) : (
-                      'Let\'s NeatPeek'
-                    )}
-                  </Button>
-                </div>
-              {/* </TabsContent> */}
+            {/* <TabsContent value="figma" className="space-y-4"> */}
+            <div className="grid gap-2">
+              <Label htmlFor="figmaUrl">Figma Design URL</Label>
+              <div className="relative">
+                <Input
+                  id="figmaUrl"
+                  placeholder="https://www.figma.com/design/..."
+                  type="url"
+                  value={figmaUrl}
+                  onChange={e => setFigmaUrl(e.target.value)}
+                  className="pl-10 hover:border-primary/50 transition-colors duration-200 focus-visible:ring-primary/20"
+                />
+                <Link2 className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Paste a link to your Figma design file to review it for brand consistency
+              </p>
+            </div>
+            <div className="flex justify-center mt-4">
+              <Button
+                onClick={handleFigmaUrlSubmit}
+                disabled={isLoading || !figmaUrl}
+                className="mt-4 hover:shadow-md transition-all duration-200 px-6"
+              >
+                {isLoading ? (
+                  <>
+                    <CustomLoader size="sm" className="mr-2" />
+                    Loading Figma Frames...
+                  </>
+                ) : (
+                  "Let's NeatPeek"
+                )}
+              </Button>
+            </div>
+            {/* </TabsContent> */}
 
-              {/* <TabsContent value="image" className="space-y-4">
+            {/* <TabsContent value="image" className="space-y-4">
                 <div className="grid gap-4">
                   <Label htmlFor="imageUpload">Upload Design Images</Label>
                   <div
@@ -362,8 +356,7 @@ export function DesignReview({
           </div>
         </div>
 
-          <h2 className="text-xl font-bold">Figma File: {fileName}</h2>
-
+        <h2 className="text-xl font-bold">Figma File: {fileName}</h2>
 
         <FrameSelector
           frames={frames}

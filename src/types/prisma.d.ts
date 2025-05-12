@@ -6,17 +6,16 @@ declare module "@prisma/client" {
       $designsReview: {
         id: string;
         designs: Design[];
-      }
+      };
     }
     interface $DesignExtensionScalar extends Design {
       $design: {
         id: string;
         reviewJson: ReviewJson;
-      }
+      };
     }
   }
   interface PrismaClient {
-
     user: {
       findUnique: (args: {
         where: { email: string };
@@ -38,17 +37,18 @@ declare module "@prisma/client" {
       }) => Promise<{
         companyId: string | null;
       } | null>;
-    },
-  designsReview: {
-    findUnique: (args: {
-      where: { id: string };
-      include: {
-        user: true;
-        brandGuideline: true;
-      };
-    }) => Promise<{
-      user: User;
-      brandGuideline: BrandGuideline;
-    } | null>;
-  };
+    };
+    designsReview: {
+      findUnique: (args: {
+        where: { id: string };
+        include: {
+          user: true;
+          brandGuideline: true;
+        };
+      }) => Promise<{
+        user: User;
+        brandGuideline: BrandGuideline;
+      } | null>;
+    };
+  }
 }

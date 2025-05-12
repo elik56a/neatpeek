@@ -30,7 +30,9 @@ export function ReviewTimeline({ designsReviewId, isVisible }: ReviewTimelinePro
       setError(null);
 
       try {
-        const response = await fetch(`/api/design-review/history?designsReviewId=${designsReviewId}`);
+        const response = await fetch(
+          `/api/design-review/history?designsReviewId=${designsReviewId}`
+        );
 
         if (!response.ok) {
           const errorData = await response.json();

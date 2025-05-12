@@ -20,7 +20,6 @@ const LoadingState = () => (
   </div>
 );
 
-
 export default function DesignReviewByIdPage() {
   const { id } = useParams();
 

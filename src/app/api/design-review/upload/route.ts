@@ -33,7 +33,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Design review ID is required" }, { status: 400 });
     }
 
-    const { DesignReviewService } = await import("@/features/design-review/services/design-review-service");
+    const { DesignReviewService } = await import(
+      "@/features/design-review/services/design-review-service"
+    );
     const designReviewService = DesignReviewService.getInstance();
 
     // Get the design review
@@ -100,4 +102,4 @@ export async function POST(req: NextRequest) {
     console.error("Error uploading files:", error);
     return NextResponse.json({ error: "Failed to upload files" }, { status: 500 });
   }
-} 
+}

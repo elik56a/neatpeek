@@ -1,8 +1,8 @@
-import { Logger } from './logger';
+import { Logger } from "./logger";
 
 // Create a logger instance for API use
 export const apiLogger = new Logger({
-  service: 'api',
+  service: "api",
 });
 
 // Helper function to log API errors
@@ -27,4 +27,4 @@ export const logApiResponse = (
   metadata?: Record<string, unknown>
 ): void => {
   apiLogger.logResponse(method, path, status, metadata);
-}; 
+};

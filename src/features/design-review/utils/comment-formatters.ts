@@ -38,7 +38,7 @@ export function formatBrandIssueComment(issue: BrandIssue): string {
   // Only include the fix suggestion if it exists
   const fixPart = issue.fix_suggestion ? `\n💡 Fix: ${issue.fix_suggestion}` : "";
 
-  return `${severityEmoji} ${severityText} Brand Issue: ${issue.description}\n📋 ${fixPart}`;
+  return `${severityEmoji} ${severityText} Brand Issue: ${issue.description}${fixPart}`;
 }
 
 /**

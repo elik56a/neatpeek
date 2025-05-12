@@ -1,10 +1,10 @@
-import { LogLevel, LogMetadata, LogContext } from './types';
+import { LogLevel, LogMetadata, LogContext } from "./types";
 
 // Define process.env type for NODE_ENV
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
-      NODE_ENV: 'development' | 'production' | 'local';
+      NODE_ENV: "development" | "production" | "local";
     }
   }
 }
@@ -23,15 +23,15 @@ export class Logger {
 
   private formatMessage(level: LogLevel, message: string, metadata?: LogMetadata): string {
     const timestamp = new Date().toISOString();
-    const context = this.context.service ? `[${this.context.service}]` : '';
-    const correlation = this.correlationId ? `[${this.correlationId}]` : '';
-    const metadataStr = metadata ? ` ${JSON.stringify(metadata)}` : '';
+    const context = this.context.service ? `[${this.context.service}]` : "";
+    const correlation = this.correlationId ? `[${this.correlationId}]` : "";
+    const metadataStr = metadata ? ` ${JSON.stringify(metadata)}` : "";
     return `${timestamp} ${level} ${context}${correlation} ${message}${metadataStr}`;
   }
 
   private shouldLog(level: LogLevel): boolean {
-    if (process.env.NODE_ENV === 'production') {
-      return level !== 'debug';
+    if (process.env.NODE_ENV === "production") {
+      return level !== "debug";
     }
     return true;
   }
@@ -40,37 +40,37 @@ export class Logger {
     if (!this.shouldLog(level)) return;
 
     const formattedMessage = this.formatMessage(level, message, metadata);
-    
+
     switch (level) {
-      case 'debug':
+      case "debug":
         console.debug(formattedMessage);
         break;
-      case 'info':
+      case "info":
         console.info(formattedMessage);
         break;
-      case 'warn':
+      case "warn":
         console.warn(formattedMessage);
         break;
-      case 'error':
+      case "error":
         console.error(formattedMessage);
         break;
     }
   }
 
   debug(message: string, metadata?: LogMetadata): void {
-    this.log('debug', message, metadata);
+    this.log("debug", message, metadata);
   }
 
   info(message: string, metadata?: LogMetadata): void {
-    this.log('info', message, metadata);
+    this.log("info", message, metadata);
   }
 
   warn(message: string, metadata?: LogMetadata): void {
-    this.log('warn', message, metadata);
+    this.log("warn", message, metadata);
   }
 
   error(message: string, metadata?: LogMetadata): void {
-    this.log('error', message, metadata);
+    this.log("error", message, metadata);
   }
 
   // Specialized logging methods
@@ -97,4 +97,4 @@ export class Logger {
   logResponse(method: string, path: string, status: number, metadata?: LogMetadata): void {
     this.info(`${method} ${path} ${status}`, metadata);
   }
-} 
+}

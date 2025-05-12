@@ -37,9 +37,8 @@ export function getClientStorageProvider(): StorageProvider {
 }
 
 // Export the appropriate provider based on environment
-export const storageProvider = typeof window === "undefined"
-  ? getServerStorageProvider()
-  : getClientStorageProvider();
+export const storageProvider =
+  typeof window === "undefined" ? getServerStorageProvider() : getClientStorageProvider();
 
 // Re-export types
 export * from "./types";

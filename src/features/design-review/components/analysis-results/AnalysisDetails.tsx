@@ -196,12 +196,12 @@ export function AnalysisDetails({
                         </AccordionTrigger>
                         <AccordionContent className="space-y-2 px-2">
                           <p className="font-medium">{issue.description}</p>
-                          {issue.brand_rule_violation && (
+                          {/* {issue.brand_rule_violation && (
                             <p className="text-sm text-muted-foreground">
                               <span className="font-medium">Rule: </span>
                               {issue.brand_rule_violation}
                             </p>
-                          )}
+                          )} */}
                           <p className="text-sm">
                             <span className="font-medium">Fix: </span>
                             {issue.fix_suggestion}

@@ -64,9 +64,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(history);
   } catch (error: any) {
     console.error("Error fetching review history:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch review history" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch review history" }, { status: 500 });
   }
 }

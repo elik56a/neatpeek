@@ -16,11 +16,11 @@ export async function POST(request: NextRequest) {
       case "saveFile":
         const saveResult = await storageProvider.saveFile(params);
         return NextResponse.json(saveResult);
-      
+
       case "getFileUrl":
         const url = storageProvider.getFileUrl(params.path);
         return NextResponse.json({ url });
-      
+
       case "getFile":
         const buffer = await storageProvider.getFile(params.path);
         return new NextResponse(buffer, {
@@ -28,19 +28,16 @@ export async function POST(request: NextRequest) {
             "Content-Type": "application/octet-stream",
           },
         });
-      
+
       case "deleteFile":
         await storageProvider.deleteFile(params.path);
         return NextResponse.json({ success: true });
-      
+
       default:
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
   } catch (error) {
     console.error("File Service Error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
-} 
+}

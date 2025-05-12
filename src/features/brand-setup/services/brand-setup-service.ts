@@ -1,5 +1,11 @@
 import { prisma } from "@/services/db/prisma";
-import { BrandGuideline, BrandGuidelineStatus, CustomRule, ProcessingStatus, RuleCategory } from "../types";
+import {
+  BrandGuideline,
+  BrandGuidelineStatus,
+  CustomRule,
+  ProcessingStatus,
+  RuleCategory,
+} from "../types";
 import { storageProvider } from "@/services/storage";
 
 /**

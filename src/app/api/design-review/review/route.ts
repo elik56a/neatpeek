@@ -37,8 +37,7 @@ export async function POST(req: NextRequest) {
     if (!figmaToken) {
       return NextResponse.json(
         {
-          error:
-            "Figma access token not found. Please connect your Figma account  .",
+          error: "Figma access token not found. Please connect your Figma account  .",
         },
         { status: 400 }
       );
@@ -67,20 +66,15 @@ export async function POST(req: NextRequest) {
       figmaUrl,
       brandId,
       designType,
-      selectedFrameIds, 
-      userId: user.id, 
+      selectedFrameIds,
+      userId: user.id,
     });
 
-    const review = await designReviewService.getDesignsReview( 
-     designsReviewId
-    );
+    const review = await designReviewService.getDesignsReview(designsReviewId);
 
     return NextResponse.json(review);
   } catch (error: any) {
     console.error("Error reviewing design:", error);
-    return NextResponse.json(
-      { error: "Failed to review design" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to review design" }, { status: 500 });
   }
 }

@@ -5,4 +5,4 @@
 export enum ReviewType {
   FIGMA = "FIGMA",
   MANUAL = "MANUAL",
-} 
+}

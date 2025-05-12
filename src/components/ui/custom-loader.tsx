@@ -17,7 +17,7 @@ export function CustomLoader({ size = "md", className, text = "Loading..." }: Cu
   };
 
   return (
-      <div className="flex flex-col items-center justify-center min-h-screen py-12">
+    <div className="flex flex-col items-center justify-center min-h-screen py-12">
       <div className={cn("relative", sizeClasses[size], className)}>
         <div className="absolute w-full h-full border-4 border-muted rounded-full"></div>
         <div className="absolute w-full h-full border-4 border-t-primary rounded-full animate-spin"></div>

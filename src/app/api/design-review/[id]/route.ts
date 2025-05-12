@@ -10,10 +10,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
 import { prisma } from "@/services/db/prisma";
 import { ReviewStatus } from "@/features/design-review/types";
 
-export async function GET(
-  request: NextRequest,
-   { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -25,7 +22,7 @@ export async function GET(
       "@/features/design-review/services/design-review-service"
     );
     const designReviewService = DesignReviewService.getInstance();
-       const { id } = await params;
+    const { id } = await params;
 
     const review = await designReviewService.getDesignsReview(id);
     if (!review) {
@@ -35,17 +32,11 @@ export async function GET(
     return NextResponse.json(review);
   } catch (error) {
     console.error("Error getting review:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -57,10 +48,7 @@ export async function PUT(
 
     // Validate status
     if (!Object.values(ReviewStatus).includes(status)) {
-      return NextResponse.json(
-        { error: "Invalid status" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid status" }, { status: 400 });
     }
 
     // Update the review status
@@ -77,9 +65,6 @@ export async function PUT(
     return NextResponse.json(review);
   } catch (error) {
     console.error("Error updating review:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

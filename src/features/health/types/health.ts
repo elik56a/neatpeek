@@ -1,5 +1,5 @@
 export interface HealthInfo {
-  status: 'healthy' | 'unhealthy';
+  status: "healthy" | "unhealthy";
   timestamp: string;
   uptime: number;
   environment: string;
@@ -12,9 +12,9 @@ export interface HealthInfo {
 }
 
 export interface HealthError {
-  status: 'unhealthy';
+  status: "unhealthy";
   error: string;
   timestamp: string;
 }
 
-export type HealthCheckResponse = HealthInfo | HealthError; 
+export type HealthCheckResponse = HealthInfo | HealthError;

@@ -49,10 +49,10 @@ export function DesignUploader({ designsReviewId, onUploadComplete }: DesignUplo
 
       const designs = await response.json();
       toast.success(`Successfully uploaded ${designs.length} design(s)`);
-      
+
       // Clear selected files
       setSelectedFiles([]);
-      
+
       // Call the completion callback if provided
       if (onUploadComplete) {
         onUploadComplete();
@@ -75,16 +75,12 @@ export function DesignUploader({ designsReviewId, onUploadComplete }: DesignUplo
         selectedFiles={selectedFiles}
         onFileRemoved={handleFileRemoved}
       />
-      
+
       {selectedFiles.length > 0 && (
-        <Button
-          onClick={handleUpload}
-          disabled={isUploading}
-          className="w-full"
-        >
+        <Button onClick={handleUpload} disabled={isUploading} className="w-full">
           {isUploading ? "Uploading..." : "Upload Designs"}
         </Button>
       )}
     </div>
   );
-} 
+}
