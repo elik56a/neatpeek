@@ -26,9 +26,13 @@ import {
   getSeverityBadgeVariant,
   getSeverityBadgeClasses,
 } from "../../utils/enum-mappers";
+import { getSeverityEmoji } from "../../utils/comment-formatters";
 import { useMemo } from "react";
 import { PositiveAspect } from "../../types/review-json";
 import { appConfig } from "@/config/app";
+
+// Add this constant
+const FIX_SUGGESTION_ICON = "💡";
 
 interface AnalysisDetailsProps {
   designsReview: DesignsReview;
@@ -195,17 +199,15 @@ export function AnalysisDetails({
                           </div>
                         </AccordionTrigger>
                         <AccordionContent className="space-y-2 px-2">
-                          <p className="font-medium">{issue.description}</p>
-                          {/* {issue.brand_rule_violation && (
-                            <p className="text-sm text-muted-foreground">
-                              <span className="font-medium">Rule: </span>
-                              {issue.brand_rule_violation}
-                            </p>
-                          )} */}
-                          <p className="text-sm">
-                            <span className="font-medium">Fix: </span>
-                            {issue.fix_suggestion}
+                          <p className="font-medium">
+                            {getSeverityEmoji(issue.severity as IssueSeverity)} {issue.description}
                           </p>
+                          {issue.fix_suggestion && (
+                            <p className="text-sm">
+                              <span className="font-medium">{FIX_SUGGESTION_ICON} Fix: </span>
+                              {issue.fix_suggestion}
+                            </p>
+                          )}
                           {colorHexCodes.length > 0 && (
                             <div className="flex gap-3 mt-2">
                               {colorHexCodes.map((hex, hexIndex) => (
@@ -271,15 +273,15 @@ export function AnalysisDetails({
                           </div>
                         </AccordionTrigger>
                         <AccordionContent className="space-y-2 px-2">
-                          <p className="font-medium">{issue.description}</p>
-                          {/* <p className="text-sm text-muted-foreground">
-                            <span className="font-medium">Issue: </span>
-                            {issue.description}
-                          </p> */}
-                          <p className="text-sm">
-                            <span className="font-medium">Fix: </span>
-                            {issue.fix_suggestion}
+                          <p className="font-medium">
+                            {getSeverityEmoji(issue.severity as IssueSeverity)} {issue.description}
                           </p>
+                          {issue.fix_suggestion && (
+                            <p className="text-sm">
+                              <span className="font-medium">{FIX_SUGGESTION_ICON} Fix: </span>
+                              {issue.fix_suggestion}
+                            </p>
+                          )}
                         </AccordionContent>
                       </AccordionItem>
                     );
