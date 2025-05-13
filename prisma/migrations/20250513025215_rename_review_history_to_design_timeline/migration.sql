@@ -23,7 +23,7 @@ CREATE TABLE "DesignTimeline" (
 CREATE INDEX "DesignTimeline_designId_idx" ON "DesignTimeline"("designId");
 CREATE INDEX "DesignTimeline_timestamp_idx" ON "DesignTimeline"("timestamp");
 
--- ✅ Migrate data from ReviewHistory → DesignTimeline
+-- ✅ Migrate ONLY rows with valid foreign keys
 INSERT INTO "DesignTimeline" (
   "id",
   "action",
@@ -39,7 +39,9 @@ SELECT
   "changes",
   "timestamp",
   "designsReviewId" AS "designId"
-FROM "ReviewHistory";
+FROM "ReviewHistory"
+WHERE "designsReviewId" IS NOT NULL
+  AND "designsReviewId" IN (SELECT "id" FROM "Design");
 
 -- Drop foreign key first
 ALTER TABLE "ReviewHistory"
