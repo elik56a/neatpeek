@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { ReviewHistoryEntry } from "../../types";
+import { ReviewTimelineEntry } from "../../types";
 import { formatDistanceToNow } from "date-fns";
 import { AlertCircle, CheckCircle2, FileSearch, PlusCircle, ThumbsUp } from "lucide-react";
 import {
@@ -12,7 +12,7 @@ import {
 } from "../../utils/enum-mappers";
 
 interface TimelineEventProps {
-  event: ReviewHistoryEntry;
+  event: ReviewTimelineEntry;
   isFirst: boolean;
 }
 

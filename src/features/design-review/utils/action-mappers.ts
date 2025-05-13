@@ -2,7 +2,7 @@
  * Utility functions for mapping enums to human-readable labels and UI properties
  */
 
-import { ReviewHistoryAction } from "../types";
+import { ReviewTimelineAction } from "../types";
 import {
   AlertCircle,
   CheckCircle2,
@@ -15,21 +15,21 @@ import {
 } from "lucide-react";
 
 /**
- * Maps a ReviewHistoryAction to a human-readable label
+ * Maps a ReviewTimelineAction to a human-readable label
  * @param action The action to map
  * @returns A human-readable label
  */
-export function getActionLabel(action: ReviewHistoryAction): string {
+export function getActionLabel(action: ReviewTimelineAction): string {
   switch (action) {
-    case ReviewHistoryAction.INITIAL_REVIEW:
+    case ReviewTimelineAction.INITIAL_REVIEW:
       return "Initial Review";
-    case ReviewHistoryAction.RECHECK:
+    case ReviewTimelineAction.RECHECK:
       return "Recheck";
-    case ReviewHistoryAction.NEW_ISSUES_FOUND:
+    case ReviewTimelineAction.NEW_ISSUES_FOUND:
       return "New Issues Found";
-    case ReviewHistoryAction.ISSUES_FIXED:
+    case ReviewTimelineAction.ISSUES_FIXED:
       return "Issues Fixed";
-    case ReviewHistoryAction.ISSUES_PARTIALLY_FIXED:
+    case ReviewTimelineAction.ISSUES_PARTIALLY_FIXED:
       return "Issues Partially Fixed";
     default:
       return action;
@@ -37,21 +37,21 @@ export function getActionLabel(action: ReviewHistoryAction): string {
 }
 
 /**
- * Maps a ReviewHistoryAction to a badge variant
+ * Maps a ReviewTimelineAction to a badge variant
  * @param action The action to map
  * @returns A badge variant
  */
-export function getActionBadgeVariant(action: ReviewHistoryAction): string {
+export function getActionBadgeVariant(action: ReviewTimelineAction): string {
   switch (action) {
-    case ReviewHistoryAction.INITIAL_REVIEW:
+    case ReviewTimelineAction.INITIAL_REVIEW:
       return "default";
-    case ReviewHistoryAction.RECHECK:
+    case ReviewTimelineAction.RECHECK:
       return "outline";
-    case ReviewHistoryAction.NEW_ISSUES_FOUND:
+    case ReviewTimelineAction.NEW_ISSUES_FOUND:
       return "destructive";
-    case ReviewHistoryAction.ISSUES_FIXED:
+    case ReviewTimelineAction.ISSUES_FIXED:
       return "success";
-    case ReviewHistoryAction.ISSUES_PARTIALLY_FIXED:
+    case ReviewTimelineAction.ISSUES_PARTIALLY_FIXED:
       return "warning";
     default:
       return "secondary";
@@ -59,21 +59,21 @@ export function getActionBadgeVariant(action: ReviewHistoryAction): string {
 }
 
 /**
- * Maps a ReviewHistoryAction to an icon
+ * Maps a ReviewTimelineAction to an icon
  * @param action The action to map
  * @returns An icon component
  */
-export function getActionIcon(action: ReviewHistoryAction): LucideIcon {
+export function getActionIcon(action: ReviewTimelineAction): LucideIcon {
   switch (action) {
-    case ReviewHistoryAction.INITIAL_REVIEW:
+    case ReviewTimelineAction.INITIAL_REVIEW:
       return FileSearch;
-    case ReviewHistoryAction.RECHECK:
+    case ReviewTimelineAction.RECHECK:
       return RefreshCw;
-    case ReviewHistoryAction.NEW_ISSUES_FOUND:
+    case ReviewTimelineAction.NEW_ISSUES_FOUND:
       return PlusCircle;
-    case ReviewHistoryAction.ISSUES_FIXED:
+    case ReviewTimelineAction.ISSUES_FIXED:
       return CheckCircle2;
-    case ReviewHistoryAction.ISSUES_PARTIALLY_FIXED:
+    case ReviewTimelineAction.ISSUES_PARTIALLY_FIXED:
       return ThumbsUp;
     default:
       return Clock;
@@ -81,21 +81,21 @@ export function getActionIcon(action: ReviewHistoryAction): LucideIcon {
 }
 
 /**
- * Maps a ReviewHistoryAction to a color
+ * Maps a ReviewTimelineAction to a color
  * @param action The action to map
  * @returns A color class
  */
-export function getActionColor(action: ReviewHistoryAction): string {
+export function getActionColor(action: ReviewTimelineAction): string {
   switch (action) {
-    case ReviewHistoryAction.INITIAL_REVIEW:
+    case ReviewTimelineAction.INITIAL_REVIEW:
       return "text-primary";
-    case ReviewHistoryAction.RECHECK:
+    case ReviewTimelineAction.RECHECK:
       return "text-amber-500";
-    case ReviewHistoryAction.NEW_ISSUES_FOUND:
+    case ReviewTimelineAction.NEW_ISSUES_FOUND:
       return "text-destructive";
-    case ReviewHistoryAction.ISSUES_FIXED:
+    case ReviewTimelineAction.ISSUES_FIXED:
       return "text-green-500";
-    case ReviewHistoryAction.ISSUES_PARTIALLY_FIXED:
+    case ReviewTimelineAction.ISSUES_PARTIALLY_FIXED:
       return "text-amber-500";
     default:
       return "text-muted-foreground";

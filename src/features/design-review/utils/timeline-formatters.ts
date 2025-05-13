@@ -1,5 +1,5 @@
 /**
- * Utility functions for formatting review history entries
+ * Utility functions for formatting review timeline entries
  * These functions generate human-readable summaries for the timeline
  */
 
@@ -61,7 +61,7 @@ export function countIssuesByStatus(
 }
 
 /**
- * Generate a summary for initial review
+ * Generate a summary for initial timeline review
  */
 export function generateInitialReviewSummary(
   brandIssues: BrandIssue[],

@@ -1,13 +1,13 @@
 /**
  * TypeScript interfaces for review history
- * These interfaces define the shape of the data stored in the ReviewHistory model
+ * These interfaces define the shape of the data stored in the ReviewTimeline model
  */
 
 /**
  * Enum for review history action
- * This should match the ReviewHistoryAction enum in the Prisma schema
+ * This should match the ReviewTimelineAction enum in the Prisma schema
  */
-export enum ReviewHistoryAction {
+export enum ReviewTimelineAction {
   INITIAL_REVIEW = "INITIAL_REVIEW",
   RECHECK = "RECHECK",
   NEW_ISSUES_FOUND = "NEW_ISSUES_FOUND",
@@ -25,9 +25,9 @@ export interface IssueSummary {
 }
 
 /**
- * Interface for history changes
+ * Interface for timeline changes
  */
-export interface HistoryChanges {
+export interface TimelineChanges {
   fixed_count: number;
   partially_fixed_count: number;
   not_fixed_count: number;

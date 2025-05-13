@@ -3,5 +3,5 @@
  */
 
 export * from "./comment-formatters";
-export * from "./history-formatters";
+export * from "./timeline-formatters";
 export * from "./validation";

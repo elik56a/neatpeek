@@ -45,15 +45,14 @@ const Sidebar = () => {
       icon: PaintBucket,
     },
     {
-      name: "Teams",
-      href: "/teams",
-      icon: Users,
-    },
-
-    {
       name: "Design History",
       href: "/design-history",
       icon: History,
+    },
+    {
+      name: "Teams",
+      href: "/teams",
+      icon: Users,
     },
     {
       name: "Settings",

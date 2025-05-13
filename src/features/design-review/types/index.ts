@@ -18,7 +18,7 @@ import {
   IssueSeverity,
   IssueType,
 } from "./review-json";
-import { ReviewHistoryAction, HistoryChanges, IssueSummary } from "./review-history";
+import { ReviewTimelineAction, TimelineChanges, IssueSummary } from "./review-timeline";
 import { ReviewStatus } from "./review-status";
 import { ScoreCategory } from "./score-category";
 import { ExportFileType } from "./file-type";
@@ -47,14 +47,14 @@ export interface DesignsReview extends DesignsReviewType {
 }
 
 // Re-export the review-history types
-export type { HistoryChanges, IssueSummary };
+export type { TimelineChanges, IssueSummary };
 
 // Re-export enums (these don't need 'export type' since they're values, not just types)
 export {
   IssueStatus,
   IssueSeverity,
   IssueType,
-  ReviewHistoryAction,
+  ReviewTimelineAction,
   ReviewStatus,
   ScoreCategory,
   ExportFileType,
@@ -244,11 +244,11 @@ export interface FrameImageData {
 /**
  * Review history entry
  */
-export interface ReviewHistoryEntry {
+export interface ReviewTimelineEntry {
   id: string;
   designReviewId: string;
-  action: ReviewHistoryAction;
+  action: ReviewTimelineAction;
   summary: string;
-  changes?: HistoryChanges;
+  changes?: TimelineChanges;
   timestamp: Date;
 }
