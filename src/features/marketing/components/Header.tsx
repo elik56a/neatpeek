@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { MobileNav } from "./MobileNav";
 import { cn } from "@/utils/cn";
 import { appConfig } from "@/config/app";
-import { getAppUrl } from "@/utils/getAppUrl";
+import { getLoginUrl, getRegisterUrl } from "@/utils/getAppUrl";
 
 const marketingNavItems = [
   {
@@ -76,11 +76,11 @@ export function Header() {
                 <ThemeToggle />
               </div>
               <Button variant="ghost" asChild className="hidden md:inline-flex">
-                <Link href={getAppUrl("/login")}>Sign In</Link>
+                <Link href={getLoginUrl()}>Sign In</Link>
               </Button>
 
               <Button asChild className="hover-scale">
-                <Link href={getAppUrl("/register")}>Sign Up</Link>
+                <Link href={getRegisterUrl()}>Sign Up</Link>
               </Button>
               <MobileNav items={marketingNavItems} isMarketing={true} />
             </div>

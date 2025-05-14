@@ -1,6 +1,7 @@
 import { signIn, signOut } from "next-auth/react";
 import { AuthResponse, LoginCredentials, RegisterCredentials } from "../types/auth";
 import { validatePassword } from "../utils/password-validator";
+import { getLoginUrl } from "@/utils/getAppUrl";
 
 export class AuthService {
   static async login(credentials: LoginCredentials): Promise<AuthResponse> {
@@ -166,7 +167,7 @@ export class AuthService {
 
   static async logout(): Promise<AuthResponse> {
     try {
-      await signOut({ callbackUrl: "/login" });
+      await signOut({ callbackUrl: getLoginUrl() });
       return { success: true };
     } catch (error) {
       return {

@@ -18,6 +18,7 @@ import {
   Eye,
   Palette,
 } from "lucide-react";
+import { getRegisterUrl } from "@/utils/getAppUrl";
 
 const FeatureCard = ({
   icon: Icon,
@@ -133,7 +134,7 @@ const FeaturesPage = () => {
         </p>
         <div className="pt-6">
           <Button size="lg" asChild>
-            <Link href="/register">Get Started Free</Link>
+            <Link href={getRegisterUrl()}>Get Started Free</Link>
           </Button>
         </div>
       </div>
@@ -186,7 +187,7 @@ const FeaturesPage = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild>
-              <Link href="/register">Start Free Trial</Link>
+              <Link href={getRegisterUrl()}>Start Free Trial</Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
               <Link href="/pricing">View Pricing</Link>

@@ -26,3 +26,11 @@ export function getAppUrl(path: string = ""): string {
   // Fallback (local or unknown env)
   return path;
 }
+
+export function getLoginUrl(): string {
+  return getAppUrl("/login");
+}
+
+export function getRegisterUrl(): string {
+  return getAppUrl("/register");
+}

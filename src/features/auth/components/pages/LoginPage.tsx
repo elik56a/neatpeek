@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { appConfig } from "@/config/app";
 import { useAuth } from "@/features/auth";
 import { useToast } from "@/hooks/use-toast";
+import { getRegisterUrl } from "@/utils/getAppUrl";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -217,7 +218,10 @@ const LoginPage = () => {
         <div className="text-center text-sm">
           <p className="text-muted-foreground">
             Don't have an account?{" "}
-            <Link href="/register" className="text-brand-600 dark:text-brand-400 hover:underline">
+            <Link
+              href={getRegisterUrl()}
+              className="text-brand-600 dark:text-brand-400 hover:underline"
+            >
               Sign Up
             </Link>
           </p>

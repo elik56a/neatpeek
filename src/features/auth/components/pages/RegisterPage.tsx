@@ -8,6 +8,7 @@ import { appConfig } from "@/config/app";
 import { useAuth } from "@/features/auth";
 import { validatePassword } from "@/features/auth/utils/password-validator";
 import { useToast } from "@/hooks/use-toast";
+import { getLoginUrl } from "@/utils/getAppUrl";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -278,7 +279,10 @@ const RegisterPage = () => {
         <div className="text-center text-sm">
           <p className="text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/login" className="text-brand-600 dark:text-brand-400 hover:underline">
+            <Link
+              href={getLoginUrl()}
+              className="text-brand-600 dark:text-brand-400 hover:underline"
+            >
               Sign In
             </Link>
           </p>
