@@ -16,8 +16,8 @@ import {
   DesignRecheckInput,
   DesignRecheckResult,
   FigmaMetadata,
-  ReviewHistoryAction,
-  HistoryChanges,
+  ReviewTimelineAction,
+  TimelineChanges,
   BrandIssue,
   GeneralIssue,
   Design,
@@ -243,7 +243,7 @@ export class DesignReviewService {
   ): Promise<string> {
     try {
       const { formatBrandIssueComment, formatGeneralIssueComment } = await import("../utils");
-      const { generateInitialReviewSummary } = await import("../utils/history-formatters");
+      const { generateInitialReviewSummary } = await import("../utils/timeline-formatters");
       const { validateDesignReviewResult } = await import("../utils/validation");
 
       const urlToFrameData: Record<string, Partial<FrameMetadata>> = {};
@@ -301,7 +301,7 @@ export class DesignReviewService {
           figmaFileId: metadata.fileKey,
           designs: {
             create: analysisResult.map(review => ({
-              userId,
+              user: { connect: { id: userId } },
               frameId: review.image.frame_id,
               reviewJson: {
                 ...review,
@@ -309,25 +309,19 @@ export class DesignReviewService {
               } as any, // Cast to any for Prisma JSON field compatibility
               status: ReviewStatus.IN_PROGRESS,
               originalFigmaUrl,
+              timeline: {
+                create: {
+                  action: ReviewTimelineAction.INITIAL_REVIEW,
+                  summary: generateInitialReviewSummary(review.brand_issues, review.general_issues),
+                  changes: this.createInitialReviewChanges(
+                    review.brand_issues,
+                    review.general_issues,
+                    review.design_score.total
+                  ) as any, // Prisma expects strict JSON, casting for now
+                },
+              },
             })),
           },
-        },
-      });
-
-      // Create initial history entry
-      await prisma.reviewHistory.create({
-        data: {
-          designsReviewId: designsReview.id,
-          action: ReviewHistoryAction.INITIAL_REVIEW,
-          summary: generateInitialReviewSummary(
-            analysisResult.flatMap(r => r.brand_issues),
-            analysisResult.flatMap(r => r.general_issues)
-          ),
-          changes: this.createInitialReviewChanges(
-            analysisResult.flatMap(r => r.brand_issues),
-            analysisResult.flatMap(r => r.general_issues),
-            analysisResult.reduce((sum, r) => sum + r.design_score.total, 0) / analysisResult.length
-          ) as any, // Cast to any for Prisma JSON field compatibility
         },
       });
 
@@ -349,7 +343,7 @@ export class DesignReviewService {
     brandIssues: BrandIssue[],
     generalIssues: GeneralIssue[],
     designScore: number
-  ): HistoryChanges {
+  ): TimelineChanges {
     return {
       brand_issues_count: brandIssues.length,
       general_issues_count: generalIssues.length,
@@ -389,7 +383,6 @@ export class DesignReviewService {
         user: true,
         brandGuideline: true,
         designs: true,
-        reviewHistory: true,
       },
     });
   }
@@ -464,7 +457,6 @@ export class DesignReviewService {
       include: {
         brandGuideline: true,
         designs: true,
-        reviewHistory: true,
       },
     });
 
@@ -528,13 +520,11 @@ export class DesignReviewService {
       where: { id },
       data: {
         status,
-        feedback,
       },
       include: {
         user: true,
         brandGuideline: true,
         designs: true,
-        reviewHistory: true,
       },
     });
 

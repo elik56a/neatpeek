@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -33,6 +33,10 @@ export function AnalysisResults({
     designsReview?.designs?.length > 0 ? designsReview.designs[0].frameId : null
   );
 
+  const designId = useMemo(() => {
+    return designsReview?.designs?.find(design => design.frameId === activeFrameId)?.id;
+  }, [activeFrameId, designsReview]);
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -60,7 +64,7 @@ export function AnalysisResults({
 
               {/* Custom timeline drawer that slides in from the right */}
               <TimelineDrawer
-                designsReviewId={designsReview.id}
+                designId={designId}
                 isOpen={isTimelineVisible}
                 onClose={() => setIsTimelineVisible(false)}
               />

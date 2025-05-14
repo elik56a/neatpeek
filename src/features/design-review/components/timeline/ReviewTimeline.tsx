@@ -4,35 +4,32 @@ import { useState, useEffect } from "react";
 import { Separator } from "@/components/ui/separator";
 import { CustomLoader } from "@/components/ui/custom-loader";
 import { AlertCircle } from "lucide-react";
-import { ReviewHistoryEntry } from "../../types";
+import { ReviewTimelineEntry } from "../../types";
 import { TimelineEvent } from "../timeline";
 
 interface ReviewTimelineProps {
-  designsReviewId: string;
-  isVisible: boolean;
+  designId: string;
   onToggle?: () => void;
 }
 
 /**
  * Component for displaying a review timeline
  */
-export function ReviewTimeline({ designsReviewId, isVisible }: ReviewTimelineProps) {
-  const [history, setHistory] = useState<ReviewHistoryEntry[]>([]);
+export function ReviewTimeline({ designId }: ReviewTimelineProps) {
+  const [history, setHistory] = useState<ReviewTimelineEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
   // Fetch history when the component mounts or reviewId changes
   useEffect(() => {
     const fetchHistory = async () => {
-      if (!designsReviewId || !isVisible) return;
+      if (!designId) return;
 
       setIsLoading(true);
       setError(null);
 
       try {
-        const response = await fetch(
-          `/api/design-review/history?designsReviewId=${designsReviewId}`
-        );
+        const response = await fetch(`/api/design-review/timeline?designId=${designId}`);
 
         if (!response.ok) {
           const errorData = await response.json();
@@ -50,14 +47,13 @@ export function ReviewTimeline({ designsReviewId, isVisible }: ReviewTimelinePro
     };
 
     fetchHistory();
-  }, [designsReviewId, isVisible]);
+  }, [designId]);
 
   return (
     <div className="relative">
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-8">
-          <CustomLoader size="sm" />
-          <p className="mt-2 text-sm text-muted-foreground">Loading timeline...</p>
+          <CustomLoader size="sm" text="Loading timeline..." />
         </div>
       ) : error ? (
         <div className="flex flex-col items-center justify-center py-4">

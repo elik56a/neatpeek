@@ -15,9 +15,9 @@ export enum CompanyRole {
 }
 
 /**
- * Review History entity
+ * Review Timeline entity
  */
-export type ReviewHistory = Prisma.ReviewHistoryGetPayload<{
+export type ReviewTimeline = Prisma.DesignTimelineGetPayload<{
   include: {
     designsReview: true;
   };
@@ -151,7 +151,6 @@ export type DesignsReview = Prisma.DesignsReviewGetPayload<{
     user: true;
     brandGuideline: true;
     designs: true;
-    reviewHistory: true;
   };
 }>;
 
@@ -162,5 +161,6 @@ export type Design = Prisma.DesignGetPayload<{
   include: {
     user: true;
     designsReview: true;
+    timeline: true;
   };
 }>;

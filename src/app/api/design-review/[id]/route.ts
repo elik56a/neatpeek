@@ -58,7 +58,6 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       include: {
         brandGuideline: true,
         designs: true,
-        reviewHistory: true,
       },
     });
 

@@ -32,12 +32,6 @@ export async function GET(req: NextRequest) {
         companyId: true,
         figmaAccessToken: true,
         companyRole: true,
-        brands: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
         company: {
           select: {
             id: true,

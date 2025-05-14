@@ -5,6 +5,7 @@ import { appConfig } from "@/config/app";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Check, LineChart, Shield, Zap } from "lucide-react";
+import { getRegisterUrl } from "@/utils/getAppUrl";
 
 const LandingPage = () => {
   return (
@@ -24,7 +25,7 @@ const LandingPage = () => {
             </div>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" asChild>
-                <Link href="/register">
+                <Link href={getRegisterUrl()}>
                   Get Started <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
@@ -130,7 +131,7 @@ const LandingPage = () => {
               </ul>
               <div className="pt-4">
                 <Button asChild>
-                  <Link href="/register">Start Your Free Trial</Link>
+                  <Link href={getRegisterUrl()}>Start Your Free Trial</Link>
                 </Button>
               </div>
             </div>
@@ -159,7 +160,7 @@ const LandingPage = () => {
             </div>
             <div className="pt-4">
               <Button size="lg" asChild>
-                <Link href="/register">Get Started for Free</Link>
+                <Link href={getRegisterUrl()}>Get Started for Free</Link>
               </Button>
             </div>
           </div>

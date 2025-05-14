@@ -20,9 +20,9 @@ import {
   BrandIssue,
   GeneralIssue,
   ReviewJson,
-  ReviewHistoryAction,
+  ReviewTimelineAction,
   IssueType,
-  HistoryChanges,
+  TimelineChanges,
   Design,
 } from "../types";
 import { FigmaService } from "./figma-service";
@@ -31,7 +31,7 @@ import {
   generateHistoryChanges,
   generateNewIssuesSummary,
   generateRecheckSummary,
-} from "../utils/history-formatters";
+} from "../utils/timeline-formatters";
 import { formatNewIssueComment, formatRecheckComment } from "../utils/comment-formatters";
 
 /**
@@ -58,9 +58,9 @@ interface CommentMaps {
 interface ProcessedRecheckResult {
   designId: string;
   updatedReviewJson: ReviewJson;
-  historyAction: ReviewHistoryAction;
+  historyAction: ReviewTimelineAction;
   historySummary: string;
-  historyChanges: HistoryChanges;
+  historyChanges: TimelineChanges;
 }
 
 /**
@@ -272,16 +272,16 @@ export class DesignRecheckService {
     const issueCounts = countIssuesByStatus(reviewJson.brand_issues, reviewJson.general_issues);
 
     // Determine history action and summary
-    let action: ReviewHistoryAction = ReviewHistoryAction.RECHECK;
+    let action: ReviewTimelineAction = ReviewTimelineAction.RECHECK;
     let summary = generateRecheckSummary(issueCounts);
 
     if (frameResult.new_issues && frameResult.new_issues.length > 0) {
-      action = ReviewHistoryAction.NEW_ISSUES_FOUND;
+      action = ReviewTimelineAction.NEW_ISSUES_FOUND;
       summary = generateNewIssuesSummary(frameResult.new_issues);
     } else if (issueCounts.fixed > 0 && issueCounts.fixed === issueCounts.total - issueCounts.new) {
-      action = ReviewHistoryAction.ISSUES_FIXED;
+      action = ReviewTimelineAction.ISSUES_FIXED;
     } else if (issueCounts.partially_fixed > 0) {
-      action = ReviewHistoryAction.ISSUES_PARTIALLY_FIXED;
+      action = ReviewTimelineAction.ISSUES_PARTIALLY_FIXED;
     }
 
     return {
@@ -385,10 +385,10 @@ export class DesignRecheckService {
         },
       });
 
-      // Create history entry
-      await prisma.reviewHistory.create({
+      // Create time line entry
+      await prisma.designTimeline.create({
         data: {
-          designsReviewId: design.designsReviewId,
+          designId: design.id,
           action: historyAction,
           summary: historySummary,
           changes: historyChanges as any,

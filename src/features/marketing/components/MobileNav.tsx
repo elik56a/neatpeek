@@ -3,6 +3,7 @@ import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
+import { getLoginUrl, getRegisterUrl } from "@/utils/getAppUrl";
 
 interface MobileNavProps {
   items: { title: string; href: string }[];
@@ -35,10 +36,10 @@ export function MobileNav({ items, isMarketing }: MobileNavProps) {
           ))}
           {isMarketing && (
             <>
-              <Link href="/login" className="text-muted-foreground">
+              <Link href={getLoginUrl()} className="text-muted-foreground">
                 Sign In
               </Link>
-              <Link href="/register" className="text-foreground font-medium">
+              <Link href={getRegisterUrl()} className="text-foreground font-medium">
                 Sign Up
               </Link>
             </>

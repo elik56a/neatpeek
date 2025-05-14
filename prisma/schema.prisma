@@ -425,16 +425,16 @@ model BrandRule {
   @@index([category])
 }
 
-model ReviewHistory {
-  id              String              @id @default(cuid())
-  action          ReviewHistoryAction
-  summary         String
-  changes         Json?
-  timestamp       DateTime            @default(now())
-  designsReviewId String
-  designsReview   DesignsReview       @relation(fields: [designsReviewId], references: [id])
+model DesignTimeline {
+  id        String               @id @default(cuid())
+  action    ReviewTimelineAction
+  summary   String
+  changes   Json?
+  timestamp DateTime             @default(now())
+  designId  String
+  design    Design               @relation(fields: [designId], references: [id])
 
-  @@index([designsReviewId])
+  @@index([designId])
   @@index([timestamp])
 }
 
@@ -449,21 +449,20 @@ model RateLimit {
 }
 
 model DesignsReview {
-  id               String          @id @default(cuid())
+  id               String         @id @default(cuid())
   userId           String
   brandGuidelineId String
   name             String
   description      String?
-  status           ReviewStatus    @default(PENDING)
+  status           ReviewStatus   @default(PENDING)
   figmaUrl         String?
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
   figmaFileId      String?
-  reviewType       ReviewType      @default(FIGMA)
+  reviewType       ReviewType     @default(FIGMA)
   designs          Design[]
-  brandGuideline   BrandGuideline  @relation(fields: [brandGuidelineId], references: [id])
-  user             User            @relation(fields: [userId], references: [id])
-  reviewHistory    ReviewHistory[]
+  brandGuideline   BrandGuideline @relation(fields: [brandGuidelineId], references: [id])
+  user             User           @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([brandGuidelineId])
@@ -471,18 +470,19 @@ model DesignsReview {
 }
 
 model Design {
-  id                   String        @id @default(cuid())
-  userId               String
-  designsReviewId      String
-  frameId              String?       // Nullable for manual uploads
-  reviewJson           Json
-  status               ReviewStatus  @default(PENDING)
-  originalFigmaUrl     String?       // Nullable for manual uploads
-  createdAt            DateTime      @default(now())
-  updatedAt            DateTime      @updatedAt
-  fileName             String?
-  designsReview        DesignsReview  @relation(fields: [designsReviewId], references: [id])
-  user                 User          @relation(fields: [userId], references: [id])
+  id               String           @id @default(cuid())
+  userId           String
+  designsReviewId  String
+  frameId          String? // Nullable for manual uploads
+  reviewJson       Json
+  status           ReviewStatus     @default(PENDING)
+  originalFigmaUrl String? // Nullable for manual uploads
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  fileName         String?
+  designsReview    DesignsReview    @relation(fields: [designsReviewId], references: [id])
+  user             User             @relation(fields: [userId], references: [id])
+  timeline         DesignTimeline[]
 
   @@index([userId])
   @@index([designsReviewId])
@@ -573,7 +573,7 @@ enum RecheckStatus {
   PARTIALLY_FIXED
 }
 
-enum ReviewHistoryAction {
+enum ReviewTimelineAction {
   INITIAL_REVIEW
   RECHECK
   NEW_ISSUES_FOUND

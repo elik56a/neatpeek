@@ -4,14 +4,6 @@ import { Company, User, CompanyRole } from "@/types";
 import { useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 
-// Define the Brand type if not already defined in types
-interface Brand {
-  id: string;
-  name: string;
-  description?: string;
-  brandRules?: any;
-}
-
 /**
  * Hook for fetching and managing app data
  *
@@ -22,7 +14,6 @@ export function useAppData() {
   const { data: session, status } = useSession();
   const [user, setUser] = useState<User | null>(null);
   const [company, setCompany] = useState<Company | null>(null);
-  const [brands, setBrands] = useState<Brand[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const initializationRef = useRef<boolean>(false);
@@ -72,15 +63,6 @@ export function useAppData() {
         console.log("User has no company");
         setCompany(null);
       }
-
-      // If user has brands, set them
-      if (userData.brands && Array.isArray(userData.brands)) {
-        console.log("User has brands:", userData.brands.length);
-        setBrands(userData.brands);
-      } else {
-        console.log("User has no brands");
-        setBrands([]);
-      }
     } catch (error) {
       console.error("Error fetching user data:", error);
       setError(error instanceof Error ? error : new Error("Failed to fetch user data"));
@@ -128,7 +110,6 @@ export function useAppData() {
     user,
     company,
     companyId: company?.id || null,
-    brands,
     hasCompany,
     isCompanyOwner,
     isCompanyAdmin,

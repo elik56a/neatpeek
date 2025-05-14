@@ -44,6 +44,7 @@ declare module "@prisma/client" {
         include: {
           user: true;
           brandGuideline: true;
+          designs: true;
         };
       }) => Promise<{
         user: User;
