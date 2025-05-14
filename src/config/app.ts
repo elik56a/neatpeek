@@ -15,7 +15,7 @@ export const appConfig = {
   /**
    * Application email
    */
-  supportEmail: "support@neatpeek.com",
+  supportEmail: "contact@neatpeek.io",
 
   /**
    * Storage keys
