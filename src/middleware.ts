@@ -11,6 +11,12 @@ export async function middleware(request: NextRequest) {
   const hostname = request.headers.get("host") || "";
   const isAppSubdomain = hostname.startsWith("app.");
 
+  console.log({
+    pathname,
+    hostname,
+    isAppSubdomain,
+  });
+
   // Allow access to public paths
   const isPublicPath = publicPaths.some(path => pathname.startsWith(path));
   if (isPublicPath) {
@@ -20,19 +26,12 @@ export async function middleware(request: NextRequest) {
   // If on app subdomain, enforce auth
   if (isAppSubdomain) {
     const token = await getToken({ req: request });
+    console.log("Token:", token);
 
     if (!token) {
-      if (pathname === "/") {
-        // Rewrite "/" to login page but keep the URL as "/"
-        const rewriteUrl = request.nextUrl.clone();
-        rewriteUrl.pathname = "/login";
-        return NextResponse.rewrite(rewriteUrl);
-      }
-
-      // For other pages, redirect to login with callback
-      const loginUrl = request.nextUrl.clone();
-      loginUrl.pathname = "/login";
-      loginUrl.searchParams.set("callbackUrl", pathname);
+      const loginUrl = new URL("/login", request.url);
+      // loginUrl.searchParams.set("callbackUrl", request.url);
+      console.log("Redirecting to login page:", loginUrl.toString());
       return NextResponse.redirect(loginUrl);
     }
 
