@@ -93,7 +93,7 @@ const LoginPage = () => {
         <div className="text-center">
           <Link href="/" className="flex items-center justify-center gap-2 mb-6">
             <div className="h-10 w-10 rounded-lg bg-brand-gradient flex items-center justify-center">
-              <span className="text-white font-bold">TC</span>
+              <span className="text-white font-bold">{appConfig.name.charAt(0)}</span>
             </div>
           </Link>
           <h2 className="text-2xl font-bold">Welcome back</h2>

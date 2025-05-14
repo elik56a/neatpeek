@@ -4,12 +4,27 @@ import { apiLogger } from "@/services/logger";
 import { getToken } from "next-auth/jwt";
 
 // List of public paths that don't require authentication
-const publicPaths = ["/api/auth", "/api/health", "/_next", "/favicon.ico", "/images", "/fonts"];
+const publicPaths = [
+  "/api/auth",
+  "/api/health",
+  "/_next",
+  "/favicon.ico",
+  "/images",
+  "/fonts",
+  "/login",
+  "/register",
+];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hostname = request.headers.get("host") || "";
   const isAppSubdomain = hostname.startsWith("app.");
+
+  console.log({
+    pathname,
+    hostname,
+    isAppSubdomain,
+  });
 
   // Allow access to public paths
   const isPublicPath = publicPaths.some(path => pathname.startsWith(path));
@@ -20,19 +35,15 @@ export async function middleware(request: NextRequest) {
   // If on app subdomain, enforce auth
   if (isAppSubdomain) {
     const token = await getToken({ req: request });
+    console.log("Token:", token);
 
     if (!token) {
-      if (pathname === "/") {
-        // Rewrite "/" to login page but keep the URL as "/"
-        const rewriteUrl = request.nextUrl.clone();
-        rewriteUrl.pathname = "/login";
-        return NextResponse.rewrite(rewriteUrl);
+      if (pathname !== "/login" && pathname !== "/register") {
+        const loginUrl = new URL("/login", request.url);
+        loginUrl.searchParams.set("callbackUrl", request.url);
+        return NextResponse.redirect(loginUrl);
       }
-
-      // For other pages, redirect to login with callback
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("callbackUrl", request.url);
-      return NextResponse.redirect(loginUrl);
+      return NextResponse.next(); // already on login/register
     }
 
     // ✅ If user is logged in and visiting "/", redirect to dashboard
