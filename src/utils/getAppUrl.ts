@@ -15,12 +15,12 @@ export function getAppUrl(path: string = ""): string {
 
   // Dev deployment
   if (host === dev.marketing) {
-    return `https://${dev.app}${path}`;
+    return `https://${dev.app}${path}/`;
   }
 
   // Prod deployment (assumes www subdomain or root)
   if (host === prod.marketing || host === prod.marketing.replace("www.", "")) {
-    return `https://${prod.app}${path}`;
+    return `https://${prod.app}${path}/`;
   }
 
   // Fallback (local or unknown env)
@@ -40,12 +40,12 @@ export const getMarketingUrl = (path: string) => {
 
   // Dev deployment
   if (host === dev.app) {
-    return `https://${dev.marketing}${path}`;
+    return `https://${dev.marketing}${path}/`;
   }
 
   // Prod deployment (assumes www subdomain or root)
   if (host === prod.app || host === prod.app.replace("www.", "")) {
-    return `https://${prod.marketing}${path}`;
+    return `https://${prod.marketing}${path}/`;
   }
 
   // Fallback (local or unknown env)
@@ -53,9 +53,9 @@ export const getMarketingUrl = (path: string) => {
 };
 
 export function getLoginUrl(): string {
-  return getAppUrl("/login");
+  return getAppUrl("login");
 }
 
 export function getRegisterUrl(): string {
-  return getAppUrl("/register");
+  return getAppUrl("register");
 }

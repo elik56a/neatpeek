@@ -29,7 +29,7 @@ export async function middleware(request: NextRequest) {
     if (!token) {
       if (pathname !== "/login" && pathname !== "/register") {
         const loginUrl = new URL("/login", request.url);
-        loginUrl.searchParams.set("callbackUrl", request.url);
+        // loginUrl.searchParams.set("callbackUrl", request.url);
         return NextResponse.redirect(loginUrl);
       }
       return NextResponse.next(); // already on login/register
