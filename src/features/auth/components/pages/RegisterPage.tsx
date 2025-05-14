@@ -8,7 +8,7 @@ import { appConfig } from "@/config/app";
 import { useAuth } from "@/features/auth";
 import { validatePassword } from "@/features/auth/utils/password-validator";
 import { useToast } from "@/hooks/use-toast";
-import { getAppUrl, getLoginUrl } from "@/utils/getAppUrl";
+import { getLoginUrl, getMarketingUrl } from "@/utils/getAppUrl";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -250,14 +250,14 @@ const RegisterPage = () => {
               >
                 I agree to the{" "}
                 <Link
-                  href={getAppUrl("terms")}
+                  href={getMarketingUrl("terms")}
                   className="text-brand-600 dark:text-brand-400 hover:underline"
                 >
                   terms of service
                 </Link>{" "}
                 and{" "}
                 <Link
-                  href={getAppUrl("privacy")}
+                  href={getMarketingUrl("privacy")}
                   className="text-brand-600 dark:text-brand-400 hover:underline"
                 >
                   privacy policy
