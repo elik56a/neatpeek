@@ -4,7 +4,16 @@ import { apiLogger } from "@/services/logger";
 import { getToken } from "next-auth/jwt";
 
 // List of public paths that don't require authentication
-const publicPaths = ["/api/auth", "/api/health", "/_next", "/favicon.ico", "/images", "/fonts"];
+const publicPaths = [
+  "/api/auth",
+  "/api/health",
+  "/_next",
+  "/favicon.ico",
+  "/images",
+  "/fonts",
+  "/login",
+  "/register",
+];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -29,10 +38,12 @@ export async function middleware(request: NextRequest) {
     console.log("Token:", token);
 
     if (!token) {
-      const loginUrl = new URL("/login", request.url);
-      // loginUrl.searchParams.set("callbackUrl", request.url);
-      console.log("Redirecting to login page:", loginUrl.toString());
-      return NextResponse.redirect(loginUrl);
+      if (pathname !== "/login" && pathname !== "/register") {
+        const loginUrl = new URL("/login", request.url);
+        loginUrl.searchParams.set("callbackUrl", request.url);
+        return NextResponse.redirect(loginUrl);
+      }
+      return NextResponse.next(); // already on login/register
     }
 
     // ✅ If user is logged in and visiting "/", redirect to dashboard
