@@ -167,7 +167,7 @@ export class AuthService {
 
   static async logout(): Promise<AuthResponse> {
     try {
-      await signOut({ callbackUrl: getLoginUrl() });
+      await signOut({ callbackUrl: "/" });
       return { success: true };
     } catch (error) {
       return {
