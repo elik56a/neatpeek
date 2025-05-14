@@ -2,18 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { apiLogger } from "@/services/logger";
 import { getToken } from "next-auth/jwt";
-
-// List of public paths that don't require authentication
-const publicPaths = [
-  "/api/auth",
-  "/api/health",
-  "/_next",
-  "/favicon.ico",
-  "/images",
-  "/fonts",
-  "/login",
-  "/register",
-];
+import { PUBLIC_PATHS } from "./config/app";
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -27,7 +16,7 @@ export async function middleware(request: NextRequest) {
   });
 
   // Allow access to public paths
-  const isPublicPath = publicPaths.some(path => pathname.startsWith(path));
+  const isPublicPath = PUBLIC_PATHS.some(path => pathname.startsWith(path));
   if (isPublicPath) {
     return NextResponse.next();
   }
@@ -40,7 +29,7 @@ export async function middleware(request: NextRequest) {
     if (!token) {
       if (pathname !== "/login" && pathname !== "/register") {
         const loginUrl = new URL("/login", request.url);
-        loginUrl.searchParams.set("callbackUrl", request.url);
+        // loginUrl.searchParams.set("callbackUrl", request.url);
         return NextResponse.redirect(loginUrl);
       }
       return NextResponse.next(); // already on login/register

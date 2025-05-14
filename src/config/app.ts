@@ -51,3 +51,16 @@ export const APP_PAGES: string[] = [
   "/company/settings",
   "/company/teams",
 ];
+
+export const PUBLIC_PATHS = [
+  "/api/auth",
+  "/api/health",
+  "/_next",
+  "/favicon.ico",
+  "/images",
+  "/fonts",
+  "/login",
+  "/register",
+  "/terms",
+  "/privacy",
+];
