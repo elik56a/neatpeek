@@ -487,6 +487,8 @@ model Design {
   @@index([userId])
   @@index([designsReviewId])
   @@index([frameId])
+  @@index([status]) // Add index for status since we filter by it
+  @@index([createdAt]) // Add index for createdAt since we sort by it often
 }
 
 enum CompanyRole {

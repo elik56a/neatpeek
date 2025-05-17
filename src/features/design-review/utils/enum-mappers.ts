@@ -2,7 +2,7 @@
  * Utility functions for mapping enums to human-readable labels and UI properties
  */
 
-import { IssueStatus, IssueSeverity, ReviewTimelineAction } from "../types";
+import { IssueStatus, IssueSeverity, ReviewTimelineAction, ReviewStatus } from "../types";
 import {
   AlertCircle,
   CheckCircle2,
@@ -234,5 +234,33 @@ export function getSeverityBadgeClasses(severity: IssueSeverity): string {
       return "bg-purple-100 text-purple-800 hover:bg-purple-100";
     default:
       return "";
+  }
+}
+
+/**
+ * Maps a score to a color class using the design system colors
+ * @param score The score to map (0-100)
+ * @returns A color class
+ */
+export function getScoreColor(score: number): string {
+  if (score > 70) {
+    return "text-green-700 bg-green-100";
+  } else if (score > 40) {
+    return "text-yellow-700 bg-yellow-100";
+  } else {
+    return "text-red-700 bg-red-100";
+  }
+}
+
+export function getReviewStatusColor(status: ReviewStatus): string {
+  switch (status) {
+    case ReviewStatus.COMPLETED:
+      return "text-green-700 bg-green-100";
+    case ReviewStatus.FAILED:
+      return "text-red-700 bg-red-100";
+    case ReviewStatus.IN_PROGRESS:
+      return "text-blue-700 bg-blue-100";
+    default:
+      return "text-muted-foreground";
   }
 }

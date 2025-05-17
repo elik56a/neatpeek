@@ -69,10 +69,6 @@ export function prepareDesignReviewExportData(
     }
   });
 
-  console.log({
-    exportData,
-  });
-
   return exportData;
 }
 

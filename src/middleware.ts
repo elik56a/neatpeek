@@ -9,12 +9,6 @@ export async function middleware(request: NextRequest) {
   const hostname = request.headers.get("host") || "";
   const isAppSubdomain = hostname.startsWith("app.");
 
-  console.log({
-    pathname,
-    hostname,
-    isAppSubdomain,
-  });
-
   // Allow access to public paths
   const isPublicPath = PUBLIC_PATHS.some(path => pathname.startsWith(path));
   if (isPublicPath) {

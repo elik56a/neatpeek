@@ -19,7 +19,7 @@ export enum CompanyRole {
  */
 export type ReviewTimeline = Prisma.DesignTimelineGetPayload<{
   include: {
-    designsReview: true;
+    design: true;
   };
 }>;
 
