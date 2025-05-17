@@ -166,10 +166,10 @@ export class DesignsReviewsListService {
           general: generalIssuesCount,
           total: brandIssuesCount + generalIssuesCount,
         },
-        designsImagesUrl: item.designs.map(design => (design.reviewJson as any).image.url),
+        designsImagesUrl: item.designs.map(design => (design.reviewJson as any).image?.url),
         status: item.status,
         figmaUrl: item.figmaUrl ?? "",
-        previewImage: item.designs[0] ? (item.designs[0].reviewJson as any).image.url : null,
+        previewImage: item.designs[0] ? (item.designs[0].reviewJson as any).image?.url : null,
         user: {
           name: item.user.name,
           email: item.user.email,

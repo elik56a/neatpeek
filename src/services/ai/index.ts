@@ -26,7 +26,7 @@ export async function getAIService() {
     // Get the project ID from environment variables
     const project = process.env.GOOGLE_PROJECT_ID || "";
     const location = process.env.GOOGLE_LOCATION || "us-central1";
-    const modelName = process.env.GOOGLE_MODEL_NAME || "gemini-2.5-pro-exp-03-25";
+    const modelName = process.env.GOOGLE_MODEL_NAME || "gemini-2.5-pro-preview-05-06";
 
     // Dynamically import the VertexAIProvider
     const { VertexAIProvider } = await import("./vertex-ai-provider");

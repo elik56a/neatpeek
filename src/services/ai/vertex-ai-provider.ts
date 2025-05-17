@@ -4,12 +4,7 @@
 
 // This service is server-side only and should not be imported on the client
 import { AIAnalysisResult } from "@/features/brand-setup/types";
-import {
-  DesignAnalysisResult,
-  DesignRecheckResult,
-  DesignReviewResult,
-  FrameRecheckResult,
-} from "@/features/design-review/types";
+import { DesignReviewResult, FrameRecheckResult } from "@/features/design-review/types";
 import {
   AIService,
   AnalyzeBrandGuidelineParams,
@@ -38,7 +33,7 @@ export class VertexAIProvider implements AIService {
   constructor(
     project: string,
     location: string = "us-central1",
-    modelName: string = "gemini-2.5-pro-exp-03-25"
+    modelName: string = "gemini-2.5-pro-preview-05-06"
   ) {
     this.project = project;
     this.location = location;
