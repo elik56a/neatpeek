@@ -6,7 +6,7 @@ import {
   DesignsReviewSortField,
 } from "../types";
 import { sortItems, formatNumber } from "@/utils/server/sort";
-import { ReviewJson } from "@/features/design-review/types";
+import { ReviewJson, Design } from "@/features/design-review/types";
 
 /**
  * Service for handling DesignsReviews list operations
@@ -24,10 +24,11 @@ export class DesignsReviewsListService {
     return DesignsReviewsListService.instance;
   }
 
-  private calculateTotalScore(designs: { reviewJson: ReviewJson }[]): number {
+  private calculateTotalScore(designs: Design[]): number {
     if (designs?.length === 0) return 0;
+    console.log(designs);
     const totalScore = designs.reduce(
-      (acc, design) => acc + design.reviewJson.design_score.total,
+      (acc, design) => acc + design.reviewJson.design_score?.total,
       0
     );
     return formatNumber(totalScore / designs.length);

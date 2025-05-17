@@ -18,7 +18,6 @@ export async function middleware(request: NextRequest) {
   // If on app subdomain, enforce auth
   if (isAppSubdomain) {
     const token = await getToken({ req: request });
-    console.log("Token:", token);
 
     if (!token) {
       if (pathname !== "/login" && pathname !== "/register") {
