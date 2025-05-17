@@ -45,8 +45,8 @@ const Sidebar = () => {
       icon: PaintBucket,
     },
     {
-      name: "Design History",
-      href: "/design-history",
+      name: "Design Reviews",
+      href: "/designs-reviews",
       icon: History,
     },
     {

@@ -37,9 +37,9 @@ export type {
 
 // extend the Design type
 //@ts-ignore
-export interface Design extends DesignType {
+export type Design = Omit<Prisma.DesignGetPayload<{}>, "reviewJson"> & {
   reviewJson: ReviewJson;
-}
+};
 
 //@ts-ignore
 export interface DesignsReview extends DesignsReviewType {
