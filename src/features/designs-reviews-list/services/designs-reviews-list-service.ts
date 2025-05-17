@@ -25,7 +25,7 @@ export class DesignsReviewsListService {
   }
 
   private calculateTotalScore(designs: { reviewJson: ReviewJson }[]): number {
-    if (designs.length === 0) return 0;
+    if (designs?.length === 0) return 0;
     const totalScore = designs.reduce(
       (acc, design) => acc + design.reviewJson.design_score.total,
       0
@@ -75,7 +75,7 @@ export class DesignsReviewsListService {
   ): number {
     return designs.reduce(
       (acc, design) =>
-        acc + design.reviewJson[type === "brand" ? "brand_issues" : "general_issues"].length,
+        acc + design.reviewJson[type === "brand" ? "brand_issues" : "general_issues"]?.length,
       0
     );
   }
@@ -204,9 +204,9 @@ export class DesignsReviewsListService {
     }
 
     // Check if we have more items
-    const hasMore = sortedItems.length > take;
+    const hasMore = sortedItems?.length > take;
     const actualItems = hasMore ? sortedItems.slice(0, -1) : sortedItems;
-    const nextCursor = hasMore ? actualItems[actualItems.length - 1].id : null;
+    const nextCursor = hasMore ? actualItems[actualItems?.length - 1].id : null;
 
     return {
       items: actualItems,
