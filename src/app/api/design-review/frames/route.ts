@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
     const figmaService = new FigmaService(figmaToken);
 
     // Extract designs from Figma
-    const { metadata } = await figmaService.extractDesignsFromFigma(figmaUrl);
+    const { metadata } = await figmaService.getAllFramesFromFigmaUrl(figmaUrl);
 
     // Return frames with image URLs
     return NextResponse.json({

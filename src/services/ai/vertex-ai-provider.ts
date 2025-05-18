@@ -5,13 +5,13 @@
 // This service is server-side only and should not be imported on the client
 import { AIAnalysisResult } from "@/features/brand-setup/types";
 import { DesignReviewResult, FrameRecheckResult } from "@/features/design-review/types";
+import { VertexAI } from "@google-cloud/vertexai";
 import {
   AIService,
   AnalyzeBrandGuidelineParams,
   AnalyzeDesignParams,
   RecheckDesignParams,
 } from "./types";
-import { VertexAI } from "@google-cloud/vertexai";
 
 export class VertexAIProvider implements AIService {
   private vertexAI: VertexAI;
@@ -173,113 +173,125 @@ export class VertexAIProvider implements AIService {
    */
   private buildBrandGuidelinePrompt(params: AnalyzeBrandGuidelineParams): string {
     // Start with role, goal, and primary instruction
-    let prompt = `You are an AI Brand Guideline Analyst. Your task is to meticulously analyze the provided brand materials (PDF, design examples, custom rules) and extract **actionable, specific brand guidelines** relevant to visual design, UI/UX, and brand identity. Structure these guidelines into a precise JSON object suitable for later use in automated design reviews.
-
-**Analysis Instructions & Source Prioritization:**
-
-1.  **Focus:** Extract rules related to visual elements (colors, fonts, logos, spacing, imagery, icons, layout) and core brand identity aspects (e.g., tone of voice if explicitly defined with actionable keywords). **Ignore** generic marketing copy, mission statements, company history, generic advice (e.g., "be creative"), or vague statements not specific to this brand's design implementation. Focus on rules that can be objectively checked.
-2.  **Source Types & Handling:**
-    * **PDF Brand Book (${params.pdfBuffer ? "Provided" : "Not Provided"}):** If provided, treat this as the **primary source of truth**. Extract explicit rules, definitions, specifications (e.g., exact color codes HEX/RGBA, full font names, specified weights/sizes, logo usage rules with clear space definitions, spacing values/systems).
-    * **Design Examples (${params.designImages && params.designImages.length > 0 ? "Provided" : "Not Provided"}):** If provided, analyze these images to **infer visual patterns and implicit rules** ONLY if they are **highly consistent** across multiple examples AND **do not contradict** the PDF or Custom Rules. Use these primarily to supplement or clarify rules found in the PDF (e.g., inferring typical component styling, common layout proportions). Clearly state in the rule's description if it was 'inferred from examples'. Be very cautious not to invent rules from single or inconsistent instances.
-    * **Custom Rules (${params.customRules && params.customRules.length > 0 ? "Provided" : "Not Provided"}):** If provided, these rules **MUST be included** and **take absolute precedence** over any conflicting information found in the PDF or inferred from design examples.
-3.  **Conflict Resolution Hierarchy:** Prioritize sources strictly as: (1st) Custom Rules > (2nd) PDF Brand Book > (3rd) Inferred from Design Examples. If conflicts arise, adhere to the higher priority source.
-
-**Input Materials Summary:**
-- Brand Name: ${params.brandName || "Not explicitly provided, attempt to infer from materials if possible."}
-- PDF Brand Book Attached: ${params.pdfBuffer ? "Yes" : "No"}
-- Design Examples Attached: ${params.designImages && params.designImages.length > 0 ? "Yes" : "No"}
-- Custom Rules Provided: ${params.customRules && params.customRules.length > 0 ? "Yes" : "No"}
-${params.customRules && params.customRules.length > 0 ? "\n**Custom Rules to Incorporate (Highest Priority):**\n" + params.customRules.map(rule => `- Category: ${rule.category || "general"}, Name: ${rule.name}, Description: ${rule.description}`).join("\n") : ""}
-
-**CRITICAL OUTPUT REQUIREMENTS:**
-
-1.  **Raw JSON Only:** Your entire response MUST be ONLY the raw JSON object. Do NOT include any introductory text, explanations, apologies, or summaries before or after the JSON. Do NOT wrap the JSON in markdown code blocks (\`\`\`json ... \`\`\`) or use any backticks.
-2.  **Strict Schema Adherence:** Adhere strictly to the following JSON structure. Populate the arrays for each category based on the extracted rules. If no rules are found for a category, return an empty array \`[]\` for it.
-3. for every rule, include the name, value, and description and  confidence score, between 0 and 1.
-
-\`\`\`json
-{
-  "metadata": {
-    // Use provided brandName. If not provided, infer companyName from materials if clearly stated. Do not guess industry unless explicitly specified in materials.
-    "companyName": "string | null",
-    "industry": "string | null"
-  },
-  "colors": [
-    // Extract ALL defined brand colors with their exact codes.
+    let prompt = `You are an AI Brand Guideline Analyst. Your task is to meticulously analyze the provided brand materials (PDF, design examples, custom rules) and extract *actionable, specific brand guidelines* relevant to visual design, UI/UX, and brand identity. Structure these guidelines into a precise JSON object suitable for later use in automated design reviews.
+    
+    *Overall Goal & Rule Categorization:*
+    Your goal is to be exhaustive in extracting all actionable rules. You will be asked to categorize rules into the following primary sections based on their most relevant domain:
+    •⁠  ⁠metadata: General information about the brand.
+    •⁠  ⁠colors: Specific brand color definitions, and gradients  
+    •⁠  ⁠typography: Rules for font families, sizes, weights, styles, and usage.
+    •⁠  ⁠spacing: Guidelines for margins, paddings, grids, and layout units.
+    •⁠  ⁠logo: Rules for logo usage, variations, clear space, and misuses.
+    •⁠  ⁠icons: Guidelines for icon style, usage, sizing, and libraries.
+    •⁠  ⁠layout: Rules for overall page structure, grid systems, and content organization.
+    •⁠  ⁠imagery: Guidelines for photography and illustration styles and usage.
+    •⁠  ⁠general: This is a CRITICAL category. It must capture any other specific, actionable visual design, UI/UX, or brand identity rule that does not fit neatly into the more specific categories listed above.
+    
+    *Analysis Instructions & Source Prioritization:*
+    
+    1.  *Focus:* Extract rules related to visual elements (colors, fonts, logos, spacing, imagery, icons, layout) and core brand identity aspects (e.g., actionable UI tone of voice keywords, specific UI wording patterns). *Ignore* generic marketing copy, mission statements, company history, generic advice (e.g., "be creative"), or vague statements not specific to this brand's design implementation. Focus on rules that can be objectively checked.
+    2.  *Source Types & Handling:*
+        * *PDF Brand Book (${params.pdfBuffer ? "Provided" : "Not Provided"}):* If provided, treat this as the *primary source of truth*. Extract explicit rules, definitions, specifications (e.g., exact color codes HEX/RGBA, full font names, specified weights/sizes, logo usage rules with clear space definitions, spacing values/systems).
+        * *Design Examples (${params.designImages && params.designImages.length > 0 ? "Provided" : "Not Provided"}):* If provided, analyze these images to *infer visual patterns and implicit rules* ONLY if they are *highly consistent* across multiple examples AND *do not contradict* the PDF or Custom Rules. Use these primarily to supplement or clarify rules found in the PDF. Clearly state in the rule's description if it was 'inferred from examples'. Be very cautious not to invent rules from single or inconsistent instances.
+        * *Custom Rules (${params.customRules && params.customRules.length > 0 ? "Provided" : "Not Provided"}):* If provided, these rules *MUST be included* and *take absolute precedence* over any conflicting information found in the PDF or inferred from design examples.
+    3.  *Conflict Resolution Hierarchy:* Prioritize sources strictly as: (1st) Custom Rules > (2nd) PDF Brand Book > (3rd) Inferred from Design Examples. If conflicts arise, adhere to the higher priority source.
+    4.  *Exhaustive Extraction & "General" Category Mandate:* Ensure that every actionable visual guideline identified from the source materials, according to the prioritization, is included in the final JSON output. *Crucially, if a rule is actionable and relevant to visual design or brand identity but does not perfectly fit one of the specific categories (colors, typography, etc.), it MUST be placed in the 'general' category.* Do not discard relevant rules simply because they are miscellaneous. The 'general' category is vital for capturing these.
+    
+    *Input Materials Summary:*
+    •⁠  ⁠Brand Name: ${params.brandName || "Not explicitly provided, attempt to infer from materials if possible."}
+    •⁠  ⁠PDF Brand Book Attached: ${params.pdfBuffer ? "Yes" : "No"}
+    •⁠  ⁠Design Examples Attached: ${params.designImages && params.designImages.length > 0 ? "Yes" : "No"}
+    •⁠  ⁠Custom Rules Provided: ${params.customRules && params.customRules.length > 0 ? "Yes" : "No"}
+    ${params.customRules && params.customRules.length > 0 ? "\n**Custom Rules to Incorporate (Highest Priority):**\n" + params.customRules.map(rule => `- Category: ${rule.category || "general"}, Name: ${rule.name}, Description: ${rule.description}`).join("\n") : ""}
+    
+    *CRITICAL OUTPUT REQUIREMENTS:*
+    
+    1.  *Raw JSON Only:* Your entire response MUST be ONLY the raw JSON object. Do NOT include any introductory text, explanations, apologies, or summaries before or after the JSON. Do NOT wrap the JSON in markdown code blocks (\⁠ \ ⁠\⁠ json ... \ ⁠\⁠ \ ⁠) or use any backticks.
+    2.  *Strict Schema Adherence:* Adhere strictly to the following JSON structure. Populate the arrays for each category based on the extracted rules. If no rules are found for a category, return an empty array \⁠ []\ ⁠ for it.
+    3.⁠ ⁠For every rule listed within arrays like "colors", "typography", etc., you MUST include "name" (string), "value" (string), "description" (string or null), and "confidence" (number between 0 and 1).
+    
+    \⁠ \ ⁠\`json
     {
-      "confidence": number, // REQUIRED: Confidence score between 0 and 1.
-      "name": "string", // REQUIRED: Clear, concise, human-readable name (e.g., "Primary Action Blue"). **This exact name will be used later to identify specific rule violations.**
-      "value": "string", // REQUIRED: The color code (e.g., "#005AEE", "rgba(0, 90, 238, 0.75)"). Verify format.
-      "description": "string | null" // e.g., "Main CTA buttons", "Secondary text", "Error states". Note if inferred.
+      "metadata": {
+        "companyName": "string | null", // Use provided brandName. If not provided, infer companyName from materials if clearly stated. Do not guess industry unless explicitly specified.
+        "industry": "string | null"
+      },
+      "colors": [
+        {
+          "confidence": number, // REQUIRED: Confidence score between 0 and 1.
+          "name": "string", // REQUIRED: Clear, concise, human-readable name (e.g., "Primary Action Blue").
+          "value": "string", // REQUIRED: The color code (e.g., "#005AEE", "rgba(0, 90, 238, 0.75)").
+          "description": "string | null" // e.g., "Main CTA buttons", "Secondary text". Note if inferred.
+        }
+      ],
+      "typography": [
+        {
+          "confidence": number, // REQUIRED
+          "name": "string", // REQUIRED: (e.g., "H1 Heading", "Body Copy").
+          "value": "string", // REQUIRED: Font Family Name (e.g., "Inter", "Roboto Slab").
+          "description": "string" // REQUIRED: Detail weights, sizes, line-height, letter-spacing, case, usage. Note if inferred.
+        }
+      ],
+      "spacing": [
+        {
+          "confidence": number, // REQUIRED
+          "name": "string", // REQUIRED: (e.g., "Base Unit", "Standard Page Margin").
+          "value": "string", // e.g., "8px", "16px", "2rem"
+          "description": "string" // REQUIRED: Detailed rule (e.g., "Base unit for grid", "Default margin between sections"). Note if inferred.
+        }
+      ],
+      "logo": [
+        {
+          "confidence": number, // REQUIRED
+          "name": "string", // REQUIRED: (e.g., "Primary Logo Usage", "Clear Space Requirement").
+          "value": "string", // e.g., "Default", "Minimum size 32px"
+          "description": "string" // REQUIRED: Detailed rule (e.g., "Maintain clear space equal to logo's height", "Never distort"). Note if inferred.
+        }
+      ],
+      "icons": [
+        {
+          "confidence": number, // REQUIRED
+          "name": "string", // REQUIRED: (e.g., "Icon Style", "Functional Icon Sizing").
+          "value": "string", // e.g., "Line style, 2px stroke", "24x24px"
+          "description": "string" // REQUIRED: Detailed rule (e.g., "Use outlined icons from Material Symbols", "Icons inherit text color"). Note if inferred.
+        }
+      ],
+      "layout": [
+        {
+          "confidence": number, // REQUIRED
+          "name": "string", // REQUIRED: (e.g., "Grid System", "Max Content Width").
+          "value": "string", // e.g., "12-column responsive grid", "1280px"
+          "description": "string" // REQUIRED: Detailed rule (e.g., "12-column grid with 24px gutters", "Max content width is 1280px for desktop"). Note if inferred.
+        }
+      ],
+      "imagery": [
+        {
+          "confidence": number, // REQUIRED
+          "name": "string", // REQUIRED: (e.g., "Photography Style", "Illustration Usage").
+          "value": "string", // e.g., "Authentic, natural light", "Flat style, brand colors only"
+          "description": "string" // REQUIRED: Detailed rule (e.g., "Photography should feature real people", "Avoid generic stock photos"). Note if inferred.
+        }
+      ],
+      "general": [
+        // CRITICAL REMINDER: This 'general' section is ESSENTIAL. It MUST capture any other specific, actionable visual design, UI/UX, or brand identity rule that does not logically fit into the more narrowly defined categories above (colors, typography, logo, etc.). Examples include, but are not limited to: rules for UI tone of voice (e.g., "Use active voice in UI text"), specific Call-To-Action phrasings (e.g., "Submit buttons must say 'Complete' not 'Send'"), basic accessibility reminders if not extensive enough for their own rules (e.g., "Ensure all interactive elements have hover states"), simple animation/transition notes (e.g., "UI transitions should be subtle and quick"), or any other miscellaneous but objective design constraint. Do not omit relevant rules; if they are actionable and don't fit elsewhere, they belong here.
+        {
+          "confidence": number, // REQUIRED
+          "name": "string", // REQUIRED: Clear, concise, human-readable name (e.g., "UI Tone Principle", "Standard Modal Transition", "Data Table Styling").
+          "value":  "string", // e.g., "Friendly, helpful, concise", "Fade-in, 300ms", "Zebra-striping for readability"
+          "description": "string" // REQUIRED: Detailed rule (e.g., "UI text should avoid jargon and be encouraging", "Modals always use a gentle fade-in transition over 300ms.", "Alternating row colors for data tables to improve scannability."). Note if specified or inferred.
+        }
+      ]
     }
-  ],
-  "typography": [
-    // Detail each distinct font usage rule (e.g., H1 Heading, Body Text, Button Label).
-    {
-      "name": "string", // REQUIRED: Clear, concise, human-readable name for the text style (e.g., "H1 Heading", "Body Copy"). **This exact name will be used later to identify specific rule violations.**
-      "value": "string", // REQUIRED: Font Family Name (e.g., "Inter", "Roboto Slab"). Be precise.
-      "description": "string" // REQUIRED: Detail specified weights (e.g., "Bold 700", "Regular 400"), sizes (e.g., "32px"), line-height (e.g., "1.5" or "48px"), letter-spacing, case (e.g., "UPPERCASE"), and usage context (e.g., "Used for main page titles"). Include all available details. Note if inferred.
-    }
-  ],
-  "spacing": [
-    // Define base units, grid systems, standard margins/paddings if specified.
-    {
-      "name": "string", // REQUIRED: Clear, concise, human-readable name (e.g., "Base Unit", "Standard Margin"). **This exact name will be used later to identify specific rule violations.**
-      "value": "string", // e.g., "8px", "16px"
-      "description": "string" // REQUIRED: Detailed rule or explanation (e.g., "Base unit for all margins/paddings", "12-column responsive grid with 24px gutters", "Default margin between sections"). Note if inferred.
-    }
-  ],
-  "logo": [
-    // Detail rules for logo usage: variations, clear space, placement, sizing, backgrounds, common misuses.
-    {
-      "name": "string", // REQUIRED: Clear, concise, human-readable name (e.g., "Primary Logo Usage", "Clear Space Requirement"). **This exact name will be used later to identify specific rule violations.**
-       "value": "string",
-      "description": "string" // REQUIRED: Detailed rule (e.g., "Maintain minimum clear space equal to the logo's height on all sides", "Never distort or recolor the logo", "Use the white version on dark backgrounds >60% black"). Note if specified or inferred.
-    }
-  ],
-  "icons": [
-    // Describe icon style (e.g., line, solid), source/library, usage rules, sizing, color application.
-    {
-      "name": "string", // REQUIRED: Clear, concise, human-readable name (e.g., "Icon Style", "Icon Sizing"). **This exact name will be used later to identify specific rule violations.**
-     "value": "string",
-      "description": "string" // REQUIRED: Detailed rule or description (e.g., "Use outlined icons from Material Symbols library", "Default size 24x24px", "Icons should inherit the color of surrounding text unless used functionally"). Note if specified or inferred.
-    }
-  ],
-  "layout": [
-    // Describe grid systems, common page structures, alignment rules, maximum widths if specified.
-    {
-      "name": "string", // REQUIRED: Clear, concise, human-readable name (e.g., "Grid System", "Max Content Width"). **This exact name will be used later to identify specific rule violations.**
-      "value": "string",
-      "description": "string" // REQUIRED: Detailed rule or description (e.g., "12-column bootstrap-based grid", "Maximum content width is 1280px", "All content should be left-aligned within containers"). Note if specified or inferred.
-    }
-  ],
-  "imagery": [
-    // Describe photography style (e.g., candid, staged, lighting), illustration style (e.g., flat, detailed), usage rules, subject matter.
-    {
-      "name": "string", // REQUIRED: Clear, concise, human-readable name (e.g., "Photography Style", "Illustration Usage"). **This exact name will be used later to identify specific rule violations.**
-      "value": "string",
-      "description": "string" // REQUIRED: Detailed rule or description (e.g., "Photography should be authentic, featuring real people in natural light", "Use flat illustrations with brand colors only", "Avoid generic stock photos"). Note if specified or inferred.
-    }
-  ],
-  "general": [
-    // Include other specific, actionable rules if defined (e.g., Tone of Voice keywords, specific CTA wording, Accessibility targets).
-        { "name": "Tone of Voice", "value": "...", "description": "..." },
-        { "name": "Social Media Guidelines", "value": "...", "description": "..." },
-    {
-      "name": "string", // REQUIRED: Clear, concise, human-readable name (e.g., "Tone of Voice Keywords", "Accessibility Compliance"). **This exact name will be used later to identify specific rule violations.**
-      "value":  "string", 
-      "description": "string" // REQUIRED: Detailed rule or description (e.g., "Tone: Friendly, helpful, concise. Avoid jargon.", "Primary buttons should use 'Learn More' or 'Get Started'", "Target WCAG 2.1 AA compliance"). Note if specified or inferred.
-    }
-  ]
-}
-\`\`\`
-
-3.  **Completeness & Accuracy:** Extract ALL relevant rules accurately and be precise. Do not miss details, especially regarding typography specifications (font name, weights, sizes, line height), exact color codes, and logo clear space requirements. Ensure the final output is valid JSON.
-4.  **No Guessing:** Do not include rules you are unsure about or that are not explicitly stated or clearly and consistently inferred from multiple examples. If a specific detail (like a font weight) isn't mentioned, do not invent it. Just state what *is* mentioned.
-`;
+    \⁠ \ ⁠\`
+    
+    3.  *Completeness & Accuracy:* Extract ALL relevant rules accurately and be precise. Do not miss details, especially regarding typography specifications (font name, weights, sizes, line height), exact color codes, and logo clear space requirements. Ensure the final output is valid JSON.
+    4.  *No Guessing:* Do not include rules you are unsure about or that are not explicitly stated or clearly and consistently inferred from multiple examples. If a specific detail (like a font weight) isn't mentioned, do not invent it. Just state what is mentioned.
+    `;
 
     return prompt;
   }
+
+  // The rest of the VertexAIProvider class (analyzeDesigns, buildDesignAnalysisPrompt, recheckDesigns, buildDesignRecheckPrompt, cleanJsonResponse) would remain as previously defined or as per your latest version.
 
   /**
    * Build the prompt for design analysis
@@ -300,7 +312,12 @@ ${params.customRules && params.customRules.length > 0 ? "\n**Custom Rules to Inc
     **ANALYSIS FOR EACH IMAGE FRAME:**
     Perform the following analysis, prioritizing #1:
     1.  **Brand Guideline Violations (Primary Focus):** Identify every deviation from the provided \`brandRules\` JSON object (this includes rules listed under *all* categories within that JSON, such as 'colors', 'typography', 'logo', and even 'general' if present). Report these in the \`brand_issues\`
-    1.2 **Dont guess**: i dont want false positives. If you are not sure about a rule violation, do not include it at the issues, for example, if the font is not clear to you, do not include it in the issues, or if the hex color is very close to the brand color, do not include it in the issues, beacuse probably it is a false positive.
+    1.2 *Minimize False Positives & Focus on Impact:* Your primary goal for identifying \⁠ brand_issues\ ⁠ is to flag clear, unambiguous violations that genuinely detract from brand consistency, user experience, or legibility.
+    * *High Confidence Required:* If you are not highly confident about a rule violation (e.g., if precise font details are obscured in the image, or if an element's exact color/size is difficult to determine with certainty), *do not report it as a \⁠ brand_issue\ ⁠*. It's better to miss a potential minor issue than to report a false positive.
+    * *Tolerance for Minor, Imperceptible Variations:* For quantifiable rules from \⁠ brandRules\ ⁠ (like specific color hex codes, spacing values, or font sizes), allow for very minor deviations that are highly unlikely to be perceptible to an end-user or to negatively impact the design's overall adherence to the brand. For instance:
+    * A color that is visually almost identical (e.g., a difference of only a few units in R, G, or B values, or an extremely similar hex code) to a specified brand color might not need to be flagged, especially for non-critical elements.
+    * A 1-2 pixel difference in spacing or sizing, especially if the element is generally compliant and the deviation isn't visually jarring, can often be tolerated.
+    * *Prioritize Significance & Impact:* Before flagging a \⁠ brand_issue\ ⁠, briefly consider its actual impact. Is the deviation on a prominent brand element (e.g., main logo, primary call-to-action button) or a less critical one? Would an average user clearly notice this deviation and would it dilute the brand's intended presentation? Focus on issues that are clearly noticeable and strategically important for brand representation. Issues that are technically violations but have negligible visual or experiential impact should be deprioritized for flagging.
     1.3 **Be specific**: If a rule is violated, be specific about the violation. For example, if the color is wrong, specify the color that was used and the correct color according to the brand rules.
     1.4 **Be precise**: If a rule is violated, be precise about the violation. For example, if the font is wrong, specify the font that was used and the correct font according to the brand rules.
     1.5 **Dont return long explanations**: I dont want long explanations. Just return the violation and the fix suggestion. strict and concise.
@@ -459,7 +476,11 @@ ${params.customRules && params.customRules.length > 0 ? "\n**Custom Rules to Inc
 
 **TASKS FOR EACH FRAME:**
 1.  **Verify Previous Issues:** For each previous comment provided below, meticulously check the *current* design at the specified location. Determine if the issue is \`fixed\`, \`partially_fixed\`, or \`not_fixed\`. Provide clear details explaining your assessment in the \`comment_checks\` array.
-2.  **Identify New Issues:** Carefully examine the *current* design for any *new* brand compliance violations (against the provided \`brandRules\` JSON) or general design issues (UX, UI, Accessibility) that were not previously commented on or may have been introduced. Report these in the \`new_issues\` array.
+2.  *Identify Limited New Issues (Strictly Conditional):* Your primary focus for this recheck is to verify fixes for previously identified issues (Task 1). The identification of 'new_issues' is secondary and strictly limited to the following conditions:
+    * *A. Directly Consequential Issues:* You may report a new brand compliance violation (against \⁠ brandRules\ ⁠) or a general design issue if it has been *directly and clearly introduced as an unintended consequence of the user's attempt to fix one of the previously reported comments.* For example, if correcting an alignment for Comment X inadvertently creates a new spacing violation with an adjacent element that was previously fine.
+    * *B. Issues in Genuinely New or Substantially Altered Unrelated Elements:* You may report new issues if you can confidently determine that the user has *added entirely new design content/elements OR made substantial modifications to existing elements that were *not the subject of previous comments AND are clearly distinct from the areas that were fixed.** For example, if the user added a completely new footer section that wasn't there before.
+    * *CRITICAL CONSTRAINT FOR NEW ISSUES:* *You MUST NOT re-evaluate or flag issues on aspects of the design that were present in the initial review and were *not flagged with a comment at that time, UNLESS they fall under condition A or B above.** The initial review is considered to have been comprehensive for the design's state at that point. Avoid raising issues now that could have been identified in the first pass but weren't.
+    * When reporting any issue in the \⁠ new_issues\ ⁠ array, ensure its \⁠ description\ ⁠ or a dedicated field clearly states why it qualifies as a new issue (e.g., "Consequence of fixing original comment ID 'abc'," or "Issue found in newly added user profile section"). Use the same severity logic for these new issues as defined in the initial 'analyzeDesign' review.
 3.  **Recalculate Scores:** Based on the current state (considering fixed previous issues and any new issues), recalculate the design scores (\`total\`, \`brand_compliance\`, \`visual_harmony\`, \`usability\`, \`accessibility\`). Report these in \`updated_scores\`.
 
 **COORDINATE SYSTEM:**
@@ -508,6 +529,8 @@ ${JSON.stringify(params.brandRules, null, 2)}
 **IMPORTANT CONTEXT:**
 - Only analyze and respond about the frames and comments listed above.
 - Brand rules are provided for context, verifying fixes against original intent (if applicable), identifying new brand violations, and recalculating scores.
+⁠* The recheck should not become a full re-analysis of unchanged parts of the design that were implicitly approved in the first pass.*
+
 
 **CRITICAL CHECK - ACCURACY:**
 Accuracy is paramount. Before marking any issue as \`fixed\`, meticulously verify the change in the design against the original comment's description and intent. Apply the same diligence when identifying any \`new_issues\`.

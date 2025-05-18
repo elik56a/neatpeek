@@ -2,37 +2,37 @@
  * Types for the Design Review feature
  */
 
-import { DesignsReview as DesignsReviewType, Design as DesignType } from "@/types";
+import { DesignsReview as DesignsReviewType } from "@/types";
 
 // Core types are imported in specific files where needed
+import { ExportFileType } from "./file-type";
 import {
-  ReviewJson,
   BaseIssue,
   BrandIssue,
-  GeneralIssue,
   DesignScore,
-  ScoreBreakdown,
   FrameImage,
+  GeneralIssue,
   IssueCoordinates,
-  IssueStatus,
   IssueSeverity,
+  IssueStatus,
   IssueType,
+  ReviewJson,
+  ScoreBreakdown,
 } from "./review-json";
-import { ReviewTimelineAction, TimelineChanges, IssueSummary } from "./review-timeline";
 import { ReviewStatus } from "./review-status";
+import { IssueSummary, ReviewTimelineAction, TimelineChanges } from "./review-timeline";
 import { ScoreCategory } from "./score-category";
-import { ExportFileType } from "./file-type";
 
 // Re-export the review-json types
 export type {
-  ReviewJson,
   BaseIssue,
   BrandIssue,
-  GeneralIssue,
   DesignScore,
-  ScoreBreakdown,
   FrameImage,
+  GeneralIssue,
   IssueCoordinates,
+  ReviewJson,
+  ScoreBreakdown,
 };
 
 // extend the Design type
@@ -47,17 +47,17 @@ export interface DesignsReview extends DesignsReviewType {
 }
 
 // Re-export the review-history types
-export type { TimelineChanges, IssueSummary };
+export type { IssueSummary, TimelineChanges };
 
 // Re-export enums (these don't need 'export type' since they're values, not just types)
 export {
-  IssueStatus,
-  IssueSeverity,
-  IssueType,
-  ReviewTimelineAction,
-  ReviewStatus,
-  ScoreCategory,
   ExportFileType,
+  IssueSeverity,
+  IssueStatus,
+  IssueType,
+  ReviewStatus,
+  ReviewTimelineAction,
+  ScoreCategory,
 };
 
 /**
@@ -232,6 +232,7 @@ export interface FrameInfo {
   name: string;
   type: string;
   absoluteBoundingBox: FramePosition;
+  document?: any;
 }
 
 export interface FrameImageData {

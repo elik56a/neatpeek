@@ -12,27 +12,25 @@
 
 import { prisma } from "@/services/db/prisma";
 import {
-  FigmaMetadata,
-  DesignRecheckResult,
-  FrameRecheckResult,
-  CommentCheckResult,
-  IssueStatus,
   BrandIssue,
+  CommentCheckResult,
+  Design,
+  FigmaMetadata,
+  FrameRecheckResult,
   GeneralIssue,
+  IssueType,
   ReviewJson,
   ReviewTimelineAction,
-  IssueType,
   TimelineChanges,
-  Design,
 } from "../types";
-import { FigmaService } from "./figma-service";
+import { formatNewIssueComment, formatRecheckComment } from "../utils/comment-formatters";
 import {
   countIssuesByStatus,
   generateHistoryChanges,
   generateNewIssuesSummary,
   generateRecheckSummary,
 } from "../utils/timeline-formatters";
-import { formatNewIssueComment, formatRecheckComment } from "../utils/comment-formatters";
+import { FigmaService } from "./figma-service";
 
 /**
  * Interface for issue information
@@ -316,11 +314,13 @@ export class DesignRecheckService {
       issue.recheck_details = check.check_result.details;
 
       // Update Figma comment if status changed
-      const commentText = formatRecheckComment(
-        check.check_result.status,
-        check.check_result.details
-      );
-      await this.figmaService.addThreadComment(fileKey, check.comment_id, commentText);
+      if (check.check_result.status !== issue.status) {
+        const commentText = formatRecheckComment(
+          check.check_result.status,
+          check.check_result.details
+        );
+        await this.figmaService.addThreadComment(fileKey, check.comment_id, commentText);
+      }
     }
   }
 

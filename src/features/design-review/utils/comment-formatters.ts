@@ -5,6 +5,10 @@
 
 import { BrandIssue, GeneralIssue, IssueSeverity, IssueStatus } from "../types";
 
+export function getCommentBotPrefix(): string {
+  return "[🤖 NeatPeek AI Bot] \n \n";
+}
+
 /**
  * Get emoji for severity level
  */
@@ -34,11 +38,12 @@ export function getSeverityEmoji(severity: IssueSeverity): string {
 export function formatBrandIssueComment(issue: BrandIssue): string {
   const severityEmoji = getSeverityEmoji(issue.severity);
   const severityText = issue.severity.toUpperCase();
+  const commentPrefix = getCommentBotPrefix();
 
   // Only include the fix suggestion if it exists
   const fixPart = issue.fix_suggestion ? `\n💡 Fix: ${issue.fix_suggestion}` : "";
 
-  return `${severityEmoji} ${severityText} Brand Issue: ${issue.description}${fixPart}`;
+  return `${commentPrefix}${severityEmoji} ${severityText} Brand Issue: ${issue.description}${fixPart}`;
 }
 
 /**
@@ -52,11 +57,12 @@ export function formatGeneralIssueComment(issue: GeneralIssue): string {
   const severityEmoji = getSeverityEmoji(issue.severity);
   const severityText = issue.severity.toUpperCase();
   const issueType = issue.issue_type || "UX";
+  const commentPrefix = getCommentBotPrefix();
 
   // Only include the fix suggestion if it exists
   const fixPart = issue.fix_suggestion ? `\n💡 Fix: ${issue.fix_suggestion}` : "";
 
-  return `${severityEmoji} ${severityText} ${issueType} Issue: \n ${issue.description}${fixPart}`;
+  return `${commentPrefix}${severityEmoji} ${severityText} ${issueType} Issue: \n ${issue.description}${fixPart}`;
 }
 
 /**
