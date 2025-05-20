@@ -5,6 +5,11 @@ import { prisma } from "@/services/db/prisma";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import {
+  refreshFigmaToken,
+  ensureFreshFigmaToken,
+  TOKEN_REFRESH_CONSTANTS,
+} from "@/features/auth/utils/figma-refresh-token";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -109,6 +114,17 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
+  },
   callbacks: {
     async signIn({ user, account, profile }) {
       if (account?.provider && account.provider in PROVIDERS) {
@@ -194,16 +210,45 @@ export const authOptions: NextAuthOptions = {
       return true;
     },
     async jwt({ token, user, account }) {
+      // Attach user info on login
       if (user) {
         token.id = user.id;
         token.email = user.email;
       }
-      return token;
+
+      // If account has figma tokens, add them to the token
+      if (account?.provider === "figma" && account.access_token) {
+        token.figmaAccessToken = account.access_token;
+        token.figmaRefreshToken = account.refresh_token;
+        token.figmaTokenExpiry = account.expires_at
+          ? new Date(account.expires_at * 1000)
+          : new Date(Date.now() + TOKEN_REFRESH_CONSTANTS.DEFAULT_EXPIRY_SEC * 1000);
+      }
+
+      // Check if Figma token needs refresh - using extracted utility
+      return ensureFreshFigmaToken(token);
     },
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id as string;
         session.user.email = token.email as string;
+
+        // Add Figma tokens to session
+        if (token.figmaAccessToken) {
+          session.user.figmaAccessToken = token.figmaAccessToken as string;
+        }
+        if (token.figmaRefreshToken) {
+          session.user.figmaRefreshToken = token.figmaRefreshToken as string;
+        }
+        if (token.figmaTokenExpiry) {
+          const tokenExpiry = token.figmaTokenExpiry;
+          session.user.figmaTokenExpiry =
+            typeof tokenExpiry === "string"
+              ? new Date(tokenExpiry)
+              : tokenExpiry instanceof Date
+                ? tokenExpiry
+                : undefined;
+        }
       }
       return session;
     },
