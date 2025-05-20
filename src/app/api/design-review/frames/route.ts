@@ -5,6 +5,7 @@
  */
 
 import { prisma } from "@/services/db/prisma";
+import { TokenService } from "@/services/tokens";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -19,23 +20,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "You must be logged in to get frames" }, { status: 401 });
     }
 
-    // Get the user
+    // Get the user by email
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true, figmaAccessToken: true },
+      select: { id: true },
     });
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const figmaToken = user.figmaAccessToken;
+    // Get Figma access token from TokenService
+    const figmaToken = await TokenService.getFigmaAccessToken(user.id);
 
     if (!figmaToken) {
       return NextResponse.json(
         {
-          error:
-            "Figma access token not found. Please connect your Figma account or set FIGMA_PERSONAL_ACCESS_TOKEN in environment variables.",
+          error: "Figma access token not found. Please connect your Figma account.",
         },
         { status: 400 }
       );

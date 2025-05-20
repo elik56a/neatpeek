@@ -112,8 +112,8 @@ export function DesignReview({
     setStep("input");
   };
 
-  // If user doesn't have a Figma token and is trying to use Figma, show the connect prompt
-  if (inputMode === "figma" && !user?.figmaAccessToken && step === "input") {
+  // If user doesn't have a Figma connection and is trying to use Figma, show the connect prompt
+  if (inputMode === "figma" && !user?.hasFigmaConnection && step === "input") {
     return <FigmaConnectPrompt />;
   }
 

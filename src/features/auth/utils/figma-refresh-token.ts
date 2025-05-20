@@ -1,5 +1,7 @@
 import "server-only";
 import { prisma } from "@/services/db/prisma";
+import { TokenService } from "@/services/tokens";
+import { decrypt, encrypt, isEncrypted } from "@/services/crypto";
 import { JWT } from "next-auth/jwt";
 
 // Token expiration constants
@@ -18,6 +20,9 @@ export async function refreshFigmaToken(refreshToken: string) {
     throw new Error("No refresh token provided");
   }
 
+  // Decrypt the token if it's encrypted
+  const actualRefreshToken = isEncrypted(refreshToken) ? decrypt(refreshToken) : refreshToken;
+
   const clientId = process.env.FIGMA_CLIENT_ID!;
   const clientSecret = process.env.FIGMA_CLIENT_SECRET!;
 
@@ -31,7 +36,7 @@ export async function refreshFigmaToken(refreshToken: string) {
         client_id: clientId,
         client_secret: clientSecret,
         grant_type: "refresh_token",
-        refresh_token: refreshToken,
+        refresh_token: actualRefreshToken,
       }),
     });
 
@@ -76,29 +81,36 @@ export async function ensureFreshFigmaToken(token: JWT): Promise<JWT> {
   ) {
     try {
       console.log("Refreshing Figma token...");
-      const refreshedTokens = await refreshFigmaToken(token.figmaRefreshToken as string);
 
-      // Update token with new credentials
-      token.figmaAccessToken = refreshedTokens.access_token;
-      token.figmaRefreshToken = refreshedTokens.refresh_token || token.figmaRefreshToken;
+      // Get the refresh token (which may be encrypted)
+      const refreshToken = token.figmaRefreshToken as string;
+
+      // Refresh the token
+      const refreshedTokens = await refreshFigmaToken(refreshToken);
 
       // Set new expiry - either from response or default expiry time
       const expiresAt = refreshedTokens.expires_in
         ? Date.now() + refreshedTokens.expires_in * 1000
         : Date.now() + TOKEN_REFRESH_CONSTANTS.DEFAULT_EXPIRY_SEC * 1000;
 
-      token.figmaTokenExpiry = new Date(expiresAt);
+      const expiryDate = new Date(expiresAt);
 
-      // Also update user in DB with new tokens
+      // Update JWT with new tokens (unencrypted for the session)
+      token.figmaAccessToken = refreshedTokens.access_token;
+      token.figmaRefreshToken = refreshedTokens.refresh_token || token.figmaRefreshToken;
+      token.figmaTokenExpiry = expiryDate;
+
+      // Store encrypted tokens in the database if we have a user ID
       if (token.id) {
-        await prisma.user.update({
-          where: { id: token.id as string },
-          data: {
-            figmaAccessToken: refreshedTokens.access_token,
-            figmaRefreshToken: refreshedTokens.refresh_token || (token.figmaRefreshToken as string),
-            figmaTokenExpiry: new Date(expiresAt),
-          },
-        });
+        // Use the token service to store encrypted tokens
+        await TokenService.storeFigmaTokens(
+          token.id as string,
+          refreshedTokens.access_token,
+          refreshedTokens.refresh_token ||
+            (isEncrypted(refreshToken) ? decrypt(refreshToken) : refreshToken),
+          expiryDate
+        );
+
         console.log("Updated user with refreshed Figma tokens");
       }
     } catch (error) {

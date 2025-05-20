@@ -10,6 +10,8 @@ import {
   ensureFreshFigmaToken,
   TOKEN_REFRESH_CONSTANTS,
 } from "@/features/auth/utils/figma-refresh-token";
+import { TokenService } from "@/services/tokens";
+import { encrypt } from "@/services/crypto";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -141,16 +143,15 @@ export const authOptions: NextAuthOptions = {
 
         if (!existingUser) {
           // Create new user
-          await prisma.user.create({
+          const newUser = await prisma.user.create({
             data: {
               email: user.email!,
               name: user.name || user.email!.split("@")[0],
               image: user.image,
-              // For Figma, store additional data
+              // For Figma, store user ID
               ...(providerId === "figma" && {
                 figmaUserId: account.providerAccountId,
-                figmaAccessToken: account.access_token,
-                figmaRefreshToken: account.refresh_token,
+                // Do NOT store tokens here - we'll do it separately with encryption
                 figmaTokenExpiry: account.expires_at ? new Date(account.expires_at * 1000) : null,
               }),
               accounts: {
@@ -158,8 +159,9 @@ export const authOptions: NextAuthOptions = {
                   type: account.type,
                   provider: account.provider,
                   providerAccountId: account.providerAccountId,
-                  access_token: account.access_token,
-                  refresh_token: account.refresh_token,
+                  // Store encrypted access token and refresh token in the account model
+                  access_token: account.access_token ? encrypt(account.access_token) : null,
+                  refresh_token: account.refresh_token ? encrypt(account.refresh_token) : null,
                   expires_at: account.expires_at,
                   token_type: account.token_type,
                   scope: account.scope,
@@ -167,6 +169,18 @@ export const authOptions: NextAuthOptions = {
               },
             },
           });
+
+          // Store encrypted Figma tokens separately for Figma provider
+          if (providerId === "figma" && account.access_token && account.refresh_token) {
+            await TokenService.storeFigmaTokens(
+              newUser.id,
+              account.access_token,
+              account.refresh_token,
+              account.expires_at
+                ? new Date(account.expires_at * 1000)
+                : new Date(Date.now() + TOKEN_REFRESH_CONSTANTS.DEFAULT_EXPIRY_SEC * 1000)
+            );
+          }
         } else {
           // Check if user already has an account with this provider
           const existingAccount = existingUser.accounts.find(
@@ -181,8 +195,9 @@ export const authOptions: NextAuthOptions = {
                 type: account.type,
                 provider: account.provider,
                 providerAccountId: account.providerAccountId,
-                access_token: account.access_token,
-                refresh_token: account.refresh_token,
+                // Store encrypted tokens in the account model
+                access_token: account.access_token ? encrypt(account.access_token) : null,
+                refresh_token: account.refresh_token ? encrypt(account.refresh_token) : null,
                 expires_at: account.expires_at,
                 token_type: account.token_type,
                 scope: account.scope,
@@ -196,17 +211,28 @@ export const authOptions: NextAuthOptions = {
             data: {
               name: user.name || existingUser.name,
               image: user.image || existingUser.image,
-              // For Figma, update tokens
+              // For Figma, update user ID and expiry only
               ...(providerId === "figma" && {
                 figmaUserId: account.providerAccountId,
-                figmaAccessToken: account.access_token,
-                figmaRefreshToken: account.refresh_token,
                 figmaTokenExpiry: account.expires_at ? new Date(account.expires_at * 1000) : null,
               }),
             },
           });
+
+          // Store encrypted Figma tokens separately for Figma provider
+          if (providerId === "figma" && account.access_token && account.refresh_token) {
+            await TokenService.storeFigmaTokens(
+              existingUser.id,
+              account.access_token,
+              account.refresh_token,
+              account.expires_at
+                ? new Date(account.expires_at * 1000)
+                : new Date(Date.now() + TOKEN_REFRESH_CONSTANTS.DEFAULT_EXPIRY_SEC * 1000)
+            );
+          }
         }
       }
+
       return true;
     },
     async jwt({ token, user, account }) {
@@ -218,11 +244,42 @@ export const authOptions: NextAuthOptions = {
 
       // If account has figma tokens, add them to the token
       if (account?.provider === "figma" && account.access_token) {
+        // Store unencrypted tokens in the JWT for session use
         token.figmaAccessToken = account.access_token;
         token.figmaRefreshToken = account.refresh_token;
         token.figmaTokenExpiry = account.expires_at
           ? new Date(account.expires_at * 1000)
           : new Date(Date.now() + TOKEN_REFRESH_CONSTANTS.DEFAULT_EXPIRY_SEC * 1000);
+      }
+
+      // If we don't have Figma tokens in the token but we have a user ID,
+      // try to fetch the tokens from the database
+      else if (token.id && !token.figmaAccessToken && !token.figmaRefreshToken) {
+        try {
+          // Get user with figma token fields
+          const user = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: {
+              figmaAccessToken: true,
+              figmaRefreshToken: true,
+              figmaTokenExpiry: true,
+            },
+          });
+
+          if (user?.figmaAccessToken && user?.figmaRefreshToken) {
+            // We'll get decrypted tokens in the session
+            const accessToken = await TokenService.getFigmaAccessToken(token.id as string);
+            const refreshToken = await TokenService.getFigmaRefreshToken(token.id as string);
+
+            if (accessToken && refreshToken) {
+              token.figmaAccessToken = accessToken;
+              token.figmaRefreshToken = refreshToken;
+              token.figmaTokenExpiry = user.figmaTokenExpiry;
+            }
+          }
+        } catch (error) {
+          console.error("Error loading Figma tokens:", error);
+        }
       }
 
       // Check if Figma token needs refresh - using extracted utility
@@ -233,21 +290,23 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
         session.user.email = token.email as string;
 
-        // Add Figma tokens to session
+        // Only indicate if the user has Figma connected, don't send actual tokens
         if (token.figmaAccessToken) {
-          session.user.figmaAccessToken = token.figmaAccessToken as string;
-        }
-        if (token.figmaRefreshToken) {
-          session.user.figmaRefreshToken = token.figmaRefreshToken as string;
-        }
-        if (token.figmaTokenExpiry) {
-          const tokenExpiry = token.figmaTokenExpiry;
-          session.user.figmaTokenExpiry =
-            typeof tokenExpiry === "string"
-              ? new Date(tokenExpiry)
-              : tokenExpiry instanceof Date
-                ? tokenExpiry
-                : undefined;
+          // Set a boolean flag instead of the actual token
+          session.user.hasFigmaConnection = true;
+
+          // Store expiry date for informational purposes only
+          if (token.figmaTokenExpiry) {
+            const tokenExpiry = token.figmaTokenExpiry;
+            session.user.figmaTokenExpiry =
+              typeof tokenExpiry === "string"
+                ? new Date(tokenExpiry)
+                : tokenExpiry instanceof Date
+                  ? tokenExpiry
+                  : undefined;
+          }
+        } else {
+          session.user.hasFigmaConnection = false;
         }
       }
       return session;

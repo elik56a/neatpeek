@@ -34,8 +34,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         companyName: session.user.companyName,
         companyRole: session.user.companyRole,
         figmaUserId: session.user.figmaUserId,
-        figmaAccessToken: session.user.figmaAccessToken,
-        figmaRefreshToken: session.user.figmaRefreshToken,
+        hasFigmaConnection: session.user.hasFigmaConnection,
         figmaTokenExpiry: session.user.figmaTokenExpiry,
       }
     : null;

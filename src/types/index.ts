@@ -32,7 +32,12 @@ export type User = Prisma.UserGetPayload<{
     brands: true;
     brandGuidelines: true;
   };
-}>;
+}> & {
+  /**
+   * Whether the user has connected their Figma account
+   */
+  hasFigmaConnection?: boolean;
+};
 
 /**
  * Company entity

@@ -19,10 +19,8 @@ declare module "next-auth" {
       companyRole?: CompanyRole;
       /** The user's Figma user ID */
       figmaUserId?: string;
-      /** The user's Figma access token */
-      figmaAccessToken?: string;
-      /** The user's Figma refresh token */
-      figmaRefreshToken?: string;
+      /** Whether the user has connected their Figma account */
+      hasFigmaConnection?: boolean;
       /** The expiry date of the Figma token */
       figmaTokenExpiry?: Date;
     } & DefaultSession["user"];
