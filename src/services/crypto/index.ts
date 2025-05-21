@@ -65,6 +65,12 @@ export function decrypt(encryptedText: string): string {
     const [ivBase64, authTagBase64, encryptedData] = encryptedText.split(":");
 
     if (!ivBase64 || !authTagBase64 || !encryptedData) {
+      console.error("Invalid encrypted data format:", {
+        ivBase64,
+        authTagBase64,
+        encryptedData,
+        encryptedText,
+      });
       throw new Error("Invalid encrypted data format");
     }
 
