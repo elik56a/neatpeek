@@ -1,19 +1,36 @@
 import "server-only";
-import { prisma } from "@/services/db/prisma";
 import { TokenService } from "@/services/tokens";
-import { decrypt, encrypt, isEncrypted } from "@/services/crypto";
-import { JWT } from "next-auth/jwt";
+import { decrypt, isEncrypted } from "@/services/crypto";
+import { FigmaTokens } from "@/types/general";
+
+/**
+ * FIGMA TOKEN LIFECYCLE
+ *
+ * Important notes about Figma's OAuth implementation:
+ *
+ * 1. Access tokens expire after 24 hours (86400 seconds)
+ * 2. Refresh tokens may have limited uses or lifetimes
+ * 3. Figma will return 'invalid_grant' if:
+ *    - The refresh token is expired
+ *    - The refresh token has already been used (one-time use)
+ *    - The client ID/secret are incorrect
+ *
+ * When this happens, the user must reconnect their Figma account to get fresh tokens.
+ *
+ * Reference: https://www.figma.com/developers/api#oauth2
+ */
 
 // Token expiration constants
 export const TOKEN_REFRESH_CONSTANTS = {
-  // Default token validity (90 days in seconds)
-  DEFAULT_EXPIRY_SEC: 90 * 24 * 60 * 60, // 90 days
-  // Time before expiry when we should refresh (5 minutes in milliseconds)
-  REFRESH_WINDOW_MS: 5 * 60 * 1000,
+  // Figma tokens expire after 24 hours (86400 seconds)
+  DEFAULT_EXPIRY_SEC: 24 * 60 * 60, // 24 hours
+  // Refresh window - refresh if token expires in the next 20 minutes
+  REFRESH_WINDOW_MS: 20 * 60 * 1000,
 };
 
 /**
  * Refreshes a Figma access token using the refresh token
+ * @returns Object with new access_token, refresh_token, and expires_in
  */
 export async function refreshFigmaToken(refreshToken: string) {
   if (!refreshToken) {
@@ -31,6 +48,8 @@ export async function refreshFigmaToken(refreshToken: string) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        // Add basic auth header for proper authentication
+        Authorization: "Basic " + Buffer.from(`${clientId}:${clientSecret}`).toString("base64"),
       },
       body: JSON.stringify({
         client_id: clientId,
@@ -41,8 +60,33 @@ export async function refreshFigmaToken(refreshToken: string) {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: "Failed to refresh token" }));
-      throw new Error(error.message || "Failed to refresh Figma token");
+      const responseText = await response.text();
+      let errorMessage = "Failed to refresh token";
+
+      try {
+        const errorData = JSON.parse(responseText);
+        errorMessage =
+          errorData.error_description || errorData.message || errorData.error || errorMessage;
+
+        // Log detailed error information
+        console.error("Figma token refresh error details:", {
+          status: response.status,
+          statusText: response.statusText,
+          errorData,
+        });
+
+        // Handle specific error types
+        if (errorData.error === "invalid_grant") {
+          throw new Error(
+            "invalid_grant: The refresh token is invalid or expired. User needs to reconnect their Figma account."
+          );
+        }
+      } catch (e) {
+        // Ignore JSON parsing errors
+        console.error("Failed to parse error response:", responseText);
+      }
+
+      throw new Error(errorMessage);
     }
 
     return await response.json();
@@ -55,69 +99,54 @@ export async function refreshFigmaToken(refreshToken: string) {
 /**
  * Checks if a Figma token is expired or about to expire and refreshes it if needed
  * Updates both the JWT token and the database
- *
- * @param token The NextAuth JWT token
- * @returns Updated token with refreshed Figma tokens if needed
  */
-export async function ensureFreshFigmaToken(token: JWT): Promise<JWT> {
+export async function ensureFreshFigmaToken(figmaTokens: FigmaTokens): Promise<FigmaTokens> {
   // Only proceed if we have all necessary Figma tokens
-  if (!token.figmaAccessToken || !token.figmaRefreshToken || !token.figmaTokenExpiry) {
-    return token;
+  if (!figmaTokens.accessToken || !figmaTokens.refreshToken || !figmaTokens.tokenExpiry) {
+    return figmaTokens;
   }
 
   // Convert expiry to Date if it's a string
   const expiryDate =
-    typeof token.figmaTokenExpiry === "string"
-      ? new Date(token.figmaTokenExpiry)
-      : token.figmaTokenExpiry instanceof Date
-        ? token.figmaTokenExpiry
-        : null;
+    typeof figmaTokens.tokenExpiry === "string"
+      ? new Date(figmaTokens.tokenExpiry)
+      : figmaTokens.tokenExpiry;
 
-  // Check if token is expired or about to expire soon
-  if (
-    expiryDate &&
+  // Check if token is expired or about to expire soon (next 20 minutes)
+  const shouldRefresh =
     expiryDate instanceof Date &&
-    expiryDate.getTime() < Date.now() + TOKEN_REFRESH_CONSTANTS.REFRESH_WINDOW_MS
-  ) {
-    try {
-      console.log("Refreshing Figma token...");
+    expiryDate.getTime() < Date.now() + TOKEN_REFRESH_CONSTANTS.REFRESH_WINDOW_MS;
 
-      // Get the refresh token (which may be encrypted)
-      const refreshToken = token.figmaRefreshToken as string;
+  if (shouldRefresh) {
+    try {
+      console.log("Refreshing Figma token (expires soon)");
 
       // Refresh the token
-      const refreshedTokens = await refreshFigmaToken(refreshToken);
+      const refreshedTokens = await refreshFigmaToken(figmaTokens.refreshToken as string);
 
-      // Set new expiry - either from response or default expiry time
-      const expiresAt = refreshedTokens.expires_in
-        ? Date.now() + refreshedTokens.expires_in * 1000
-        : Date.now() + TOKEN_REFRESH_CONSTANTS.DEFAULT_EXPIRY_SEC * 1000;
+      // Calculate new expiry date using Figma's expires_in value (or default 24h)
+      const expiresIn = refreshedTokens.expires_in || TOKEN_REFRESH_CONSTANTS.DEFAULT_EXPIRY_SEC;
+      const newExpiryDate = new Date(Date.now() + expiresIn * 1000);
 
-      const expiryDate = new Date(expiresAt);
+      // Update JWT with new tokens for the session
+      figmaTokens.accessToken = refreshedTokens.access_token;
+      figmaTokens.refreshToken = refreshedTokens.refresh_token || figmaTokens.refreshToken;
+      figmaTokens.tokenExpiry = newExpiryDate;
 
-      // Update JWT with new tokens (unencrypted for the session)
-      token.figmaAccessToken = refreshedTokens.access_token;
-      token.figmaRefreshToken = refreshedTokens.refresh_token || token.figmaRefreshToken;
-      token.figmaTokenExpiry = expiryDate;
-
-      // Store encrypted tokens in the database if we have a user ID
-      if (token.id) {
-        // Use the token service to store encrypted tokens
+      // Store tokens in database if we have a user ID
+      if (figmaTokens.id) {
         await TokenService.storeFigmaTokens(
-          token.id as string,
+          figmaTokens.id as string,
           refreshedTokens.access_token,
-          refreshedTokens.refresh_token ||
-            (isEncrypted(refreshToken) ? decrypt(refreshToken) : refreshToken),
-          expiryDate
+          refreshedTokens.refresh_token || figmaTokens.refreshToken,
+          newExpiryDate
         );
-
-        console.log("Updated user with refreshed Figma tokens");
       }
     } catch (error) {
       console.error("Failed to refresh Figma token:", error);
-      // Don't throw - just continue with expired token
+      // Don't throw - continue with expired token
     }
   }
 
-  return token;
+  return figmaTokens;
 }

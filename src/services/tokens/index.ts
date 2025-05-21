@@ -1,6 +1,7 @@
 import "server-only";
 import { encrypt, decrypt } from "../crypto";
 import { prisma } from "../db/prisma";
+import { FigmaTokens } from "@/types/general";
 
 /**
  * Token service for handling secure storage and retrieval of sensitive tokens
@@ -88,5 +89,21 @@ export class TokenService {
       console.error("Error retrieving Figma refresh token:", error);
       throw new Error("Failed to retrieve Figma refresh token");
     }
+  }
+
+  /**
+   * Get a user's Figma tokens
+   *
+   * @param userId The user ID
+   * @param tokenExpiry The token expiry date
+   * @returns The decrypted access token, refresh token, and token expiry
+   */
+  static async getFigmaTokens(userId: string, tokenExpiry: Date): Promise<FigmaTokens> {
+    const [accessToken, refreshToken] = await Promise.all([
+      this.getFigmaAccessToken(userId),
+      this.getFigmaRefreshToken(userId),
+    ]);
+
+    return { accessToken, refreshToken, tokenExpiry, id: userId };
   }
 }

@@ -67,8 +67,40 @@ export class FigmaService {
       });
 
       if (!response.ok) {
-        console.error(`Figma API error: ${response.statusText}`);
-        throw new Error(`Figma API error`);
+        const status = response.status;
+        const statusText = response.statusText;
+
+        // Try to get more detailed error info if available
+        let errorDetails = "";
+        try {
+          const errorData = await response.json();
+          errorDetails = errorData.message || errorData.error || "";
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+
+        console.error(`Figma API error [${status}]: ${statusText} for endpoint ${endpoint}`);
+        console.error(`Error details: ${errorDetails}`);
+
+        if (status === 403) {
+          console.error(
+            "Received 403 Forbidden from Figma API - token might be expired or invalid"
+          );
+          throw new Error(
+            `Figma API authentication error (403): Token expired or invalid. Please reconnect your Figma account.`
+          );
+        }
+
+        if (status === 401) {
+          console.error("Received 401 Unauthorized from Figma API");
+          throw new Error(
+            `Figma API authorization error (401): Not authorized to access this resource. Please reconnect your Figma account.`
+          );
+        }
+
+        throw new Error(
+          `Figma API error: ${statusText} ${errorDetails ? `- ${errorDetails}` : ""}`
+        );
       }
 
       return (await response.json()) as T;

@@ -4,7 +4,6 @@ import crypto from "crypto";
 // Constants
 const ALGORITHM = "aes-256-gcm";
 const IV_LENGTH = 16; // For AES, this is always 16 bytes
-const AUTH_TAG_LENGTH = 16; // For GCM mode
 
 /**
  * Get encryption key from environment

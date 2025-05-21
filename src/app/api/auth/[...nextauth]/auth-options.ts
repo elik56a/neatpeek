@@ -6,7 +6,6 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import {
-  refreshFigmaToken,
   ensureFreshFigmaToken,
   TOKEN_REFRESH_CONSTANTS,
 } from "@/features/auth/utils/figma-refresh-token";
@@ -152,7 +151,9 @@ export const authOptions: NextAuthOptions = {
               ...(providerId === "figma" && {
                 figmaUserId: account.providerAccountId,
                 // Do NOT store tokens here - we'll do it separately with encryption
-                figmaTokenExpiry: account.expires_at ? new Date(account.expires_at * 1000) : null,
+                figmaTokenExpiry: new Date(
+                  Date.now() + TOKEN_REFRESH_CONSTANTS.DEFAULT_EXPIRY_SEC * 1000
+                ),
               }),
               accounts: {
                 create: {
@@ -176,9 +177,9 @@ export const authOptions: NextAuthOptions = {
               newUser.id,
               account.access_token,
               account.refresh_token,
-              account.expires_at
-                ? new Date(account.expires_at * 1000)
-                : new Date(Date.now() + TOKEN_REFRESH_CONSTANTS.DEFAULT_EXPIRY_SEC * 1000)
+              // Always use 24 hours (86400 seconds) as the expiration time for Figma tokens
+              // regardless of what Figma sends to avoid potential bugs with their OAuth implementation
+              new Date(Date.now() + TOKEN_REFRESH_CONSTANTS.DEFAULT_EXPIRY_SEC * 1000)
             );
           }
         } else {
@@ -214,7 +215,10 @@ export const authOptions: NextAuthOptions = {
               // For Figma, update user ID and expiry only
               ...(providerId === "figma" && {
                 figmaUserId: account.providerAccountId,
-                figmaTokenExpiry: account.expires_at ? new Date(account.expires_at * 1000) : null,
+                // Always use a consistent 24-hour expiration
+                figmaTokenExpiry: new Date(
+                  Date.now() + TOKEN_REFRESH_CONSTANTS.DEFAULT_EXPIRY_SEC * 1000
+                ),
               }),
             },
           });
@@ -225,9 +229,9 @@ export const authOptions: NextAuthOptions = {
               existingUser.id,
               account.access_token,
               account.refresh_token,
-              account.expires_at
-                ? new Date(account.expires_at * 1000)
-                : new Date(Date.now() + TOKEN_REFRESH_CONSTANTS.DEFAULT_EXPIRY_SEC * 1000)
+              // Always use 24 hours (86400 seconds) as the expiration time for Figma tokens
+              // regardless of what Figma sends to avoid potential bugs with their OAuth implementation
+              new Date(Date.now() + TOKEN_REFRESH_CONSTANTS.DEFAULT_EXPIRY_SEC * 1000)
             );
           }
         }
@@ -247,9 +251,12 @@ export const authOptions: NextAuthOptions = {
         // Store unencrypted tokens in the JWT for session use
         token.figmaAccessToken = account.access_token;
         token.figmaRefreshToken = account.refresh_token;
-        token.figmaTokenExpiry = account.expires_at
-          ? new Date(account.expires_at * 1000)
-          : new Date(Date.now() + TOKEN_REFRESH_CONSTANTS.DEFAULT_EXPIRY_SEC * 1000);
+
+        // Always use a consistent 24-hour expiration for Figma tokens
+        // regardless of what's provided in the OAuth response
+        token.figmaTokenExpiry = new Date(
+          Date.now() + TOKEN_REFRESH_CONSTANTS.DEFAULT_EXPIRY_SEC * 1000
+        );
       }
 
       // If we don't have Figma tokens in the token but we have a user ID,
