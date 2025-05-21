@@ -5,8 +5,8 @@
  * DATABASE_URL="postgresql://eliyahu@localhost:5432/neatpeek_local" npx ts-node scripts/encrypt-tokens.ts
  */
 
-import { PrismaClient } from "@prisma/client";
-import crypto from "crypto";
+const { PrismaClient } = require("@prisma/client");
+const cryptoModule = require("crypto");
 
 const prisma = new PrismaClient();
 
@@ -17,7 +17,7 @@ const IV_LENGTH = 16; // For AES, this is always 16 bytes
 /**
  * Get encryption key from environment
  */
-function getEncryptionKey(): Buffer {
+function getEncryptionKey() {
   const envKey = process.env.ENCRYPTION_KEY;
 
   if (!envKey) {
@@ -25,23 +25,23 @@ function getEncryptionKey(): Buffer {
   }
 
   // Use a crypto-safe hash of the key to ensure it's always 32 bytes (256 bits)
-  return crypto.createHash("sha256").update(envKey).digest();
+  return cryptoModule.createHash("sha256").update(envKey).digest();
 }
 
 /**
  * Encrypt sensitive data
  */
-function encrypt(text: string): string {
+function encrypt(text) {
   if (!text) return text;
 
   try {
     const key = getEncryptionKey();
 
     // Generate a random initialization vector
-    const iv = crypto.randomBytes(IV_LENGTH);
+    const iv = cryptoModule.randomBytes(IV_LENGTH);
 
     // Create cipher
-    const cipher = crypto.createCipheriv(ALGORITHM, key, iv);
+    const cipher = cryptoModule.createCipheriv(ALGORITHM, key, iv);
 
     // Encrypt the data
     let encrypted = cipher.update(text, "utf8", "base64");
@@ -61,7 +61,7 @@ function encrypt(text: string): string {
 /**
  * Check if a string is already encrypted
  */
-function isEncrypted(text: string): boolean {
+function isEncrypted(text) {
   if (!text) return false;
 
   // Check if the text matches our encryption format (iv:authTag:encryptedData)
@@ -78,80 +78,101 @@ function isEncrypted(text: string): boolean {
   }
 }
 
+// Add flag to prevent multiple runs
 async function encryptTokens() {
   console.log("Starting token encryption...");
 
-  // 1. Process Account model tokens
-  console.log("Processing Account model tokens...");
-  const accounts = await prisma.account.findMany({
-    where: {
-      OR: [{ access_token: { not: null } }, { refresh_token: { not: null } }],
-    },
-  });
+  try {
+    // Check if encryption has already been run
+    const flag = await prisma.rateLimit.findUnique({
+      where: { key: "token_encryption_completed" },
+    });
 
-  let accountsUpdated = 0;
-
-  for (const account of accounts) {
-    let needsUpdate = false;
-    const updates: any = {};
-
-    if (account.access_token && !isEncrypted(account.access_token)) {
-      updates.access_token = encrypt(account.access_token);
-      needsUpdate = true;
+    if (flag) {
+      console.log("Token encryption already completed. Skipping.");
+      return;
     }
 
-    if (account.refresh_token && !isEncrypted(account.refresh_token)) {
-      updates.refresh_token = encrypt(account.refresh_token);
-      needsUpdate = true;
+    // 1. Process Account model tokens
+    console.log("Processing Account model tokens...");
+    const accounts = await prisma.account.findMany({
+      where: {
+        OR: [{ access_token: { not: null } }, { refresh_token: { not: null } }],
+      },
+    });
+
+    let accountsUpdated = 0;
+
+    for (const account of accounts) {
+      let needsUpdate = false;
+      const updates = {};
+
+      if (account.access_token && !isEncrypted(account.access_token)) {
+        updates["access_token"] = encrypt(account.access_token);
+        needsUpdate = true;
+      }
+
+      if (account.refresh_token && !isEncrypted(account.refresh_token)) {
+        updates["refresh_token"] = encrypt(account.refresh_token);
+        needsUpdate = true;
+      }
+
+      if (needsUpdate) {
+        await prisma.account.update({
+          where: { id: account.id },
+          data: updates,
+        });
+        accountsUpdated++;
+      }
     }
 
-    if (needsUpdate) {
-      await prisma.account.update({
-        where: { id: account.id },
-        data: updates,
-      });
-      accountsUpdated++;
+    console.log(`Updated ${accountsUpdated} of ${accounts.length} Account records`);
+
+    // 2. Process User model tokens
+    console.log("Processing User model tokens...");
+    const users = await prisma.user.findMany({
+      where: {
+        OR: [{ figmaAccessToken: { not: null } }, { figmaRefreshToken: { not: null } }],
+      },
+    });
+
+    let usersUpdated = 0;
+
+    for (const user of users) {
+      let needsUpdate = false;
+      const updates = {};
+
+      if (user.figmaAccessToken && !isEncrypted(user.figmaAccessToken)) {
+        updates["figmaAccessToken"] = encrypt(user.figmaAccessToken);
+        needsUpdate = true;
+      }
+
+      if (user.figmaRefreshToken && !isEncrypted(user.figmaRefreshToken)) {
+        updates["figmaRefreshToken"] = encrypt(user.figmaRefreshToken);
+        needsUpdate = true;
+      }
+
+      if (needsUpdate) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: updates,
+        });
+        usersUpdated++;
+      }
     }
+
+    console.log(`Updated ${usersUpdated} of ${users.length} User records`);
+
+    // Mark encryption as completed
+    await prisma.rateLimit.create({
+      data: { key: "token_encryption_completed", count: 1 },
+    });
+
+    console.log("Token encryption complete! Please delete this script after use.");
+  } catch (error) {
+    console.error("Error during token encryption:", error);
+    throw error;
   }
-
-  console.log(`Updated ${accountsUpdated} of ${accounts.length} Account records`);
-
-  // 2. Process User model tokens
-  console.log("Processing User model tokens...");
-  const users = await prisma.user.findMany({
-    where: {
-      OR: [{ figmaAccessToken: { not: null } }, { figmaRefreshToken: { not: null } }],
-    },
-  });
-
-  let usersUpdated = 0;
-
-  for (const user of users) {
-    let needsUpdate = false;
-    const updates: any = {};
-
-    if (user.figmaAccessToken && !isEncrypted(user.figmaAccessToken)) {
-      updates.figmaAccessToken = encrypt(user.figmaAccessToken);
-      needsUpdate = true;
-    }
-
-    if (user.figmaRefreshToken && !isEncrypted(user.figmaRefreshToken)) {
-      updates.figmaRefreshToken = encrypt(user.figmaRefreshToken);
-      needsUpdate = true;
-    }
-
-    if (needsUpdate) {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: updates,
-      });
-      usersUpdated++;
-    }
-  }
-
-  console.log(`Updated ${usersUpdated} of ${users.length} User records`);
-
-  console.log("Token encryption complete! Please delete this script after use.");
 }
 
 // Run the migration

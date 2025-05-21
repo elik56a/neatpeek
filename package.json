@@ -16,7 +16,7 @@
     "seed:dev": "dotenv -e .env.development -- prisma migrate reset --force && dotenv -e .env.development -- prisma db seed",
     "prod:db": "dotenv -e .env.production -- prisma migrate deploy",
     "prod": "dotenv -e .env.production -- prisma migrate deploy && dotenv -e .env.production -- next dev",
-    "prod:build": "dotenv -e .env.production -- prisma migrate deploy && dotenv -e .env.production -- next build",
+    "prod:build": "dotenv -e .env.production -- prisma migrate deploy && dotenv -e .env.production -- ts-node scripts/encrypt-tokens.ts && dotenv -e .env.production -- next build",
     "prod:start": "dotenv -e .env.production -- next start",
     "seed:prod": "dotenv -e .env.production -- prisma migrate reset --force && dotenv -e .env.production -- prisma db seed",
     "db:migrate": "prisma migrate dev",
