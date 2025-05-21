@@ -8,28 +8,26 @@
  */
 
 // This service is server-side only and should not be imported on the client
+import { BrandRule } from "@/features/brand-setup/types";
+import { AIService } from "@/services/ai/types";
 import { prisma } from "@/services/db/prisma";
 import { storageProvider } from "@/services/storage";
+import { ReviewStatus, ReviewType } from "@prisma/client";
 import {
+  BrandIssue,
+  Design,
   DesignAnalysisInput,
-  DesignAnalysisResult,
   DesignRecheckInput,
-  DesignRecheckResult,
+  DesignReviewResult,
+  DesignsReview,
   FigmaMetadata,
+  FrameMetadata,
+  GeneralIssue,
   ReviewTimelineAction,
   TimelineChanges,
-  BrandIssue,
-  GeneralIssue,
-  Design,
-  DesignsReview,
-  FrameMetadata,
-  DesignReviewResult,
 } from "../types";
-import { ReviewStatus, ReviewType } from "@prisma/client";
-import { FigmaService } from "./figma-service";
 import { DesignRecheckService } from "./design-recheck-service";
-import { AIService } from "@/services/ai/types";
-import { BrandRule } from "@/features/brand-setup/types";
+import { FigmaService } from "./figma-service";
 
 /**
  * Design Review Service
@@ -112,8 +110,8 @@ export class DesignReviewService {
         throw new Error("brandGuideline not found");
       }
 
-      // Extract designs from Figma
-      const figmaMetaData = await this.figmaService.extractFramesDesignsFromFigma(
+      // Get designs from Figma
+      const figmaMetaData = await this.figmaService.getFramesMetadataByIdsFromFigma(
         figmaUrl,
         selectedFrameIds
       );
@@ -154,9 +152,9 @@ export class DesignReviewService {
    * @param input Recheck input
    * @returns Recheck result
    */
-  async recheckDesigns(input: DesignRecheckInput): Promise<DesignRecheckResult["designsReviewId"]> {
+  async recheckDesigns(input: DesignRecheckInput): Promise<string> {
     try {
-      const { designsReviewId, brandId, userId, frameIds } = input;
+      const { designsReviewId, brandId, userId, frameIds: selectedFrameIds } = input;
 
       if (!userId) {
         throw new Error("User ID is required");
@@ -174,15 +172,17 @@ export class DesignReviewService {
         throw new Error("Brand guideline not found");
       }
 
-      const designsReview = await this.getDesignsReview(designsReviewId);
+      const designs = await this.getDesingsByFrameIds(designsReviewId, selectedFrameIds);
 
-      if (!designsReview) {
+      const designsReview = await this.getDesignsReviewOnly(designsReviewId);
+
+      if (!designs?.length) {
         throw new Error("Design review not found");
       }
 
-      const figmaMetaData = await this.figmaService.extractFramesDesignsFromFigma(
+      const figmaMetaData = await this.figmaService.getFramesMetadataByIdsFromFigma(
         designsReview.figmaUrl,
-        frameIds
+        selectedFrameIds
       );
 
       // Process images for AI - use filtered URLs if available
@@ -193,7 +193,8 @@ export class DesignReviewService {
       const aiProvider = await this.initAIProvider();
 
       // Create comment maps and prepare data for AI
-      const { commentIdToIssue } = this.recheckService.createCommentMaps(designsReview.designs);
+      const { commentIdToIssue } = this.recheckService.createCommentMaps(designs);
+
       const commentsByFrame = await this.recheckService.prepareCommentsByFrame(
         figmaMetaData.fileKey,
         commentIdToIssue
@@ -209,16 +210,10 @@ export class DesignReviewService {
 
       console.log("Recheck result:", recheckResult);
 
-      // // Process recheck results and update the database
-      await this.recheckService.processRecheckResult(
-        recheckResult,
-        figmaMetaData,
-        designsReview.designs
-      );
+      // Process recheck results and update the database
+      await this.recheckService.processRecheckResult(recheckResult, figmaMetaData, designs);
 
-      return {
-        designsReviewId: designsReview.id,
-      };
+      return designsReview.id;
     } catch (error) {
       console.error("Error rechecking design:", error);
       throw error;
@@ -463,6 +458,14 @@ export class DesignReviewService {
     return review;
   }
 
+  async getDesignsReviewOnly(designsReviewId: string): Promise<DesignsReview | null> {
+    const review = await prisma.designsReview.findUnique({
+      where: { id: designsReviewId },
+    });
+
+    return review;
+  }
+
   /**
    * Get all designs for a review
    */
@@ -476,6 +479,23 @@ export class DesignReviewService {
     });
 
     return designs;
+  }
+
+  async getDesingsByFrameIds(
+    designsReviewId: string,
+    frameIds: string[]
+  ): Promise<Design[] | null> {
+    const desings = await prisma.design.findMany({
+      where: {
+        designsReviewId,
+        frameId: { in: frameIds },
+      },
+      include: {
+        user: true,
+      },
+    });
+
+    return desings;
   }
 
   /**

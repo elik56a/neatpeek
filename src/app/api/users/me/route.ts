@@ -30,8 +30,8 @@ export async function GET(req: NextRequest) {
         image: true,
         role: true,
         companyId: true,
-        figmaAccessToken: true,
         companyRole: true,
+        figmaUserId: true, // Used only for determining connection status
         company: {
           select: {
             id: true,
@@ -48,7 +48,23 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json(user);
+    // Check if user has Figma connection
+    const hasFigmaConnection = Boolean(user.figmaUserId);
+
+    // Create a new user object without sensitive Figma fields
+    const safeUser = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      image: user.image,
+      role: user.role,
+      companyId: user.companyId,
+      companyRole: user.companyRole,
+      company: user.company,
+      hasFigmaConnection,
+    };
+
+    return NextResponse.json(safeUser);
   } catch (error) {
     console.error("Error fetching user profile:", error);
     return NextResponse.json({ error: "Failed to fetch user profile" }, { status: 500 });

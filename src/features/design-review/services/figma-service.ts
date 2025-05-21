@@ -15,6 +15,15 @@ import {
   FrameMetadata,
   FramePosition,
 } from "../types";
+import {
+  Comment as FigmaComment,
+  FRAME,
+  GetCommentsResult,
+  GetFileNodesResult,
+  GetFileResult,
+  GetImageResult,
+  PostCommentResult,
+} from "../types/figma";
 
 // Constants
 const FIGMA_API_BASE_URL = "https://api.figma.com";
@@ -58,7 +67,40 @@ export class FigmaService {
       });
 
       if (!response.ok) {
-        throw new Error(`Figma API error: ${response.status} ${response.statusText}`);
+        const status = response.status;
+        const statusText = response.statusText;
+
+        // Try to get more detailed error info if available
+        let errorDetails = "";
+        try {
+          const errorData = await response.json();
+          errorDetails = errorData.message || errorData.error || "";
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+
+        console.error(`Figma API error [${status}]: ${statusText} for endpoint ${endpoint}`);
+        console.error(`Error details: ${errorDetails}`);
+
+        if (status === 403) {
+          console.error(
+            "Received 403 Forbidden from Figma API - token might be expired or invalid"
+          );
+          throw new Error(
+            `Figma API authentication error (403): Token expired or invalid. Please reconnect your Figma account.`
+          );
+        }
+
+        if (status === 401) {
+          console.error("Received 401 Unauthorized from Figma API");
+          throw new Error(
+            `Figma API authorization error (401): Not authorized to access this resource. Please reconnect your Figma account.`
+          );
+        }
+
+        throw new Error(
+          `Figma API error: ${statusText} ${errorDetails ? `- ${errorDetails}` : ""}`
+        );
       }
 
       return (await response.json()) as T;
@@ -108,8 +150,8 @@ export class FigmaService {
    * @param fileKey Figma file key
    * @returns File information
    */
-  async getFileInfo(fileKey: string): Promise<any> {
-    return this.request<any>(`/files/${fileKey}`);
+  async getFileInfo(fileKey: string): Promise<GetFileResult> {
+    return this.request<GetFileResult>(`/files/${fileKey}`);
   }
 
   /**
@@ -118,9 +160,9 @@ export class FigmaService {
    * @param nodeId Node ID
    * @returns Node information
    */
-  async getNodeInfo(fileKey: string, nodeId: string): Promise<any> {
+  async getNodeInfo(fileKey: string, nodeId: string): Promise<GetFileNodesResult> {
     const formattedNodeId = nodeId.includes(":") ? nodeId : nodeId.replace("-", ":");
-    return this.request<any>(`/files/${fileKey}/nodes?ids=${formattedNodeId}`);
+    return this.request<GetFileNodesResult>(`/files/${fileKey}/nodes?ids=${formattedNodeId}`);
   }
 
   /**
@@ -134,8 +176,21 @@ export class FigmaService {
     fileKey: string,
     nodeIds: string[],
     format: "png" | "jpg" | "svg" | "pdf" = "png"
-  ): Promise<any> {
-    return this.request<any>(`/images/${fileKey}?ids=${nodeIds.join(",")}&format=${format}`);
+  ): Promise<GetImageResult> {
+    return this.request<GetImageResult>(
+      `/images/${fileKey}?ids=${nodeIds.join(",")}&format=${format}`
+    );
+  }
+
+  /**
+   * Get frames info
+   * @param fileKey Figma file key
+   * @param frameIds Array of frame IDs
+   * @returns Array of frame information
+   * @todo fix type with sdk
+   */
+  async getFramesInfo(fileKey: string, frameIds: string): Promise<GetFileResult> {
+    return await this.request<GetFileResult>(`/files/${fileKey}?ids=${frameIds}`);
   }
 
   /**
@@ -188,20 +243,6 @@ export class FigmaService {
     }
   }
 
-  async getSelectedFrames(
-    fileKey: string,
-    nodeId: string,
-    framesIds: string[]
-  ): Promise<FrameInfo[]> {
-    try {
-      const frames = await this.getChildFrames(fileKey, nodeId);
-      return frames.filter(frame => framesIds.includes(frame.id));
-    } catch (error) {
-      console.error("Error retrieving selected frames:", error);
-      throw error;
-    }
-  }
-
   /**
    * Get frame images from a Figma file
    * @param fileKey Figma file key
@@ -249,65 +290,12 @@ export class FigmaService {
       throw error;
     }
   }
-
-  async extractFramesDesignsFromFigma(
-    figmaUrl: string,
-    frameIds: string[]
-  ): Promise<FigmaMetadata> {
-    try {
-      // Extract file key and node ID from URL
-      const { fileKey, nodeId } = this.extractFigmaInfo(figmaUrl);
-
-      if (!fileKey) {
-        throw new Error("Invalid Figma URL");
-      }
-
-      // Get the starting node ID (either the one from the URL or the root)
-      const startNodeId = nodeId || "0:1";
-      // Get child frames directly without fetching the entire file
-      const frames = await this.getSelectedFrames(fileKey, startNodeId, frameIds);
-      if (frames.length === 0) {
-        throw new Error("No frames found in Figma file");
-      }
-      // Get frame images
-      const frameImages = await this.getFrameImages(fileKey, frames);
-      // Map image URLs to frames
-      const frameMetadata: FrameMetadata[] = [];
-      const imageUrls: string[] = [];
-      for (const frame of frames) {
-        const imageData = frameImages[frame.id];
-        if (imageData && imageData.url) {
-          frameMetadata.push({
-            id: frame.id,
-            name: frame.name,
-            position: frame.absoluteBoundingBox,
-            url: imageData.url,
-          });
-          imageUrls.push(imageData.url);
-        }
-      }
-      // Get file name from Figma API
-      const fileInfo = await this.getFileInfo(fileKey);
-      // Create metadata
-      const metadata: FigmaMetadata = {
-        fileKey,
-        fileName: fileInfo.name,
-        extractionDate: new Date().toISOString(),
-        frames: frameMetadata,
-      };
-      return metadata;
-    } catch (error) {
-      console.error("Error extracting frames designs from Figma:", error);
-      throw error;
-    }
-  }
-
   /**
    * Extract designs from a Figma file
    * @param figmaUrl Figma URL
    * @returns Image URLs and metadata
    */
-  async extractDesignsFromFigma(figmaUrl: string): Promise<{
+  async getAllFramesFromFigmaUrl(figmaUrl: string): Promise<{
     imageUrls: string[];
     metadata: FigmaMetadata;
   }> {
@@ -371,13 +359,68 @@ export class FigmaService {
   }
 
   /**
+   * Get metadata for specific frames by their IDs (no full file scan)
+   * @param fileKey Figma file key
+   * @param nodeId Node ID
+   * @param frameIds Array of frame IDs
+   * @returns Array of frame metadata
+   */
+  async getFramesMetadataByIds(
+    fileKey: string,
+    nodeId: string,
+    frameIds: string[]
+  ): Promise<FrameMetadata[]> {
+    if (!frameIds.length) return [];
+    const idsParam = frameIds.join(",");
+    const data = await this.getFramesInfo(fileKey, idsParam);
+    const node = data?.document?.children?.find(child => child.id === nodeId) as FRAME;
+    const frames: FrameMetadata[] = node?.children.map(frame => ({
+      id: frame.id,
+      name: frame.name,
+      position: frame.absoluteBoundingBox,
+      url: undefined, // will be filled in later
+    }));
+
+    return frames;
+  }
+
+  /**
+   * Extract only selected frames' metadata and images (fast, no full file scan)
+   * @param figmaUrl Figma URL
+   * @param selectedFrameIds Array of frame IDs
+   * @returns Figma metadata
+   */
+  async getFramesMetadataByIdsFromFigma(
+    figmaUrl: string,
+    selectedFrameIds: string[]
+  ): Promise<FigmaMetadata> {
+    const { fileKey, nodeId } = this.extractFigmaInfo(figmaUrl);
+    if (!fileKey) throw new Error("Invalid Figma URL");
+    // Get metadata for just the selected frames
+    const frames = await this.getFramesMetadataByIds(fileKey, nodeId, selectedFrameIds);
+    // Get image URLs for these frames
+    const frameImages = await this.getImageUrls(fileKey, selectedFrameIds);
+    for (const frame of frames) {
+      frame.url = frameImages.images[frame.id];
+    }
+    // Get file name
+    const fileInfo = await this.getFileInfo(fileKey);
+    return {
+      fileKey,
+      fileName: fileInfo.name,
+      extractionDate: new Date().toISOString(),
+      frames,
+    };
+  }
+
+  /**
    * Get all comments from a Figma file
    * @param fileKey Figma file key
    * @returns Array of comments
    */
-  async getFigmaComments(fileKey: string): Promise<any[]> {
+  async getFigmaComments(fileKey: string): Promise<FigmaComment[]> {
     try {
-      const response = await this.request<any>(`/files/${fileKey}/comments`);
+      const response = await this.request<GetCommentsResult>(`/files/${fileKey}/comments`);
       return response.comments || [];
     } catch (error) {
       console.error("Error fetching Figma comments:", error);
@@ -402,7 +445,7 @@ export class FigmaService {
     framePosition: FramePosition
   ): Promise<string> {
     try {
-      const requestBody = {
+      const requestBody: Partial<FigmaComment> = {
         message,
         client_meta: {
           node_id: frameId,
@@ -413,7 +456,7 @@ export class FigmaService {
         },
       };
 
-      const response = await this.request<any>(`/files/${fileKey}/comments`, {
+      const response = await this.request<PostCommentResult>(`/files/${fileKey}/comments`, {
         method: "POST",
         body: JSON.stringify(requestBody),
       });

@@ -16,7 +16,6 @@ import { useState } from "react";
 import { appConfig } from "@/config/app";
 
 interface FigmaConnectPromptProps {
-  user?: User;
   onConnect?: () => void;
 }
 
@@ -24,7 +23,7 @@ interface FigmaConnectPromptProps {
  * Component that prompts the user to connect their Figma account
  * if they haven't already
  */
-export function FigmaConnectPrompt({ user, onConnect }: FigmaConnectPromptProps) {
+export function FigmaConnectPrompt({ onConnect }: FigmaConnectPromptProps) {
   // If user is undefined, we'll still show the connect prompt
   const [isConnecting, setIsConnecting] = useState(false);
   const { toast } = useToast();
@@ -51,11 +50,6 @@ export function FigmaConnectPrompt({ user, onConnect }: FigmaConnectPromptProps)
       setIsConnecting(false);
     }
   };
-
-  // If the user already has a Figma token, don't show the prompt
-  if (user?.figmaAccessToken) {
-    return null;
-  }
 
   return (
     <Card>
