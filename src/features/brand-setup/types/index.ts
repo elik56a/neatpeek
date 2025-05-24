@@ -65,7 +65,7 @@ export interface DesignImage {
 export interface CustomRule {
   id: string;
   brandGuidelineId: string;
-  category: string;
+  category: RuleCategory;
   name: string;
   description: string;
   createdAt: Date;
@@ -91,6 +91,7 @@ export enum RuleCategory {
   ICON = "ICON",
   LAYOUT = "LAYOUT",
   GENERAL = "GENERAL",
+  BEST_PRACTICES = "BEST_PRACTICES",
 }
 
 export enum RuleSource {
@@ -113,12 +114,7 @@ export interface BrandSetupFormData {
     name?: string;
     description?: string;
   }[];
-  customRules?: {
-    id?: string;
-    category: string;
-    name: string;
-    description: string;
-  }[];
+  customRules?: CustomRule[];
   companyId?: string;
   teamId?: string;
 }

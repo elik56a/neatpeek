@@ -10,7 +10,7 @@ interface BrandGuidelinePageProps {
 
 export default function BrandGuidelinePage({ params }: BrandGuidelinePageProps) {
   // Extract the ID directly to avoid the warning
-  const id = params.id;
+  const id = params?.id;
 
   return (
     <div className="container py-6">

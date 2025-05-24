@@ -19,6 +19,7 @@ interface EditableBrandRuleProps {
   getCategoryBadgeColor: (category: RuleCategory) => string;
   getCategoryIcon: (category: RuleCategory) => React.ReactNode;
   getCategoryColor: (category: RuleCategory) => string;
+  getCategoryLabel: (category: RuleCategory) => string;
   brandGuidelineId: string;
   onRuleUpdated?: () => void;
 }
@@ -29,6 +30,7 @@ export function EditableBrandRule({
   getCategoryBadgeColor,
   getCategoryIcon,
   getCategoryColor,
+  getCategoryLabel,
   brandGuidelineId,
   onRuleUpdated,
 }: EditableBrandRuleProps) {
@@ -142,7 +144,7 @@ export function EditableBrandRule({
 
           {category === RuleCategory.COLOR ? (
             <div className="flex items-center space-x-2 mt-2">
-              <ColorValueDisplay value={value} showText={false} showIndividualColors={false} />
+              <ColorValueDisplay value={value} showText={false} />
               <Input
                 value={value}
                 onChange={e => setValue(e.target.value)}
@@ -209,13 +211,16 @@ export function EditableBrandRule({
       ) : (
         <>
           <div className="flex justify-between items-start">
-            <h3 className="font-medium text-gray-900 flex items-center">{rule.name}</h3>
+            <h3 className="font-medium text-gray-900 flex items-center flex-1 pr-2">{rule.name}</h3>
             <Badge
               variant="secondary"
-              className={cn("font-medium", getCategoryBadgeColor(category))}
+              className={cn(
+                "font-medium flex-shrink-0 whitespace-nowrap",
+                getCategoryBadgeColor(category)
+              )}
             >
               {getCategoryIcon(category)}
-              <span className="ml-1">{category.charAt(0) + category.slice(1).toLowerCase()}</span>
+              <span className="ml-1">{getCategoryLabel(category)}</span>
             </Badge>
           </div>
 

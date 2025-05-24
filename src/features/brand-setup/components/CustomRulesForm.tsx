@@ -15,18 +15,14 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { AlertCircle, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { RuleCategory } from "../types";
-
-interface CustomRule {
-  category: string;
-  name: string;
-  description: string;
-}
+import { RuleCategory, CustomRule } from "../types";
 
 interface CustomRulesFormProps {
   rules: CustomRule[];
   onAddRule: (rule: CustomRule) => void;
   onRemoveRule: (index: number) => void;
+  getCategoryColor: (category: RuleCategory) => string;
+  getCategoryLabel: (category: RuleCategory) => string;
   maxRules?: number;
 }
 
@@ -35,6 +31,8 @@ export function CustomRulesForm({
   onAddRule,
   onRemoveRule,
   maxRules = 10,
+  getCategoryColor,
+  getCategoryLabel,
 }: CustomRulesFormProps) {
   const [newRule, setNewRule] = useState<CustomRule>({
     category: "COLOR",
@@ -70,50 +68,6 @@ export function CustomRulesForm({
       name: "",
       description: "",
     });
-  };
-
-  // Get category label
-  const getCategoryLabel = (category: RuleCategory) => {
-    switch (category) {
-      case "COLOR":
-        return "Color";
-      case "TYPOGRAPHY":
-        return "Typography";
-      case "SPACING":
-        return "Spacing";
-      case "LOGO":
-        return "Logo";
-      case "ICON":
-        return "Icon";
-      case "LAYOUT":
-        return "Layout";
-      case "GENERAL":
-        return "General";
-      default:
-        return category;
-    }
-  };
-
-  // Get category color
-  const getCategoryColor = (category: RuleCategory) => {
-    switch (category) {
-      case "COLOR":
-        return "bg-red-100 text-red-800";
-      case "TYPOGRAPHY":
-        return "bg-blue-100 text-blue-800";
-      case "SPACING":
-        return "bg-green-100 text-green-800";
-      case "LOGO":
-        return "bg-purple-100 text-purple-800";
-      case "ICON":
-        return "bg-yellow-100 text-yellow-800";
-      case "LAYOUT":
-        return "bg-indigo-100 text-indigo-800";
-      case "GENERAL":
-        return "bg-gray-100 text-gray-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
   };
 
   return (

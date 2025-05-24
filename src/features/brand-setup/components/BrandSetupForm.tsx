@@ -33,7 +33,7 @@ import {
   Users,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useBrandSetupForm } from "../hooks";
+import { useBrandGuidelineUI, useBrandSetupForm } from "../hooks";
 import { CustomRule } from "../types";
 
 import { CustomRulesForm } from "./CustomRulesForm";
@@ -81,6 +81,8 @@ export function BrandSetupForm({ brandId, mode = "create" }: BrandSetupFormProps
     removeCustomRule,
     submitForm,
   } = useBrandSetupForm({ brandId, mode });
+
+  const { getCategoryColor, getCategoryLabel } = useBrandGuidelineUI();
 
   // Show loading state while form data is being loaded
   const [isLoading, setIsLoading] = useState(mode === "edit");
@@ -358,6 +360,8 @@ export function BrandSetupForm({ brandId, mode = "create" }: BrandSetupFormProps
               rules={formData.customRules || []}
               onAddRule={handleAddRule}
               onRemoveRule={handleRemoveRule}
+              getCategoryColor={getCategoryColor}
+              getCategoryLabel={getCategoryLabel}
             />
 
             <div className="flex justify-between">

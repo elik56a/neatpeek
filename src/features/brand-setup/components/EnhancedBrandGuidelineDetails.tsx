@@ -24,16 +24,13 @@ import {
   ArrowLeft,
   BookOpen,
   Brain,
-  Brush,
   Edit,
   FileText,
   Image,
   Loader2,
-  Palette,
   Play,
   Sparkles,
   Trash2,
-  Type,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -42,6 +39,7 @@ import { useBrandGuideline, useBrandGuidelineUI } from "../hooks";
 import { BrandGuidelineStatus, BrandRule, ProcessingStatus } from "../types";
 import { RuleCategory } from "../types";
 import { EditableBrandRule } from "./EditableBrandRule";
+import { appConfig } from "@/config/app";
 
 interface EnhancedBrandGuidelineDetailsProps {
   id: string;
@@ -58,6 +56,8 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
     getCategoryBadgeColor,
     getStatusBadge,
     groupRulesByCategory,
+    getCategoryLabel,
+    isBestPracticesActiveCategory,
   } = useBrandGuidelineUI();
   const [isStartingAnalysis, setIsStartingAnalysis] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -250,7 +250,7 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
         )}
 
       {/* Brand details card */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="md:col-span-1 animate-in fade-in duration-500 slide-in-from-left-5">
           <CardHeader className="bg-gradient-to-r from-gray-50 to-slate-50 border-b">
             <CardTitle className="flex items-center">
@@ -316,7 +316,7 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
         {brandGuideline.status === BrandGuidelineStatus.COMPLETED &&
           brandGuideline.brandRules &&
           brandGuideline.brandRules.length > 0 && (
-            <Card className="md:col-span-2 animate-in fade-in duration-500 slide-in-from-right-5">
+            <Card className="md:col-span-3 animate-in fade-in duration-500 slide-in-from-right-5">
               <CardHeader className="bg-gradient-to-r from-indigo-50 to-blue-50 border-b">
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center">
@@ -331,7 +331,9 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
                   </CardTitle>
                 </div>
                 <CardDescription>
-                  These rules were automatically generated based on your brand guidelines.
+                  {activeTab === RuleCategory.BEST_PRACTICES
+                    ? "These are general best practices for effective brand design and implementation."
+                    : "These rules were automatically generated based on your brand guidelines."}
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-6">
@@ -340,23 +342,48 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
                   className="space-y-6"
                 >
                   <TabsList className="flex flex-wrap bg-slate-50 p-1">
-                    {Object.keys(rulesByCategory).map(category => (
-                      <TabsTrigger
-                        key={category}
-                        value={category}
-                        className={cn(
-                          "flex items-center data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-200",
-                          "data-[state=active]:text-indigo-700"
-                        )}
-                        onClick={() => setActiveTab(category)}
-                      >
-                        {getCategoryIcon(category as RuleCategory)}
-                        <span className="ml-1.5">
-                          {category.charAt(0) + category.slice(1).toLowerCase()}
-                        </span>
-                      </TabsTrigger>
-                    ))}
+                    {Object.keys(rulesByCategory).map(category => {
+                      return (
+                        <TabsTrigger
+                          key={category}
+                          value={category}
+                          className={cn(
+                            "flex items-center data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-200",
+                            "data-[state=active]:text-indigo-700"
+                          )}
+                          onClick={() => setActiveTab(category)}
+                        >
+                          {getCategoryIcon(category as RuleCategory)}
+                          <span className="ml-1.5">
+                            {getCategoryLabel(category as RuleCategory)}
+                          </span>
+                        </TabsTrigger>
+                      );
+                    })}
                   </TabsList>
+
+                  {/* Best Practices Header */}
+                  {isBestPracticesActiveCategory() && (
+                    <div className="bg-gradient-to-r from-primary/8 via-primary/5 to-primary/8 border border-primary/25 rounded-lg p-4 animate-in fade-in slide-in-from-top-2 duration-500">
+                      <div className="flex items-center space-x-3">
+                        <div className="flex-shrink-0">
+                          <div className="w-10 h-10 bg-gradient-to-br from-primary/20 to-primary/30 rounded-full flex items-center justify-center">
+                            <Sparkles className="h-5 w-5 text-primary" />
+                          </div>
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                            {appConfig.name} Best Practices
+                          </h3>
+                          <p className="text-sm text-gray-700 leading-relaxed">
+                            These are carefully curated best practices that we've created
+                            specifically for you. They represent industry standards and proven
+                            design principles to help elevate your brand.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {Object.entries(rulesByCategory).map(
                     ([category, rules]: [RuleCategory, BrandRule[]]) => (
@@ -376,6 +403,7 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
                               getCategoryBadgeColor={getCategoryBadgeColor}
                               getCategoryIcon={getCategoryIcon}
                               getCategoryColor={getCategoryColor}
+                              getCategoryLabel={getCategoryLabel}
                               brandGuidelineId={id}
                             />
                           ))}
