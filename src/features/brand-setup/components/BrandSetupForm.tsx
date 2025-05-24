@@ -99,7 +99,7 @@ export function BrandSetupForm({ brandId, mode = "create" }: BrandSetupFormProps
   const [success, setSuccess] = useState(false);
 
   // Check if at least one of PDF, design images, or custom rules is provided
-  const hasPdf = !!formData.pdfFile;
+  const hasPdf = !!formData.pdfFile || !!formData.pdfPath;
   const hasDesignImages = formData.designImages && formData.designImages.length > 0;
   const hasCustomRules = formData.customRules && formData.customRules.length > 0;
   const canSubmit = formData.name && (hasPdf || hasDesignImages || hasCustomRules);
