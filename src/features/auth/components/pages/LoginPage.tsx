@@ -15,12 +15,15 @@ import { useEffect, useState } from "react";
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { login, loginWithGoogle, loginWithFigma } = useAuth();
+  const { login, loginWithGoogle, loginWithFigma, isLoading, autoLogin } = useAuth();
   const { toast } = useToast();
   const searchParams = useSearchParams();
+
+  // Auto-redirect if authenticated
+  autoLogin();
 
   // Check if user just registered
   useEffect(() => {
@@ -44,7 +47,7 @@ const LoginPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setIsLoading(true);
+    setIsSubmitting(true);
 
     try {
       await login(email, password);
@@ -57,7 +60,7 @@ const LoginPage = () => {
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -107,7 +110,7 @@ const LoginPage = () => {
             variant="outline"
             className="w-full relative"
             onClick={handleGoogleLogin}
-            disabled={isLoading}
+            disabled={isSubmitting || isLoading}
           >
             <svg
               className="mr-2 h-4 w-4"
@@ -131,7 +134,7 @@ const LoginPage = () => {
             variant="outline"
             className="w-full relative"
             onClick={handleFigmaLogin}
-            disabled={isLoading}
+            disabled={isSubmitting || isLoading}
           >
             <svg
               className="mr-2 h-4 w-4"
@@ -169,7 +172,7 @@ const LoginPage = () => {
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
-              disabled={isLoading}
+              disabled={isSubmitting || isLoading}
               className={error ? "border-destructive" : ""}
             />
           </div>
@@ -189,7 +192,7 @@ const LoginPage = () => {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
-                disabled={isLoading}
+                disabled={isSubmitting || isLoading}
                 className={error ? "border-destructive" : ""}
               />
               <button
@@ -203,8 +206,8 @@ const LoginPage = () => {
             {error && <p className="text-sm text-destructive mt-1">{error}</p>}
           </div>
 
-          <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? (
+          <Button type="submit" className="w-full" disabled={isSubmitting || isLoading}>
+            {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Signing in...

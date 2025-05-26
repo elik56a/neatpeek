@@ -1,6 +1,5 @@
-/**
- * Hook for design review functionality
- */
+"use client";
+
 import { useState } from "react";
 import { useFetch } from "@/hooks/use-fetch";
 import { useToast } from "@/hooks/use-toast";
