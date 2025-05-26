@@ -7,6 +7,7 @@ import {
   RuleCategory,
 } from "../types";
 import { storageProvider } from "@/services/storage";
+import { bestPracticesRules } from "@/constants/best-practices-rules";
 
 /**
  * Service for brand setup functionality
@@ -370,6 +371,16 @@ export class BrandSetupService {
             description: generalRule.description,
           });
         }
+      }
+
+      // Process best practices
+      for (const bestPractice of bestPracticesRules) {
+        rules.push({
+          category: RuleCategory.BEST_PRACTICES,
+          name: bestPractice.name,
+          value: bestPractice.value,
+          description: bestPractice.description,
+        });
       }
 
       // Save the rules

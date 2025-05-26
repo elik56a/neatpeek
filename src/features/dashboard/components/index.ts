@@ -1,0 +1,9 @@
+export { DashboardHeader } from "./DashboardHeader";
+export { MetricsCards } from "./MetricsCards";
+export { ActivityTrendsChart } from "./ActivityTrendsChart";
+export { RecentActivityList } from "./RecentActivityList";
+export { DesignTypesBreakdown } from "./DesignTypesBreakdown";
+export { TopIssuesList } from "./TopIssuesList";
+export { Dashboard } from "./Dashboard";
+export { PerformanceInsights } from "./PerformanceInsights";
+export { DashboardPage } from "../pages/DashboardPage";

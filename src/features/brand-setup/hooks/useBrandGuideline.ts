@@ -113,6 +113,18 @@ export function useBrandGuideline(id: string) {
     }
   }, [id, toast]);
 
+  // Remove rule locally after successful deletion
+  const removeRuleLocally = useCallback((ruleId: string) => {
+    setBrandGuideline(prevGuideline => {
+      if (!prevGuideline?.brandRules) return prevGuideline;
+
+      return {
+        ...prevGuideline,
+        brandRules: prevGuideline.brandRules.filter(rule => rule.id !== ruleId),
+      };
+    });
+  }, []);
+
   // Fetch brand guideline on mount and when ID changes
   useEffect(() => {
     if (id) {
@@ -127,5 +139,6 @@ export function useBrandGuideline(id: string) {
     refetch: fetchBrandGuideline,
     startAnalysis,
     deleteBrandGuideline,
+    removeRuleLocally,
   };
 }

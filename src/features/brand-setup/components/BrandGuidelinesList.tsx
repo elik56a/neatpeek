@@ -11,15 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   AlertCircle,
@@ -34,47 +26,29 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { useBrandGuidelines } from "../hooks";
+import { useBrandGuidelines, useBrandGuidelineUI } from "../hooks";
 import { BrandGuidelineStatus, ProcessingStatus } from "../types";
 
 export function BrandGuidelinesList() {
   const { brandGuidelines, isLoading, error, refetch, deleteBrandGuideline } = useBrandGuidelines();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [selectedGuidelineId, setSelectedGuidelineId] = useState<string | null>(null);
+  const { getStatusBadge } = useBrandGuidelineUI();
 
   // Handle delete confirmation
-  const handleDelete = async (id: string) => {
-    setDeletingId(id);
-    await deleteBrandGuideline(id);
+  const handleDelete = async () => {
+    if (!selectedGuidelineId) return;
+    setDeletingId(selectedGuidelineId);
+    await deleteBrandGuideline(selectedGuidelineId);
     setDeletingId(null);
+    setShowDeleteDialog(false);
+    setSelectedGuidelineId(null);
   };
 
-  // Get status badge color
-  const getStatusBadge = (status: BrandGuidelineStatus, processingStatus: ProcessingStatus) => {
-    if (status === BrandGuidelineStatus.DRAFT) {
-      return <Badge variant="outline">Draft</Badge>;
-    }
-
-    if (status === BrandGuidelineStatus.PROCESSING) {
-      return (
-        <Badge variant="secondary" className="bg-amber-100 text-amber-800 hover:bg-amber-100">
-          Processing
-        </Badge>
-      );
-    }
-
-    if (status === BrandGuidelineStatus.COMPLETED) {
-      return (
-        <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-100">
-          Completed
-        </Badge>
-      );
-    }
-
-    if (status === BrandGuidelineStatus.FAILED) {
-      return <Badge variant="destructive">Failed</Badge>;
-    }
-
-    return <Badge variant="outline">Unknown</Badge>;
+  const openDeleteDialog = (id: string) => {
+    setSelectedGuidelineId(id);
+    setShowDeleteDialog(true);
   };
 
   if (isLoading) {
@@ -211,41 +185,9 @@ export function BrandGuidelinesList() {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-between">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Delete Brand Guideline</DialogTitle>
-                      <DialogDescription>
-                        Are you sure you want to delete this brand guideline? This action cannot be
-                        undone.
-                      </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                      <Button variant="outline" onClick={() => {}}>
-                        Cancel
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        onClick={() => handleDelete(guideline.id)}
-                        disabled={deletingId === guideline.id}
-                      >
-                        {deletingId === guideline.id ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Deleting...
-                          </>
-                        ) : (
-                          "Delete"
-                        )}
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
+                <Button variant="ghost" size="icon" onClick={() => openDeleteDialog(guideline.id)}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
 
                 <Button asChild>
                   <Link href={`/brand-setup/${guideline.id}`}>
@@ -258,6 +200,20 @@ export function BrandGuidelinesList() {
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={handleDelete}
+        title="Delete Brand Guideline"
+        description="Are you sure you want to delete this brand guideline? This action cannot be undone and will permanently remove all brand rules, custom rules, and associated data."
+        confirmText="Delete Guideline"
+        cancelText="Cancel"
+        isLoading={deletingId !== null}
+        variant="destructive"
+        icon={<Trash2 className="h-5 w-5" />}
+      />
     </div>
   );
 }

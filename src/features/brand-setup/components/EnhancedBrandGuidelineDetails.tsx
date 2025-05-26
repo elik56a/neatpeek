@@ -1,39 +1,25 @@
 "use client";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ColorValueDisplay } from "@/components/ui/color-value-display";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { cn } from "@/utils/cn";
 import {
   AlertCircle,
   ArrowLeft,
   BookOpen,
   Brain,
-  Brush,
   Edit,
   FileText,
   Image,
   Loader2,
-  Palette,
   Play,
   Sparkles,
   Trash2,
-  Type,
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -42,14 +28,21 @@ import { useBrandGuideline, useBrandGuidelineUI } from "../hooks";
 import { BrandGuidelineStatus, BrandRule, ProcessingStatus } from "../types";
 import { RuleCategory } from "../types";
 import { EditableBrandRule } from "./EditableBrandRule";
+import { appConfig } from "@/config/app";
 
 interface EnhancedBrandGuidelineDetailsProps {
   id: string;
 }
 
 export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDetailsProps) {
-  const { brandGuideline, isLoading, error, startAnalysis, deleteBrandGuideline } =
-    useBrandGuideline(id);
+  const {
+    brandGuideline,
+    isLoading,
+    error,
+    startAnalysis,
+    deleteBrandGuideline,
+    removeRuleLocally,
+  } = useBrandGuideline(id);
   const {
     activeTab,
     setActiveTab,
@@ -58,9 +51,12 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
     getCategoryBadgeColor,
     getStatusBadge,
     groupRulesByCategory,
+    getCategoryLabel,
+    isBestPracticesActiveCategory,
   } = useBrandGuidelineUI();
   const [isStartingAnalysis, setIsStartingAnalysis] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const router = useRouter();
 
   // Handle start analysis
@@ -78,6 +74,7 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
     setIsDeleting(true);
     try {
       await deleteBrandGuideline();
+      setShowDeleteDialog(false);
       router.push("/brand-setup");
     } catch (error) {
       console.error("Error deleting brand guideline:", error);
@@ -166,36 +163,10 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
           </Button>
 
           {/* Delete Button */}
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive">
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete the brand guideline and
-                  all associated data.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
-                  {isDeleting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Deleting...
-                    </>
-                  ) : (
-                    "Delete"
-                  )}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete
+          </Button>
 
           {/* Start Analysis Button */}
           {brandGuideline.status === BrandGuidelineStatus.DRAFT && (
@@ -250,7 +221,7 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
         )}
 
       {/* Brand details card */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="md:col-span-1 animate-in fade-in duration-500 slide-in-from-left-5">
           <CardHeader className="bg-gradient-to-r from-gray-50 to-slate-50 border-b">
             <CardTitle className="flex items-center">
@@ -316,7 +287,7 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
         {brandGuideline.status === BrandGuidelineStatus.COMPLETED &&
           brandGuideline.brandRules &&
           brandGuideline.brandRules.length > 0 && (
-            <Card className="md:col-span-2 animate-in fade-in duration-500 slide-in-from-right-5">
+            <Card className="md:col-span-3 animate-in fade-in duration-500 slide-in-from-right-5">
               <CardHeader className="bg-gradient-to-r from-indigo-50 to-blue-50 border-b">
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center">
@@ -331,7 +302,9 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
                   </CardTitle>
                 </div>
                 <CardDescription>
-                  These rules were automatically generated based on your brand guidelines.
+                  {activeTab === RuleCategory.BEST_PRACTICES
+                    ? "These are general best practices for effective brand design and implementation."
+                    : "These rules were automatically generated based on your brand guidelines."}
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-6">
@@ -340,23 +313,48 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
                   className="space-y-6"
                 >
                   <TabsList className="flex flex-wrap bg-slate-50 p-1">
-                    {Object.keys(rulesByCategory).map(category => (
-                      <TabsTrigger
-                        key={category}
-                        value={category}
-                        className={cn(
-                          "flex items-center data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-200",
-                          "data-[state=active]:text-indigo-700"
-                        )}
-                        onClick={() => setActiveTab(category)}
-                      >
-                        {getCategoryIcon(category as RuleCategory)}
-                        <span className="ml-1.5">
-                          {category.charAt(0) + category.slice(1).toLowerCase()}
-                        </span>
-                      </TabsTrigger>
-                    ))}
+                    {Object.keys(rulesByCategory).map(category => {
+                      return (
+                        <TabsTrigger
+                          key={category}
+                          value={category}
+                          className={cn(
+                            "flex items-center data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all duration-200",
+                            "data-[state=active]:text-indigo-700"
+                          )}
+                          onClick={() => setActiveTab(category)}
+                        >
+                          {getCategoryIcon(category as RuleCategory)}
+                          <span className="ml-1.5">
+                            {getCategoryLabel(category as RuleCategory)}
+                          </span>
+                        </TabsTrigger>
+                      );
+                    })}
                   </TabsList>
+
+                  {/* Best Practices Header */}
+                  {isBestPracticesActiveCategory() && (
+                    <div className="bg-gradient-to-r from-primary/8 via-primary/5 to-primary/8 border border-primary/25 rounded-lg p-4 animate-in fade-in slide-in-from-top-2 duration-500">
+                      <div className="flex items-center space-x-3">
+                        <div className="flex-shrink-0">
+                          <div className="w-10 h-10 bg-gradient-to-br from-primary/20 to-primary/30 rounded-full flex items-center justify-center">
+                            <Sparkles className="h-5 w-5 text-primary" />
+                          </div>
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                            {appConfig.name} Best Practices
+                          </h3>
+                          <p className="text-sm text-gray-700 leading-relaxed">
+                            These are carefully curated best practices that we've created
+                            specifically for you. They represent industry standards and proven
+                            design principles to help elevate your brand.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {Object.entries(rulesByCategory).map(
                     ([category, rules]: [RuleCategory, BrandRule[]]) => (
@@ -376,7 +374,9 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
                               getCategoryBadgeColor={getCategoryBadgeColor}
                               getCategoryIcon={getCategoryIcon}
                               getCategoryColor={getCategoryColor}
+                              getCategoryLabel={getCategoryLabel}
                               brandGuidelineId={id}
+                              onRuleDeleted={removeRuleLocally}
                             />
                           ))}
                         </div>
@@ -475,6 +475,20 @@ export function EnhancedBrandGuidelineDetails({ id }: EnhancedBrandGuidelineDeta
           </CardContent>
         </Card>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={handleDelete}
+        title="Delete Brand Guideline"
+        description="Are you sure you want to delete this brand guideline? This action cannot be undone and will permanently remove all brand rules, custom rules, and associated data."
+        confirmText="Delete Guideline"
+        cancelText="Cancel"
+        isLoading={isDeleting}
+        variant="destructive"
+        icon={<Trash2 className="h-5 w-5" />}
+      />
     </div>
   );
 }

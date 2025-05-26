@@ -3,6 +3,8 @@
  * These interfaces define the shape of the data stored in the reviewJson field of the DesignReview model
  */
 
+import { RuleCategory } from "@/features/brand-setup/types";
+
 /**
  * Enum for issue status
  */
@@ -52,6 +54,7 @@ export interface BaseIssue {
   recheck_details?: string; // Additional details from recheck
   created_at?: string; // ISO timestamp when the issue was created
   element_type?: string; // Type of element (e.g., "Button", "Text", "Image")
+  category?: RuleCategory;
 }
 
 /**

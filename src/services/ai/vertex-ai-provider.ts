@@ -382,6 +382,7 @@ export class VertexAIProvider implements AIService {
           },
           "brand_issues": [
             {
+              "category": "string", // from this enum -> COLOR / TYPOGRAPHY / LOGO / ICON / LAYOUT / GENERAL / SPACING
               "element_type": "string", // e.g., 'Button', 'Text', 'Logo', 'Image'
               "description": "string", // Concise description of the issue found
               "brand_rule_violation": "string", // REQUIRED: The 'name' of the violated rule from brandRules JSON
@@ -392,6 +393,7 @@ export class VertexAIProvider implements AIService {
           ],
           "general_issues": [
             {
+              "category": "string", // from this enum -> COLOR / TYPOGRAPHY / LOGO / ICON / LAYOUT / GENERAL / SPACING
               "element_type": "string",
               "description": "string",
               "issue": "string", // Type of issue, e.g., 'Accessibility', 'UX', 'Alignment', 'Contrast'
