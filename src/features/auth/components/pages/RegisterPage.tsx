@@ -21,8 +21,11 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { register, loginWithGoogle, loginWithFigma } = useAuth();
+  const { register, loginWithGoogle, loginWithFigma, autoLogin } = useAuth();
   const { toast } = useToast();
+
+  // Auto-redirect if authenticated
+  autoLogin();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
