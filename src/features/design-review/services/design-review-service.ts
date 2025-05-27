@@ -28,6 +28,9 @@ import {
 } from "../types";
 import { DesignRecheckService } from "./design-recheck-service";
 import { FigmaService } from "./figma-service";
+import { formatBrandIssueComment, formatGeneralIssueComment } from "../utils";
+import { generateInitialReviewSummary } from "../utils/timeline-formatters";
+import { VoidFunctionComponent } from "react";
 
 /**
  * Design Review Service
@@ -80,11 +83,11 @@ export class DesignReviewService {
   }
 
   /**
-   * Review a design against brand rules
+   * Create a design review immediately and start background processing
    * @param input Review input with optional selectedFrameIds and userId
-   * @returns DesignsReviewId
+   * @returns DesignsReviewId immediately
    */
-  async analyzeDesigns(
+  async createDesignReviewAndStartProcessing(
     input: DesignAnalysisInput & { selectedFrameIds?: string[]; userId: string }
   ): Promise<string> {
     try {
@@ -98,6 +101,77 @@ export class DesignReviewService {
         throw new Error("User ID is required");
       }
 
+      // Get brand guideline to validate it exists
+      const brandGuideline = await prisma.brandGuideline.findUnique({
+        where: { id: brandId },
+        select: { id: true, name: true },
+      });
+
+      if (!brandGuideline) {
+        throw new Error("Brand guideline not found");
+      }
+
+      // Extract file key from URL for basic info
+      const { fileKey } = this.figmaService.extractFigmaInfo(figmaUrl);
+
+      // Create the design review immediately with PENDING status and default name
+      const designsReview = await prisma.designsReview.create({
+        data: {
+          userId,
+          brandGuidelineId: brandId,
+          name: "Design Review", // Default name, will be updated with actual file name in background
+          status: ReviewStatus.PENDING,
+          reviewType: ReviewType.FIGMA,
+          figmaUrl,
+          figmaFileId: fileKey,
+        },
+      });
+
+      // Start background processing without waiting for it
+      this.processDesignReviewInBackground(designsReview.id, input).catch(error => {
+        console.error("Background processing failed:", error);
+        this.updateReviewStatus(designsReview.id, ReviewStatus.FAILED);
+      });
+
+      return designsReview.id;
+    } catch (error) {
+      console.error("Error creating design review:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Process design review in the background
+   * @param designsReviewId The ID of the design review to process
+   * @param input Original input parameters
+   */
+  private async processDesignReviewInBackground(
+    designsReviewId: string,
+    input: DesignAnalysisInput & { selectedFrameIds?: string[]; userId: string }
+  ): Promise<void> {
+    try {
+      const { figmaUrl, brandId, userId, selectedFrameIds } = input;
+
+      // Update status to IN_PROGRESS - fire and forget, don't block
+      this.updateReviewStatus(designsReviewId, ReviewStatus.IN_PROGRESS);
+
+      // Get basic file info first (fast call for name and key)
+      const { fileKey } = this.figmaService.extractFigmaInfo(figmaUrl);
+      const fileInfo = await this.figmaService.getFileInfo(fileKey);
+
+      // Update review name immediately with actual file name
+      if (fileInfo.name) {
+        prisma.designsReview
+          .update({
+            where: { id: designsReviewId },
+            data: {
+              name: fileInfo.name,
+              figmaFileId: fileKey,
+            },
+          })
+          .catch(error => console.error("Failed to update review metadata:", error));
+      }
+
       // Get brand rules
       const brandGuideline = await prisma.brandGuideline.findUnique({
         where: { id: brandId },
@@ -107,17 +181,17 @@ export class DesignReviewService {
       });
 
       if (!brandGuideline) {
-        throw new Error("brandGuideline not found");
+        throw new Error("Brand guideline not found");
       }
 
-      // Get designs from Figma
+      // Now get the full figma metadata with frames (the heavy operation)
       const figmaMetaData = await this.figmaService.getFramesMetadataByIdsFromFigma(
         figmaUrl,
         selectedFrameIds
       );
 
-      // Process images for AI - use filtered URLs if available
-      const imageParts = await Promise.all(
+      // Process images for AI (keeping sequential since we need frame URLs from metadata)
+      const processedImageParts = await Promise.all(
         figmaMetaData.frames.map(frame => this.figmaService.urlToInlineData(frame.url))
       );
 
@@ -126,27 +200,167 @@ export class DesignReviewService {
 
       // Analyze designs
       const analysisResult = await aiService.analyzeDesigns({
-        imageParts,
+        imageParts: processedImageParts,
         metadata: figmaMetaData,
         brandRules: brandGuideline.brandRules as Partial<BrandRule>[],
       });
 
-      // Save results to database and get review IDs
-      const designsReviewId = await this.saveAnalysisResults(
-        brandId,
-        userId,
+      // Save results to database
+      await this.saveAnalysisResultsToExistingReview(
+        designsReviewId,
         figmaMetaData,
         analysisResult,
+        userId,
         figmaUrl
       );
 
-      return designsReviewId;
+      // Update status to COMPLETED - fire and forget, don't block
+      this.updateReviewStatus(designsReviewId, ReviewStatus.COMPLETED);
     } catch (error) {
-      console.error("Error analyzing design:", error);
+      console.error("Error processing design review in background:", error);
+      // Update status to FAILED - fire and forget
+      this.updateReviewStatus(designsReviewId, ReviewStatus.FAILED);
+
       throw error;
     }
   }
 
+  /**
+   * Save analysis results to an existing design review
+   * @param designsReviewId Existing design review ID
+   * @param metadata Figma metadata
+   * @param analysisResult Analysis result
+   * @param userId User ID (passed directly to avoid DB lookup)
+   * @param originalFigmaUrl Original Figma URL
+   */
+  private async saveAnalysisResultsToExistingReview(
+    designsReviewId: string,
+    metadata: FigmaMetadata,
+    analysisResult: DesignReviewResult[],
+    userId: string,
+    originalFigmaUrl?: string
+  ): Promise<void> {
+    try {
+      const urlToFrameData: Record<string, Partial<FrameMetadata>> = {};
+      for (const frame of metadata.frames) {
+        urlToFrameData[frame.url] = {
+          id: frame.id,
+          position: frame.position,
+        };
+      }
+
+      // Collect all comment creation promises for parallel execution
+      const commentPromises: Promise<string>[] = [];
+
+      // Prepare comment creation for all issues
+      for (const review of analysisResult) {
+        const frameData = urlToFrameData[review.image.url];
+        if (frameData) {
+          // Add brand issue comments
+          if (review.brand_issues) {
+            for (const issue of review.brand_issues) {
+              const commentText = formatBrandIssueComment(issue);
+              const commentPromise = this.figmaService.addFigmaComment(
+                metadata.fileKey,
+                frameData.id,
+                commentText,
+                issue.coordinates,
+                frameData.position
+              );
+              commentPromises.push(commentPromise);
+
+              // Store promise index to map back to issue later
+              const promiseIndex = commentPromises.length - 1;
+              (issue as any)._commentPromiseIndex = promiseIndex;
+            }
+          }
+
+          // Add general issue comments
+          if (review.general_issues) {
+            for (const issue of review.general_issues) {
+              const commentText = formatGeneralIssueComment(issue);
+              const commentPromise = this.figmaService.addFigmaComment(
+                metadata.fileKey,
+                frameData.id,
+                commentText,
+                issue.coordinates,
+                frameData.position
+              );
+              commentPromises.push(commentPromise);
+
+              // Store promise index to map back to issue later
+              const promiseIndex = commentPromises.length - 1;
+              (issue as any)._commentPromiseIndex = promiseIndex;
+            }
+          }
+        }
+      }
+
+      // Execute all comment creation in parallel
+      const commentIds = await Promise.all(commentPromises);
+
+      // Map comment IDs back to issues
+      for (const review of analysisResult) {
+        if (review.brand_issues) {
+          for (const issue of review.brand_issues) {
+            const promiseIndex = (issue as any)._commentPromiseIndex;
+            if (promiseIndex !== undefined) {
+              issue.figma_comment_id = commentIds[promiseIndex];
+              delete (issue as any)._commentPromiseIndex; // Clean up temp property
+            }
+          }
+        }
+
+        if (review.general_issues) {
+          for (const issue of review.general_issues) {
+            const promiseIndex = (issue as any)._commentPromiseIndex;
+            if (promiseIndex !== undefined) {
+              issue.figma_comment_id = commentIds[promiseIndex];
+              delete (issue as any)._commentPromiseIndex; // Clean up temp property
+            }
+          }
+        }
+      }
+
+      // Use transaction to create all designs in parallel
+      await prisma.$transaction(async tx => {
+        await Promise.all(
+          analysisResult.map(review =>
+            tx.design.create({
+              data: {
+                userId,
+                designsReviewId,
+                frameId: review.image.frame_id,
+                reviewJson: {
+                  ...review,
+                  created_at: new Date().toISOString(),
+                } as any,
+                status: ReviewStatus.COMPLETED,
+                originalFigmaUrl,
+                timeline: {
+                  create: {
+                    action: ReviewTimelineAction.INITIAL_REVIEW,
+                    summary: generateInitialReviewSummary(
+                      review.brand_issues,
+                      review.general_issues
+                    ),
+                    changes: this.createInitialReviewChanges(
+                      review.brand_issues,
+                      review.general_issues,
+                      review.design_score.total
+                    ) as any,
+                  },
+                },
+              },
+            })
+          )
+        );
+      });
+    } catch (error) {
+      console.error("Error saving analysis results to existing review:", error);
+      throw error;
+    }
+  }
   /**
    * Recheck a design against previous comments
    * @param input Recheck input
@@ -216,113 +430,6 @@ export class DesignReviewService {
       return designsReview.id;
     } catch (error) {
       console.error("Error rechecking design:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Save analysis results to database
-   * @param brandGuidelineId Brand guideline ID
-   * @param userId User ID
-   * @param metadata Figma metadata
-   * @param analysisResult Analysis result
-   * @param originalFigmaUrl Original Figma URL
-   * @returns DesignsReviewId
-   */
-  private async saveAnalysisResults(
-    brandGuidelineId: string,
-    userId: string,
-    metadata: FigmaMetadata,
-    analysisResult: DesignReviewResult[],
-    originalFigmaUrl?: string
-  ): Promise<string> {
-    try {
-      const { formatBrandIssueComment, formatGeneralIssueComment } = await import("../utils");
-      const { generateInitialReviewSummary } = await import("../utils/timeline-formatters");
-      const { validateDesignReviewResult } = await import("../utils/validation");
-
-      const urlToFrameData: Record<string, Partial<FrameMetadata>> = {};
-      for (const frame of metadata.frames) {
-        urlToFrameData[frame.url] = {
-          id: frame.id,
-          position: frame.position,
-        };
-      }
-
-      // Add Figma comment IDs to brand issues
-      for (const review of analysisResult) {
-        const frameData = urlToFrameData[review.image.url];
-        if (frameData && review.brand_issues) {
-          for (const issue of review.brand_issues) {
-            const commentText = formatBrandIssueComment(issue);
-            const commentId = await this.figmaService.addFigmaComment(
-              metadata.fileKey,
-              frameData.id,
-              commentText,
-              issue.coordinates,
-              frameData.position
-            );
-            issue.figma_comment_id = commentId;
-          }
-        }
-
-        // Add Figma comment IDs to general issues
-        if (frameData && review.general_issues) {
-          for (const issue of review.general_issues) {
-            const commentText = formatGeneralIssueComment(issue);
-            const commentId = await this.figmaService.addFigmaComment(
-              metadata.fileKey,
-              frameData.id,
-              commentText,
-              issue.coordinates,
-              frameData.position
-            );
-
-            // Store the comment ID directly in the issue
-            issue.figma_comment_id = commentId;
-          }
-        }
-      }
-
-      // Create a new DesignsReview
-      const designsReview = await prisma.designsReview.create({
-        data: {
-          userId,
-          brandGuidelineId,
-          name: metadata.fileName || "Design Review",
-          status: "IN_PROGRESS",
-          reviewType: ReviewType.FIGMA,
-          figmaUrl: originalFigmaUrl,
-          figmaFileId: metadata.fileKey,
-          designs: {
-            create: analysisResult.map(review => ({
-              user: { connect: { id: userId } },
-              frameId: review.image.frame_id,
-              reviewJson: {
-                ...review,
-                created_at: new Date().toISOString(),
-              } as any, // Cast to any for Prisma JSON field compatibility
-              status: ReviewStatus.IN_PROGRESS,
-              originalFigmaUrl,
-              timeline: {
-                create: {
-                  action: ReviewTimelineAction.INITIAL_REVIEW,
-                  summary: generateInitialReviewSummary(review.brand_issues, review.general_issues),
-                  changes: this.createInitialReviewChanges(
-                    review.brand_issues,
-                    review.general_issues,
-                    review.design_score.total
-                  ) as any, // Prisma expects strict JSON, casting for now
-                },
-              },
-            })),
-          },
-        },
-      });
-
-      return designsReview.id;
-    } catch (error) {
-      console.error("Error saving analysis results:", error);
       throw error;
     }
   }
@@ -531,12 +638,8 @@ export class DesignReviewService {
     });
   }
 
-  async updateReviewStatus(
-    id: string,
-    status: ReviewStatus,
-    feedback?: string
-  ): Promise<DesignsReview> {
-    const review = await prisma.designsReview.update({
+  async updateReviewStatus(id: string, status: ReviewStatus): Promise<void> {
+    await prisma.designsReview.update({
       where: { id },
       data: {
         status,
@@ -547,7 +650,5 @@ export class DesignReviewService {
         designs: true,
       },
     });
-
-    return review;
   }
 }

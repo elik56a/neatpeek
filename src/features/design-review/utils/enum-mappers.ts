@@ -264,3 +264,29 @@ export function getReviewStatusColor(status: ReviewStatus): string {
       return "text-muted-foreground";
   }
 }
+
+export function getReviewStatusLabel(status: ReviewStatus): string {
+  switch (status) {
+    case ReviewStatus.COMPLETED:
+      return "Completed";
+    case ReviewStatus.FAILED:
+      return "Failed";
+    case ReviewStatus.IN_PROGRESS:
+      return "In Progress";
+    default:
+      return "Pending";
+  }
+}
+
+export function getReviewStatusBadgeVariant(status: ReviewStatus): any {
+  switch (status) {
+    case ReviewStatus.COMPLETED:
+      return "default";
+    case ReviewStatus.FAILED:
+      return "destructive";
+    case ReviewStatus.IN_PROGRESS:
+      return "secondary";
+    default:
+      return "default";
+  }
+}

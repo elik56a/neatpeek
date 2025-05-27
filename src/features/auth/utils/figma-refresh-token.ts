@@ -2,6 +2,7 @@ import "server-only";
 import { TokenService } from "@/services/tokens";
 import { decrypt, isEncrypted } from "@/services/crypto";
 import { FigmaTokens } from "@/types/general";
+import { FigmaAuthError } from "@/features/design-review/services/figma-service";
 
 /**
  * FIGMA TOKEN LIFECYCLE
@@ -77,7 +78,7 @@ export async function refreshFigmaToken(refreshToken: string) {
 
         // Handle specific error types
         if (errorData.error === "invalid_grant") {
-          throw new Error(
+          throw new FigmaAuthError(
             "invalid_grant: The refresh token is invalid or expired. User needs to reconnect their Figma account."
           );
         }

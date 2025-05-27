@@ -10,7 +10,12 @@ import { DesignsReviewSortField } from "../types/enums";
 import Link from "next/link";
 import { SortDirection } from "@/types/enums";
 import { useMemo } from "react";
-import { getReviewStatusColor, getScoreColor } from "@/features/design-review/utils/enum-mappers";
+import {
+  getReviewStatusBadgeVariant,
+  getReviewStatusColor,
+  getReviewStatusLabel,
+  getScoreColor,
+} from "@/features/design-review/utils/enum-mappers";
 import { ActionMenu } from "./ActionMenu";
 
 interface TableViewProps {
@@ -110,11 +115,8 @@ export function TableView({
         header: "Status",
         sortable: true,
         cell: (item: DesignsReviewListItemViewModel) => (
-          <Badge
-            variant={item.status === ReviewStatus.COMPLETED ? "default" : "secondary"}
-            className={getReviewStatusColor(item.status)}
-          >
-            {item.status}
+          <Badge variant={getReviewStatusBadgeVariant(item.status)}>
+            {getReviewStatusLabel(item.status)}
           </Badge>
         ),
       },
