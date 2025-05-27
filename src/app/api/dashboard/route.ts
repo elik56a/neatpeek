@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
+import { getServerSession } from "@/features/auth/server";
 import { dashboardService } from "@/features/dashboard/services/dashboard-service";
 import { DashboardFilters, DatePeriod } from "@/features/dashboard/types";
 
@@ -12,7 +11,7 @@ import { DashboardFilters, DatePeriod } from "@/features/dashboard/types";
 export async function GET(request: NextRequest) {
   try {
     // Authentication check
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     if (!session?.user?.id) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
     }

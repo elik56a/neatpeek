@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/auth-options";
+import { getServerSession } from "@/features/auth/server";
 import type { DesignRecheckInput } from "@/features/design-review/types";
 import { TokenService } from "@/services/tokens";
 import { prisma } from "@/services/db/prisma";
@@ -8,7 +7,7 @@ import { ensureFreshFigmaToken } from "@/features/auth/utils/figma-refresh-token
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await getServerSession();
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

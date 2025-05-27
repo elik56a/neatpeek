@@ -6,7 +6,7 @@
 
 import { prisma } from "@/services/db/prisma";
 import { TokenService } from "@/services/tokens";
-import { getServerSession } from "next-auth";
+import { getServerSession } from "@/features/auth/server";
 import { NextRequest, NextResponse } from "next/server";
 import { ensureFreshFigmaToken } from "@/features/auth/utils/figma-refresh-token";
 

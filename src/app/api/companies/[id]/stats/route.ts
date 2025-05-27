@@ -1,5 +1,5 @@
 import { prisma } from "@/services/db/prisma";
-import { getServerSession } from "next-auth";
+import { getServerSession } from "@/features/auth/server";
 import { NextRequest, NextResponse } from "next/server";
 
 // Store a map of company IDs to timestamps to prevent excessive API calls
