@@ -23,7 +23,11 @@ import {
   FileText,
 } from "lucide-react";
 import { RecentActivity, ActivityType, DashboardStatus } from "../types";
-import { getStatusVariant, formatRelativeTime } from "../utils/dashboard-utils";
+import {
+  getStatusVariant,
+  formatRelativeTime,
+  getActivityTypeLabel,
+} from "../utils/dashboard-utils";
 
 interface RecentActivityListProps {
   activities?: RecentActivity[];
@@ -100,7 +104,7 @@ export const RecentActivityList = ({ activities, loading }: RecentActivityListPr
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="text-xs text-muted-foreground">
-                          {activity.type.replace(/_/g, " ").toLowerCase()}
+                          {getActivityTypeLabel(activity.type)}
                         </div>
                         <Badge variant={getStatusVariant(activity.status)} className="text-xs">
                           {activity.status}

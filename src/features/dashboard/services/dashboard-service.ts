@@ -10,10 +10,18 @@ import {
   ImpactLevel,
   DashboardMetrics,
 } from "../types";
-import { BrandIssue, Design, DesignsReview, GeneralIssue } from "@/features/design-review";
-import { BrandGuideline } from "@/features/brand-setup/types";
+import {
+  BaseIssue,
+  BrandIssue,
+  Design,
+  DesignsReview,
+  GeneralIssue,
+  ReviewStatus,
+} from "@/features/design-review";
+import { BrandGuideline, BrandGuidelineStatus } from "@/features/brand-setup/types";
 
 class DashboardService {
+  private readonly passRateThreshold = 70;
   /**
    * Get comprehensive dashboard data for a user
    */
@@ -104,8 +112,8 @@ class DashboardService {
    */
   private async calculateMetrics(
     userId: string,
-    designReviews: any[],
-    brandGuidelines: any[],
+    designReviews: DesignsReview[],
+    brandGuidelines: BrandGuideline[],
     startDate: Date,
     endDate: Date
   ): Promise<DashboardMetrics> {
@@ -114,18 +122,19 @@ class DashboardService {
     // Get all designs from the reviews to analyze them
     const allDesigns = designReviews.flatMap(review => review.designs || []);
     const passedDesigns = allDesigns.filter(
-      design => design.reviewJson && (design.reviewJson as any)?.design_score?.total >= 70
+      design =>
+        design.reviewJson && design.reviewJson?.design_score?.total >= this.passRateThreshold
     ).length;
     const passingRate = this.calculatePassRate(passedDesigns, allDesigns.length);
 
     // Calculate average consistency score
     const consistencyScores = allDesigns
-      .filter(design => design.reviewJson && (design.reviewJson as any)?.design_score)
-      .map(design => (design.reviewJson as any).design_score.total);
+      .filter(design => design.reviewJson && design.reviewJson?.design_score)
+      .map(design => design.reviewJson.design_score.total);
     const brandConsistencyScore = this.calculateAverageScore(consistencyScores);
 
     const activeReviews = designReviews.filter(
-      review => review.status === "PENDING" || review.status === "IN_PROGRESS"
+      review => review.status === ReviewStatus.PENDING || review.status === ReviewStatus.IN_PROGRESS
     ).length;
 
     // Get previous period for growth calculation
@@ -134,7 +143,7 @@ class DashboardService {
     const prevEndDate = new Date(startDate);
     prevStartDate.setDate(prevStartDate.getDate() - periodDays);
 
-    const prevReviews = await prisma.designsReview.findMany({
+    const prevReviews = (await prisma.designsReview.findMany({
       where: {
         userId,
         createdAt: {
@@ -145,17 +154,18 @@ class DashboardService {
       include: {
         designs: true,
       },
-    });
+    })) as unknown as DesignsReview[];
 
     const prevDesigns = prevReviews.flatMap(review => review.designs || []);
     const prevPassedDesigns = prevDesigns.filter(
-      design => design.reviewJson && (design.reviewJson as any)?.design_score?.total >= 70
+      design =>
+        design.reviewJson && design.reviewJson?.design_score?.total >= this.passRateThreshold
     ).length;
     const prevPassingRate = this.calculatePassRate(prevPassedDesigns, prevDesigns.length);
 
     const prevConsistencyScores = prevDesigns
-      .filter(design => design.reviewJson && (design.reviewJson as any)?.design_score)
-      .map(design => (design.reviewJson as any).design_score.total);
+      .filter(design => design.reviewJson && design.reviewJson?.design_score)
+      .map(design => design.reviewJson.design_score.total);
     const prevBrandConsistency = this.calculateAverageScore(prevConsistencyScores);
 
     return {
@@ -189,12 +199,13 @@ class DashboardService {
 
       const dayDesigns = dayReviews.flatMap(review => review.designs || []);
       const dayPassed = dayDesigns.filter(
-        design => design.reviewJson && (design.reviewJson as any)?.design_score?.total >= 70
+        design =>
+          design.reviewJson && design.reviewJson?.design_score?.total >= this.passRateThreshold
       ).length;
 
       const dayScores = dayDesigns
-        .filter(design => design.reviewJson && (design.reviewJson as any)?.design_score)
-        .map(design => (design.reviewJson as any).design_score.total);
+        .filter(design => design.reviewJson && design.reviewJson?.design_score)
+        .map(design => design.reviewJson.design_score.total);
 
       activityTrends.push({
         date: d.toISOString().split("T")[0],
@@ -211,26 +222,26 @@ class DashboardService {
    * Analyze issues from design reviews
    */
   private analyzeIssues(designReviews: DesignsReview[]) {
-    const allIssues: Array<{ category: string; severity: string }> = [];
+    const allIssues: Array<{ category: string; severity: IssueSeverity }> = [];
 
     designReviews.forEach(review => {
       if (review.designs) {
-        review.designs.forEach((design: any) => {
+        review.designs.forEach(design => {
           if (design.reviewJson) {
-            const reviewData = design.reviewJson as any;
+            const reviewData = design.reviewJson;
             if (reviewData.brand_issues) {
-              reviewData.brand_issues.forEach((issue: any) => {
+              reviewData.brand_issues.forEach(issue => {
                 allIssues.push({
-                  category: issue.brand_rule_violation || "Brand Compliance",
-                  severity: issue.severity || "MEDIUM",
+                  category: issue.category || "Brand Compliance",
+                  severity: issue.severity || IssueSeverity.MEDIUM,
                 });
               });
             }
             if (reviewData.general_issues) {
-              reviewData.general_issues.forEach((issue: any) => {
+              reviewData.general_issues.forEach(issue => {
                 allIssues.push({
-                  category: issue.issue_type || "General Design",
-                  severity: issue.severity || "MEDIUM",
+                  category: issue.category || "Design Quality",
+                  severity: issue.severity || IssueSeverity.MEDIUM,
                 });
               });
             }
@@ -240,20 +251,23 @@ class DashboardService {
     });
 
     // Group issues by category
-    const issueCategories = allIssues.reduce((acc, issue) => {
-      const existing = acc.find(cat => cat.category === issue.category);
-      if (existing) {
-        existing.count++;
-      } else {
-        acc.push({
-          category: issue.category,
-          count: 1,
-          percentage: 0,
-          severity: issue.severity as IssueSeverity,
-        });
-      }
-      return acc;
-    }, [] as any[]);
+    const issueCategories = allIssues.reduce(
+      (acc, issue) => {
+        const existing = acc.find(cat => cat.category === issue.category);
+        if (existing) {
+          existing.count++;
+        } else {
+          acc.push({
+            category: issue.category,
+            count: 1,
+            percentage: 0,
+            severity: issue.severity,
+          });
+        }
+        return acc;
+      },
+      [] as Array<{ category: string; count: number; percentage: number; severity: IssueSeverity }>
+    );
 
     // Calculate percentages
     const totalIssues = issueCategories.reduce((sum, cat) => sum + cat.count, 0);
@@ -298,8 +312,7 @@ class DashboardService {
           if (design.reviewJson) {
             const reviewData = design.reviewJson;
             const score = reviewData?.design_score?.total || 0;
-            if (score >= 70) {
-              // Assuming 70% is passing
+            if (score >= this.passRateThreshold) {
               typeData.passed++;
             }
           }
@@ -364,24 +377,28 @@ class DashboardService {
   private generateBrandGuidelineStats(brandGuidelines: BrandGuideline[]) {
     return {
       total: brandGuidelines.length,
-      completed: brandGuidelines.filter(bg => bg.status === "COMPLETED").length,
-      processing: brandGuidelines.filter(bg => bg.status === "PROCESSING").length,
-      failed: brandGuidelines.filter(bg => bg.status === "FAILED").length,
+      completed: brandGuidelines.filter(bg => bg.status === BrandGuidelineStatus.COMPLETED).length,
+      processing: brandGuidelines.filter(bg => bg.status === BrandGuidelineStatus.PROCESSING)
+        .length,
+      failed: brandGuidelines.filter(bg => bg.status === BrandGuidelineStatus.FAILED).length,
       mostUsedRules: brandGuidelines
         .flatMap(bg => bg.brandRules || [])
-        .reduce((acc, rule) => {
-          const existing = acc.find(r => r.ruleName === rule.name);
-          if (existing) {
-            existing.usageCount++;
-          } else {
-            acc.push({
-              ruleName: rule.name,
-              category: rule.category,
-              usageCount: 1,
-            });
-          }
-          return acc;
-        }, [] as any[])
+        .reduce(
+          (acc, rule) => {
+            const existing = acc.find(r => r.ruleName === rule.name);
+            if (existing) {
+              existing.usageCount++;
+            } else {
+              acc.push({
+                ruleName: rule.name,
+                category: rule.category,
+                usageCount: 1,
+              });
+            }
+            return acc;
+          },
+          [] as Array<{ ruleName: string; category: string; usageCount: number }>
+        )
         .sort((a, b) => b.usageCount - a.usageCount)
         .slice(0, 5),
     };
@@ -404,7 +421,7 @@ class DashboardService {
           review.status === "COMPLETED"
             ? review.designs &&
               review.designs.some(
-                (d: any) => d.reviewJson && (d.reviewJson as any)?.design_score?.total >= 70
+                d => d.reviewJson && d.reviewJson?.design_score?.total >= this.passRateThreshold
               )
               ? DashboardStatus.PASSED
               : DashboardStatus.FAILED
@@ -413,9 +430,9 @@ class DashboardService {
         updatedAt: review.updatedAt.toISOString(),
         designType: "Web",
         issueCount: review.designs
-          ? review.designs.reduce((total: number, design: any) => {
+          ? review.designs.reduce((total: number, design) => {
               if (design.reviewJson) {
-                const reviewData = design.reviewJson as any;
+                const reviewData = design.reviewJson;
                 return (
                   total +
                   ((reviewData?.brand_issues?.length || 0) +
@@ -663,7 +680,9 @@ class DashboardService {
     sortedReviews.forEach(review => {
       const reviewPassed =
         review.designs &&
-        review.designs.some(design => design.reviewJson?.design_score?.total >= 70);
+        review.designs.some(
+          design => design.reviewJson?.design_score?.total >= this.passRateThreshold
+        );
 
       if (reviewPassed) {
         currentStreak++;
@@ -716,7 +735,7 @@ class DashboardService {
     const thisWeekReviews = designReviews.filter(review => review.createdAt >= oneWeekAgo);
     const thisWeekDesigns = thisWeekReviews.flatMap(review => review.designs || []);
     const thisWeekPassed = thisWeekDesigns.filter(
-      design => design.reviewJson?.design_score?.total >= 70
+      design => design.reviewJson?.design_score?.total >= this.passRateThreshold
     ).length;
     const thisWeekScores = thisWeekDesigns
       .filter(design => design.reviewJson?.design_score)
@@ -728,7 +747,7 @@ class DashboardService {
     );
     const lastWeekDesigns = lastWeekReviews.flatMap(review => review.designs || []);
     const lastWeekPassed = lastWeekDesigns.filter(
-      design => design.reviewJson?.design_score?.total >= 70
+      design => design.reviewJson?.design_score?.total >= this.passRateThreshold
     ).length;
     const lastWeekScores = lastWeekDesigns
       .filter(design => design.reviewJson?.design_score)

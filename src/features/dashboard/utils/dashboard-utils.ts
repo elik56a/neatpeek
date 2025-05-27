@@ -142,6 +142,20 @@ export function getActivityIcon(type: ActivityType): string {
   }
 }
 
+export function getActivityTypeLabel(type: ActivityType): string {
+  switch (type) {
+    case ActivityType.DESIGN_REVIEW:
+      return "Design Review";
+    case ActivityType.BRAND_UPDATE:
+      return "Brand Update";
+    case ActivityType.GUIDELINE_CREATED:
+      return "Guideline Created";
+    case ActivityType.BRAND_RULE_CREATED:
+      return "Brand Rule Created";
+    case ActivityType.DESIGN_UPLOADED:
+  }
+}
+
 /**
  * Calculate growth percentage
  */

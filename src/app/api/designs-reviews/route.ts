@@ -1,4 +1,4 @@
-import { getServerSession } from "next-auth";
+import { getServerSession } from "@/features/auth/server";
 import { NextRequest, NextResponse } from "next/server";
 import { DesignsReviewsListService } from "@/features/designs-reviews-list/services/designs-reviews-list-service";
 import { DesignsReviewSortField } from "@/features/designs-reviews-list/types/enums";

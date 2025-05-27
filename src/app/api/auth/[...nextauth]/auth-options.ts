@@ -5,10 +5,7 @@ import { prisma } from "@/services/db/prisma";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import {
-  ensureFreshFigmaToken,
-  TOKEN_REFRESH_CONSTANTS,
-} from "@/features/auth/utils/figma-refresh-token";
+import { TOKEN_REFRESH_CONSTANTS } from "@/features/auth/utils/figma-refresh-token";
 import { TokenService } from "@/services/tokens";
 import { encrypt } from "@/services/crypto";
 
@@ -290,7 +287,7 @@ export const authOptions: NextAuthOptions = {
       }
 
       // Check if Figma token needs refresh - using extracted utility
-      return ensureFreshFigmaToken(token);
+      return token;
     },
     async session({ session, token }) {
       if (token) {
