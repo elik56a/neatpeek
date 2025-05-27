@@ -1,16 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useFetch } from "@/hooks/use-fetch";
 import { useToast } from "@/hooks/use-toast";
+import { usePoll } from "@/hooks/usePoll";
 import {
   DesignAnalysisInput,
   DesignRecheckInput,
   DesignRecheckResult,
   FrameSelectionState,
   DesignsReview,
+  ReviewStatus,
 } from "../types";
 import { useRouter } from "next/navigation";
+import { handleFigmaAuthRedirect } from "@/utils/client/figma-auth-redirect";
 
 /**
  * Hook for design review functionality
@@ -26,6 +29,41 @@ export function useDesignReview() {
   const { toast } = useToast();
   const api = useFetch();
   const router = useRouter();
+
+  // Poll callback function for review status
+  const pollReviewCallback = useCallback(
+    async (reviewId: string) => {
+      const response = await fetch(`/api/design-review/${reviewId}`);
+      if (response.ok) {
+        const updatedReview = await response.json();
+        const currentStatus = designsReview?.status;
+        const newStatus = updatedReview.status;
+
+        setDesignsReview(updatedReview);
+
+        // Stop polling if review is complete or failed
+        if (newStatus === ReviewStatus.COMPLETED || newStatus === ReviewStatus.FAILED) {
+          stopPolling();
+
+          if (newStatus === ReviewStatus.COMPLETED && currentStatus !== ReviewStatus.COMPLETED) {
+            toast({
+              title: "Review Complete",
+              description: "Your design review has been completed successfully.",
+            });
+          } else if (newStatus === ReviewStatus.FAILED && currentStatus !== ReviewStatus.FAILED) {
+            toast({
+              title: "Review Failed",
+              description: "There was an error processing your design review.",
+              variant: "destructive",
+            });
+          }
+        }
+      }
+    },
+    [designsReview?.status, toast]
+  );
+
+  const { isPolling, startPolling, stopPolling } = usePoll(pollReviewCallback);
 
   const getDesignsReview = async (designsReviewId: string) => {
     setIsLoading(true);
@@ -60,6 +98,13 @@ export function useDesignReview() {
 
       if (!response.ok) {
         const errorData = await response.json();
+
+        // Handle auth redirect response
+        const redirectTriggered = await handleFigmaAuthRedirect(errorData);
+        if (redirectTriggered) {
+          return null;
+        }
+
         throw new Error(errorData.error || "Failed to get frames");
       }
 
@@ -136,6 +181,13 @@ export function useDesignReview() {
 
       if (!response.ok) {
         const errorData = await response.json();
+
+        // Handle auth redirect response
+        const redirectTriggered = await handleFigmaAuthRedirect(errorData);
+        if (redirectTriggered) {
+          return null;
+        }
+
         throw new Error(errorData.error || "Failed to review design");
       }
 
@@ -145,8 +197,9 @@ export function useDesignReview() {
         router.replace(`/design-review/${data.id}`);
 
         toast({
-          title: "Review Complete",
-          description: "Design review has been completed successfully.",
+          title: "Review Started",
+          description:
+            "Your design review has been created and is being processed. This may take a few minutes.",
         });
       }
 
@@ -206,11 +259,22 @@ export function useDesignReview() {
     setFileName(null);
     setDesignsReview(null);
     setError(null);
+    stopPolling();
+  };
+
+  /**
+   * Start polling for review status updates
+   * @param reviewId Review ID to poll
+   * @param onStatusChange Callback when status changes
+   */
+  const pollReviewStatus = (reviewId: string, onStatusChange?: (status: string) => void) => {
+    startPolling(reviewId, onStatusChange);
   };
 
   return {
     isLoading,
     isRecheckLoading,
+    isPolling,
     error,
     frames,
     fileKey,
@@ -224,5 +288,6 @@ export function useDesignReview() {
     recheckDesign,
     reset,
     getDesignsReview,
+    pollReviewStatus,
   };
 }

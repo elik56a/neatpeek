@@ -8,6 +8,8 @@ import { prisma } from "@/services/db/prisma";
 import { TokenService } from "@/services/tokens";
 import { getServerSession } from "@/features/auth/server";
 import { NextRequest, NextResponse } from "next/server";
+import { FigmaAuthError } from "@/features/design-review/services/figma-service";
+import { PROVIDERS } from "@/features/auth/config/providers";
 
 // We'll import the service dynamically to avoid client-side issues
 
@@ -64,7 +66,8 @@ export async function POST(req: NextRequest) {
 
     const designReviewService = DesignReviewService.getInstance(figmaToken);
 
-    const designsReviewId = await designReviewService.analyzeDesigns({
+    // Create design review immediately and start background processing
+    const designsReviewId = await designReviewService.createDesignReviewAndStartProcessing({
       figmaUrl,
       brandId,
       designType,
@@ -72,11 +75,24 @@ export async function POST(req: NextRequest) {
       userId: user.id,
     });
 
+    // Get the created review to return to the client
     const review = await designReviewService.getDesignsReview(designsReviewId);
 
     return NextResponse.json(review);
   } catch (error: any) {
     console.error("Error reviewing design:", error);
+
+    // Handle Figma authentication errors
+    if (error instanceof FigmaAuthError) {
+      return NextResponse.json(
+        {
+          requiresAuth: true,
+          redirectTo: PROVIDERS.figma.id,
+        },
+        { status: 401 }
+      );
+    }
+
     return NextResponse.json({ error: "Failed to review design" }, { status: 500 });
   }
 }

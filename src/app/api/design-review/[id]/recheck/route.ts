@@ -4,6 +4,8 @@ import type { DesignRecheckInput } from "@/features/design-review/types";
 import { TokenService } from "@/services/tokens";
 import { prisma } from "@/services/db/prisma";
 import { ensureFreshFigmaToken } from "@/features/auth/utils/figma-refresh-token";
+import { FigmaAuthError } from "@/features/design-review/services/figma-service";
+import { PROVIDERS } from "@/features/auth/config/providers";
 
 export async function POST(request: NextRequest) {
   try {
@@ -54,6 +56,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result);
   } catch (error) {
     console.error("Error rechecking design review:", error);
+
+    // Handle Figma authentication errors
+    if (error instanceof FigmaAuthError) {
+      return NextResponse.json(
+        {
+          requiresAuth: true,
+          redirectTo: PROVIDERS.figma.id,
+        },
+        { status: 401 }
+      );
+    }
+
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

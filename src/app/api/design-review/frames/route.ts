@@ -9,6 +9,8 @@ import { TokenService } from "@/services/tokens";
 import { getServerSession } from "@/features/auth/server";
 import { NextRequest, NextResponse } from "next/server";
 import { ensureFreshFigmaToken } from "@/features/auth/utils/figma-refresh-token";
+import { FigmaAuthError } from "@/features/design-review/services/figma-service";
+import { PROVIDERS } from "@/features/auth/config/providers";
 
 // We'll import the service dynamically to avoid client-side issues
 
@@ -78,21 +80,12 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error("Error getting frames:", error);
 
-    // Provide more specific error message if it's a Figma API auth error
-    if (error.message?.includes("403") || error.message?.includes("authentication")) {
-      return NextResponse.json(
-        { error: "Figma authentication failed. Please reconnect your Figma account." },
-        { status: 403 }
-      );
-    }
-
-    // Handle invalid_grant errors from token refresh
-    if (error.message?.includes("invalid_grant")) {
+    // Handle Figma authentication errors
+    if (error instanceof FigmaAuthError) {
       return NextResponse.json(
         {
-          error:
-            "Your Figma connection has expired. Please disconnect and reconnect your Figma account.",
-          code: "INVALID_GRANT",
+          requiresAuth: true,
+          redirectTo: PROVIDERS.figma.id,
         },
         { status: 401 }
       );

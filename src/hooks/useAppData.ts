@@ -29,7 +29,6 @@ export function useAppData() {
    * Fetch user data including company information
    */
   const fetchUserData = async () => {
-    console.log("Fetching user data...");
     setIsLoading(true);
     setError(null);
 
@@ -49,18 +48,15 @@ export function useAppData() {
       }
 
       const userData = await response.json();
-      console.log("User data fetched:", userData);
 
       // Set user data
       setUser(userData);
 
       // If user has company data, set it
       if (userData.company) {
-        console.log("User has company:", userData.company.name);
         setCompany(userData.company);
       } else {
         // User has no company
-        console.log("User has no company");
         setCompany(null);
       }
     } catch (error) {
@@ -77,14 +73,11 @@ export function useAppData() {
       // Skip if not authenticated or already initialized
       if (status !== "authenticated" || initializationRef.current) return;
 
-      console.log("Initializing app data...");
-
       // Set initialization flag immediately to prevent multiple fetches
       initializationRef.current = true;
 
       try {
         await fetchUserData();
-        console.log("App data initialization complete");
       } catch (error) {
         console.error("Error during app data initialization:", error);
       }

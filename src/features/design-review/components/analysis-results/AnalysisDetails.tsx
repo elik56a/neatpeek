@@ -118,7 +118,7 @@ export function AnalysisDetails({
                   <Badge variant="outline">{image.screen_type || "Screen"}</Badge>
                   <Badge variant="outline">{image.platform || "Platform"}</Badge>
                   <Badge variant="outline">
-                    {image.position.width}x{image.position.height}
+                    {image?.position?.width}x{image?.position?.height}
                   </Badge>
                 </div>
               </CardContent>
@@ -139,7 +139,10 @@ export function AnalysisDetails({
                 <div className="space-y-2 animate-in fade-in-50 duration-500">
                   {renderScoreCard(design_score.total || 0, "Overall Score")}
                   <Separator className="my-1" />
-                  {renderScoreCard(design_score.max_score || 0, "Brand Compliance")}
+                  {renderScoreCard(
+                    design_score.breakdown.brand_compliance || 0,
+                    "Brand Compliance"
+                  )}
                   {renderScoreCard(design_score.breakdown.visual_harmony || 0, "Visual Harmony")}
                   {renderScoreCard(design_score.breakdown.usability || 0, "Usability")}
                   {renderScoreCard(design_score.breakdown.accessibility || 0, "Accessibility")}

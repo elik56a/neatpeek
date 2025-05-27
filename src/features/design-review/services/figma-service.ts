@@ -7,6 +7,20 @@
  * - Adding and managing comments
  */
 
+/**
+ * Custom error class for Figma authentication failures
+ */
+export class FigmaAuthError extends Error {
+  constructor(
+    message: string,
+    public readonly statusCode: number = 401,
+    public readonly requiresReauth: boolean = true
+  ) {
+    super(message);
+    this.name = "FigmaAuthError";
+  }
+}
+
 import {
   FigmaInfo,
   FigmaMetadata,
@@ -86,14 +100,14 @@ export class FigmaService {
           console.error(
             "Received 403 Forbidden from Figma API - token might be expired or invalid"
           );
-          throw new Error(
+          throw new FigmaAuthError(
             `Figma API authentication error (403): Token expired or invalid. Please reconnect your Figma account.`
           );
         }
 
         if (status === 401) {
           console.error("Received 401 Unauthorized from Figma API");
-          throw new Error(
+          throw new FigmaAuthError(
             `Figma API authorization error (401): Not authorized to access this resource. Please reconnect your Figma account.`
           );
         }
