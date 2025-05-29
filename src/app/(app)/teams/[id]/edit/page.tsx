@@ -1,14 +1,17 @@
 "use client";
 
+import { use } from "react";
 import { TeamEditForm } from "@/features/team";
+import { PageParams } from "@/types/general";
 
-export default function TeamEditPage({ params }: { params: { id: string } }) {
-  // Extract the ID directly to avoid the warning
-  const teamId = params.id;
+interface TeamEditPageProps extends PageParams<{ id: string }> {}
+
+export default function TeamEditPage({ params }: TeamEditPageProps) {
+  const { id } = use(params);
 
   return (
     <div className="container py-10">
-      <TeamEditForm teamId={teamId} />
+      <TeamEditForm teamId={id} />
     </div>
   );
 }

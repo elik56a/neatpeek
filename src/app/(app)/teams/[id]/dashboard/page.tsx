@@ -1,15 +1,18 @@
 "use client";
 
+import { use } from "react";
 import { TeamDashboard } from "@/features/team";
 import { useAppDataContext } from "@/providers";
+import { PageParams } from "@/types/general";
 import { useEffect, useState } from "react";
 
-export default function TeamDashboardPage({ params }: { params: { id: string } }) {
+interface TeamDashboardPageProps extends PageParams<{ id: string }> {}
+
+export default function TeamDashboardPage({ params }: TeamDashboardPageProps) {
   const { companyId, isCompanyAdmin } = useAppDataContext();
   const [isTeamAdmin, setIsTeamAdmin] = useState(false);
 
-  // Extract the ID directly to avoid the warning
-  const teamId = params.id;
+  const { id: teamId } = use(params);
 
   useEffect(() => {
     const checkTeamAdmin = async () => {

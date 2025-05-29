@@ -1,14 +1,17 @@
 "use client";
 
+import { use } from "react";
 import { TeamDetail } from "@/features/team";
+import { PageParams } from "@/types/general";
 
-export default function TeamDetailPage({ params }: { params: { id: string } }) {
-  // Extract the ID directly to avoid the warning
-  const teamId = params.id;
+interface TeamDetailPageProps extends PageParams<{ id: string }> {}
+
+export default function TeamDetailPage({ params }: TeamDetailPageProps) {
+  const { id } = use(params);
 
   return (
     <div className="container py-10">
-      <TeamDetail teamId={teamId} />
+      <TeamDetail teamId={id} />
     </div>
   );
 }

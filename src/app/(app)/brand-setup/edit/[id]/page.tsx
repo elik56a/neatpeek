@@ -1,19 +1,16 @@
 "use client";
 
+import { use } from "react";
 import { Button } from "@/components/ui/button";
 import { BrandSetupForm } from "@/features/brand-setup/components/BrandSetupForm";
+import { PageParams } from "@/types/general";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-interface EditBrandGuidelinePageProps {
-  params: {
-    id: string;
-  };
-}
+interface EditBrandGuidelinePageProps extends PageParams<{ id: string }> {}
 
 export default function EditBrandGuidelinePage({ params }: EditBrandGuidelinePageProps) {
-  // Extract the ID from params to avoid Next.js warnings
-  const id = params.id;
+  const { id } = use(params);
 
   return (
     <div className="container py-6 space-y-6">

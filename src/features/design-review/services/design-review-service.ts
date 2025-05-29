@@ -30,7 +30,6 @@ import { DesignRecheckService } from "./design-recheck-service";
 import { FigmaService } from "./figma-service";
 import { formatBrandIssueComment, formatGeneralIssueComment } from "../utils";
 import { generateInitialReviewSummary } from "../utils/timeline-formatters";
-import { VoidFunctionComponent } from "react";
 
 /**
  * Design Review Service
