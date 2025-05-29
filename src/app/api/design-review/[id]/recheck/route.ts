@@ -3,7 +3,6 @@ import { getServerSession } from "@/features/auth/server";
 import type { DesignRecheckInput } from "@/features/design-review/types";
 import { TokenService } from "@/services/tokens";
 import { prisma } from "@/services/db/prisma";
-import { ensureFreshFigmaToken } from "@/features/auth/utils/figma-refresh-token";
 import { FigmaAuthError } from "@/features/design-review/services/figma-service";
 import { PROVIDERS } from "@/features/auth/config/providers";
 
@@ -24,7 +23,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Get Figma access token from TokenService
+    // Get Figma tokens from TokenService
     const figmaTokens = await TokenService.getFigmaTokens(user.id, user.figmaTokenExpiry);
     if (!figmaTokens.accessToken) {
       return NextResponse.json(
@@ -32,8 +31,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    const tokenToUse = await ensureFreshFigmaToken(figmaTokens);
 
     // Parse and type the request body as DesignRecheckInput
     const body = (await request.json()) as DesignRecheckInput;
@@ -43,7 +40,7 @@ export async function POST(request: NextRequest) {
     const { DesignReviewService } = await import(
       "@/features/design-review/services/design-review-service"
     );
-    const designReviewService = DesignReviewService.getInstance(tokenToUse.accessToken as string);
+    const designReviewService = DesignReviewService.getInstance(figmaTokens.accessToken);
 
     // Call the recheck logic (assume recheckDesigns method exists and is correct)
     const result = await designReviewService.recheckDesigns({

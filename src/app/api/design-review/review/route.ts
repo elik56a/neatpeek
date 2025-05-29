@@ -28,17 +28,17 @@ export async function POST(req: NextRequest) {
     // Get the user by email
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { id: true },
+      select: { id: true, figmaTokenExpiry: true },
     });
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Get Figma access token from TokenService
-    const figmaToken = await TokenService.getFigmaAccessToken(user.id);
+    // Get Figma tokens from TokenService
+    const figmaTokens = await TokenService.getFigmaTokens(user.id, user.figmaTokenExpiry);
 
-    if (!figmaToken) {
+    if (!figmaTokens.accessToken) {
       return NextResponse.json(
         {
           error: "Figma access token not found. Please connect your Figma account.",
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
       "@/features/design-review/services/design-review-service"
     );
 
-    const designReviewService = DesignReviewService.getInstance(figmaToken);
+    const designReviewService = DesignReviewService.getInstance(figmaTokens.accessToken);
 
     // Create design review immediately and start background processing
     const designsReviewId = await designReviewService.createDesignReviewAndStartProcessing({

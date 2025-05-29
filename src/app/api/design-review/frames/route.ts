@@ -8,11 +8,8 @@ import { prisma } from "@/services/db/prisma";
 import { TokenService } from "@/services/tokens";
 import { getServerSession } from "@/features/auth/server";
 import { NextRequest, NextResponse } from "next/server";
-import { ensureFreshFigmaToken } from "@/features/auth/utils/figma-refresh-token";
 import { FigmaAuthError } from "@/features/design-review/services/figma-service";
 import { PROVIDERS } from "@/features/auth/config/providers";
-
-// We'll import the service dynamically to avoid client-side issues
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,9 +31,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Get Figma tokens from TokenService
-    const currentFigmaTokens = await TokenService.getFigmaTokens(user.id, user.figmaTokenExpiry);
+    const figmaTokens = await TokenService.getFigmaTokens(user.id, user.figmaTokenExpiry);
 
-    if (!currentFigmaTokens.accessToken || !currentFigmaTokens.refreshToken) {
+    if (!figmaTokens.accessToken || !figmaTokens.refreshToken) {
       return NextResponse.json(
         {
           error: "Figma tokens not found. Please connect your Figma account.",
@@ -44,9 +41,6 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-
-    // Ensure token is fresh - this will refresh if needed
-    const tokenToUse = await ensureFreshFigmaToken(currentFigmaTokens);
 
     // Get request body
     const body = await req.json();
@@ -60,7 +54,7 @@ export async function POST(req: NextRequest) {
     const { FigmaService } = await import("@/features/design-review/services/figma-service");
 
     // Create Figma service with the token
-    const figmaService = new FigmaService(tokenToUse.accessToken as string);
+    const figmaService = new FigmaService(figmaTokens.accessToken);
 
     // Extract designs from Figma
     const { metadata } = await figmaService.getAllFramesFromFigmaUrl(figmaUrl);

@@ -16,7 +16,7 @@ export default function FigmaProvider<P extends FigmaProfile>(
     type: "oauth",
     authorization: {
       url: "https://www.figma.com/oauth",
-      params: { scope: "file_read" },
+      params: { scope: "files:read,file_comments:write" },
     },
     // Note: The authorization URL is still www.figma.com/oauth (not migrated to api.figma.com)
     // Only the token endpoint has been migrated
@@ -24,24 +24,28 @@ export default function FigmaProvider<P extends FigmaProfile>(
       url: "https://api.figma.com/v1/oauth/token",
       async request(context) {
         const tokenUrl = "https://api.figma.com/v1/oauth/token";
+
+        // Prepare form data as per Figma docs
+        const formData = new URLSearchParams({
+          client_id: context.provider.clientId,
+          client_secret: context.provider.clientSecret,
+          code: context.params.code,
+          grant_type: "authorization_code",
+          redirect_uri: context.provider.callbackUrl,
+        });
+
         const response = await fetch(tokenUrl, {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
-            // Add basic auth header as an alternative way to authenticate
+            "Content-Type": "application/x-www-form-urlencoded",
+            // Add basic auth header as per Figma docs
             Authorization:
               "Basic " +
               Buffer.from(`${context.provider.clientId}:${context.provider.clientSecret}`).toString(
                 "base64"
               ),
           },
-          body: JSON.stringify({
-            client_id: context.provider.clientId,
-            client_secret: context.provider.clientSecret,
-            code: context.params.code,
-            grant_type: "authorization_code",
-            redirect_uri: context.provider.callbackUrl,
-          }),
+          body: formData.toString(),
         });
 
         let tokens: any;
