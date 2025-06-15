@@ -4,4 +4,9 @@ export { useAuth } from "./hooks/useAuth";
 export { useRefreshUser } from "./hooks/useRefreshUser";
 
 // Use client-safe auth options to prevent Prisma bundling issues
-export { authOptionsSafe as authOptions } from "./config/auth-options-safe";
+// export { authOptionsSafe as authOptions } from "./config/auth-options-safe";
+
+// For server-side usage, export the full authOptions
+export * from './config/auth-options';
+export * from './middleware';
+export * from './utils/rbac';

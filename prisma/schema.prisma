@@ -59,6 +59,19 @@ model Company {
   invitations     Invitation[]
   teams           Team[]
   users           User[]
+  companyProfile CompanyProfile?
+  campaignBriefs  CampaignBrief[]
+}
+
+model CompanyProfile {
+  id          String   @id @default(cuid())
+  companyId   String   @unique // Ensures one profile per company
+  industry    String?
+  personas    Json?    // Or String for simpler text
+  positioning String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
 }
 
 model User {
@@ -76,11 +89,12 @@ model User {
   lastLogin            DateTime?
   emailVerified        DateTime?
   image                String?
-  role                 String?
   companyId            String?
-  companyRole          CompanyRole           @default(MEMBER)
+  role                 Role                  @default(MARKETER)
   accounts             Account[]
+  adPlatformConnections AdPlatformConnection[]
   brands               Brand[]
+  campaignBriefs       CampaignBrief[]
   brandGuidelines      BrandGuideline[]
   designs              Design[]
   designsReviews       DesignsReview[]
@@ -96,11 +110,89 @@ model User {
   @@index([companyId])
 }
 
+model AdPlatformConnection {
+  id              String   @id @default(cuid())
+  userId          String
+  platformName    String // e.g., LINKEDIN, GOOGLE_ADS, FACEBOOK, INSTAGRAM
+  accessToken     String
+  refreshToken    String?
+  expiresAt       DateTime?
+  platformUserId  String?  // User ID on the specific platform
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@unique([userId, platformName]) // User can connect each platform only once
+}
+
+model CampaignBrief {
+  id                               String                 @id @default(cuid())
+  marketerId                       String
+  companyId                        String? // To associate brief with a company
+  objective                        String
+  funnelStage                      String // e.g., AWARENESS, CONSIDERATION, CONVERSION
+  targetPlatforms                  String[]               // List of platform names
+  audience                         String? // Detailed description
+  messagingPainPoints              String?
+  messagingTone                    String?
+  messagingGoals                   String?
+  creativeConstraintsMustHaves     String?
+  creativeConstraintsDonts         String?
+  creativeConstraintsCTAs          String? // Call to Actions
+  generatedSummary                 String?
+  aiRecommendations                Json?
+  createdAt                        DateTime               @default(now())
+  updatedAt                        DateTime               @updatedAt
+  marketer                         User                   @relation(fields: [marketerId], references: [id])
+  company                          Company?               @relation(fields: [companyId], references: [id])
+  content                          CampaignBriefContent[]
+  campaignPerformances             CampaignPerformance[]
+  designReviews                    DesignsReview[]        // Link to design reviews
+
+  @@index([marketerId])
+  @@index([companyId])
+}
+
+model CampaignBriefContent {
+  id              String        @id @default(cuid())
+  campaignBriefId String
+  fileName        String
+  fileType        String // MIME type or custom enum
+  fileUrl         String
+  fileSize        Int
+  uploadedAt      DateTime      @default(now())
+  campaignBrief   CampaignBrief @relation(fields: [campaignBriefId], references: [id], onDelete: Cascade)
+
+  @@index([campaignBriefId])
+}
+
+model CampaignPerformance {
+  id                        String        @id @default(cuid())
+  campaignBriefId           String
+  platformName              String
+  metrics                   Json // Store various metrics like CTR, conversions, impressions
+  expectedPerformance       Json? // Store expected metrics for comparison
+  aiLearningSummary         String?
+  aiNextStepRecommendations Json?
+  recordedAt                DateTime      @default(now()) // When these metrics were pulled
+  campaignBrief             CampaignBrief @relation(fields: [campaignBriefId], references: [id], onDelete: Cascade)
+
+  @@index([campaignBriefId])
+  @@unique([campaignBriefId, platformName]) // One performance record per platform for a brief
+}
+
+enum Role {
+  ADMIN
+  MARKETER
+  DESIGNER
+}
+
 model Invitation {
   id          String           @id @default(cuid())
   email       String
   companyId   String
-  role        CompanyRole      @default(MEMBER)
+  role        Role             @default(MARKETER)
   token       String           @unique
   expires     DateTime
   createdAt   DateTime         @default(now())
@@ -460,13 +552,16 @@ model DesignsReview {
   updatedAt        DateTime       @updatedAt
   figmaFileId      String?
   reviewType       ReviewType     @default(FIGMA)
+  campaignBriefId  String?
   designs          Design[]
   brandGuideline   BrandGuideline @relation(fields: [brandGuidelineId], references: [id])
   user             User           @relation(fields: [userId], references: [id])
+  campaignBrief    CampaignBrief? @relation(fields: [campaignBriefId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([brandGuidelineId])
   @@index([figmaFileId])
+  @@index([campaignBriefId])
 }
 
 model Design {
@@ -491,11 +586,11 @@ model Design {
   @@index([createdAt]) // Add index for createdAt since we sort by it often
 }
 
-enum CompanyRole {
-  OWNER
-  ADMIN
-  MEMBER
-}
+// enum CompanyRole {
+//   OWNER
+//   ADMIN
+//   MEMBER
+// }
 
 enum InvitationStatus {
   PENDING

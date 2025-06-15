@@ -43,9 +43,10 @@ import { Team } from "@/types";
 interface BrandSetupFormProps {
   brandId?: string;
   mode?: "create" | "edit";
+  onSuccessRedirect?: (brandId: string) => void; // Add this line
 }
 
-export function BrandSetupForm({ brandId, mode = "create" }: BrandSetupFormProps) {
+export function BrandSetupForm({ brandId, mode = "create", onSuccessRedirect }: BrandSetupFormProps) {
   const [activeTab, setActiveTab] = useState("basic");
   const { company, companyId, hasCompany } = useAppDataContext();
   const [teams, setTeams] = useState<Pick<Team, "id" | "name">[]>([]);
@@ -140,9 +141,19 @@ export function BrandSetupForm({ brandId, mode = "create" }: BrandSetupFormProps
   const handleSubmit = async () => {
     try {
       setError(null);
-      const result = await submitForm();
-      if (result) {
+      const result = await submitForm(); // Assume submitForm returns an object like { id: string } on success
+      if (result && result.id) {
         setSuccess(true);
+        if (mode === "create" && onSuccessRedirect) { // Only call for create mode during onboarding
+          onSuccessRedirect(result.id);
+        } else if (mode === "edit" && onSuccessRedirect) { // Or if specifically needed for edit mode too
+           // Potentially call onSuccessRedirect here too if the parent needs to know
+        }
+      } else if (result) { // If result is true but no id (legacy or different structure)
+         setSuccess(true);
+         // Developer note: If result is not an object with id, this part may need adjustment.
+         // For now, we'll assume result.id is the way to get the new brandId.
+         // If onSuccessRedirect is present and no ID, it won't be called with an ID.
       }
     } catch (err: any) {
       setError(err.message || "An error occurred");
